@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <base href="<?= $GLOBALS["url"] ?>/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Title -->
+    <title><?php if(isset($page_title)){ echo $page_title; } else { ?> Miamy - Le menu interactif de votre restaurant<?php } ?></title>
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/bootstrap.min.css" />
+    <!-- animate css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/animate.min.css" />
+    <!-- Fontawesome css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/fontawesome.all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
+    <!-- owl.carousel css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/owl.carousel.min.css" />
+	<!-- Rangeslider css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/nouislider.css" />
+    <!-- owl.theme.default css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/owl.theme.default.min.css" />
+    <!-- navber css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/navber.css" />
+    <!-- meanmenu css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/meanmenu.css" />
+    <!-- Style css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/style.css" />
+    <!-- Responsive css -->
+    <link rel="stylesheet" href="<?php echo $GLOBALS["url"]; ?>/assets/css/responsive.css" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="<?php echo $GLOBALS["url"]; ?>/assets/img/favicon-96x96.png">
+    
+</head>
+<body>

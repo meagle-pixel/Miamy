@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pass  = $_POST['password'];
 
     if (!empty($email) && !empty($pass)) {
-        // On utilise TA fonction de connexion
+        
         if (trytoconnect($email, $pass)) {
 
             // Redirection selon le profil

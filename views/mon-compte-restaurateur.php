@@ -11,6 +11,12 @@ $id_restaurateur = $_SESSION['user']['profil_id'];
 
 // 3. Récupération des restaurants possédés
 $mesRestos = getRestaurantsByOwner($id_restaurateur);
+
+// 4. Message de succès après suppression
+$message_success = '';
+if (isset($_GET['success']) && $_GET['success'] === 'deleted') {
+    $message_success = "Le restaurant a été supprimé avec succès.";
+}
 ?>
 
 <section id="common_banner">
@@ -35,7 +41,7 @@ $mesRestos = getRestaurantsByOwner($id_restaurateur);
             <div class="col-lg-4">
                 <div class="dashboard_sidebar shadow-sm p-4 bg-white rounded">
                     <div class="dashboard_sidebar_user text-center mb-4">
-                        <img src="assets/img/common/user-placeholder.png" alt="img" class="rounded-circle mb-3" style="width:100px;">
+                        <img src="<?= $GLOBALS['url'] ?>/assets/img/common/user-placeholder.png" alt="img" class="rounded-circle mb-3" style="width:100px;">
                         <h3><?= htmlspecialchars($restaurateur['prenom'] . ' ' . $restaurateur['nom']) ?></h3>
                         <p class="text-muted"><?= htmlspecialchars($restaurateur['email']) ?></p>
                     </div>
@@ -72,6 +78,12 @@ $mesRestos = getRestaurantsByOwner($id_restaurateur);
                         </a>
                     </div>
 
+                    <?php if ($message_success): ?>
+                        <div class="alert alert-success shadow-sm">
+                            <i class="fas fa-check-circle me-2"></i> <?= $message_success ?>
+                        </div>
+                    <?php endif; ?>
+
                     <?php if (empty($mesRestos)): ?>
                         <div class="alert alert-info text-center py-5 shadow-sm">
                             <i class="fas fa-utensils fa-3x mb-3 text-muted"></i>
@@ -85,7 +97,7 @@ $mesRestos = getRestaurantsByOwner($id_restaurateur);
                                 <div class="col-lg-12 mb-4">
                                     <div class="restaurant_card_admin d-md-flex align-items-center bg-white shadow-sm rounded overflow-hidden p-3 border">
                                         <div class="resto_img me-md-4 mb-3 mb-md-0">
-                                            <img src="assets/img/restaurants/<?= !empty($resto['main_image']) ? $resto['main_image'] : 'default-resto.jpg' ?>"
+                                            <img src="<?= $GLOBALS['url'] ?>/assets/img/restaurants/<?= !empty($resto['main_image']) ? $resto['main_image'] : 'default-resto.jpg' ?>"
                                                 alt="img" class="rounded" style="width:150px; height:100px; object-fit:cover;">
                                         </div>
                                         <div class="resto_info flex-grow-1">
@@ -99,7 +111,7 @@ $mesRestos = getRestaurantsByOwner($id_restaurateur);
                                             <?php endif; ?>
 
                                             <div class="resto_actions">
-                                                <a href="gestion-carte/<?= $resto['id'] ?>" class="btn btn_theme btn_sm me-2">
+                                                <a href="gestion-carte?id=<?= $resto['id'] ?>" class="btn btn_theme btn_sm me-2">
                                                     <i class="fas fa-book-open me-1"></i> Gérer la carte
                                                 </a>
                                                 <a href="configurer-qr-codes/<?= $resto['id'] ?>" class="btn btn_navber btn_sm me-2">
@@ -107,6 +119,9 @@ $mesRestos = getRestaurantsByOwner($id_restaurateur);
                                                 </a>
                                                 <a href="modifier-restaurant?id=<?= $resto['id'] ?>" class="btn btn_sm btn-outline-secondary">
                                                     <i class="fas fa-edit me-1"></i> Modifier
+                                                </a>
+                                                <a href="supprimer-restaurant?id=<?= $resto['id'] ?>" class="btn btn_sm btn-outline-danger ms-2">
+                                                    <i class="fas fa-trash me-1"></i> Supprimer
                                                 </a>
                                             </div>
                                         </div>

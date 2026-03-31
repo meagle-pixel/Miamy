@@ -58,7 +58,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
 
             if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
                 $image_name = $resto['slug'] . '-' . time() . '.' . $ext;
-                $upload_path = $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/restaurants/' . $image_name;
+
+                // Chemin adapté local/prod
+                if ($GLOBALS['dev']) {
+                    $upload_path = $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/restaurants/' . $image_name;
+                } else {
+                    $upload_path = $_SERVER['DOCUMENT_ROOT'] . '/assets/img/restaurants/' . $image_name;
+                }
+
                 move_uploaded_file($_FILES['image']['tmp_name'], $upload_path);
             }
         }

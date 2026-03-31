@@ -673,12 +673,12 @@
 		
 		if ($stmt->execute()) {
 			// Envoi Mail (Utilisation de votre nouvelle fonction sendShopMail)
-			$link = "https://intranet.horme-carrosserie.fr/reset-password.php?token=" . $token;
-			$subject = "Réinitialisation de votre mot de passe";
+			$link = $GLOBALS['url'] . "/reset-password?token=" . $token;
+			$subject = "Réinitialisation de votre mot de passe - Miamy";
 			$body = "<p>Bonjour,</p>";
-			$body .= "<p>Une demande de changement de mot de passe a été faite.</p>";
-			$body .= "<p><a href='$link' style='background:#0d6efd; color:#fff; padding:10px 15px; text-decoration:none; border-radius:4px;'>Changer mon mot de passe</a></p>";
-			$body .= "<p><small>Ce lien est valide 1 heure.</small></p>";
+			$body .= "<p>Une demande de réinitialisation de mot de passe a été effectuée pour votre compte Miamy.</p>";
+			$body .= "<p><a href='$link' style='background:#e74c3c; color:#fff; padding:10px 20px; text-decoration:none; border-radius:4px;'>Réinitialiser mon mot de passe</a></p>";
+			$body .= "<p><small>Ce lien est valide pendant 1 heure. Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</small></p>";
 			
 			// Si sendShopMail n'est pas chargé ici, utiliser mail() en fallback
 			if (function_exists('sendShopMail')) {

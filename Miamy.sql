@@ -7,6 +7,8 @@
 -- Version du serveur : 11.4.10-MariaDB
 -- Version de PHP : 8.4.18
 
+USE Miamy;
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 
 START TRANSACTION;
@@ -1192,5 +1194,21 @@ INSERT INTO `categories` (`name`, `icon`) VALUES
 ('Végétarien', 'fa-carrot'),
 ('Fruits de mer', 'fa-shrimp');
 
+USE Miamy;
 
-SELECT * FROM categories;
+INSERT INTO pages (nom, `mod`, url) VALUES 
+('Accueil', 'accueil', 'views/home.php'),
+('À propos', 'a-propos', 'views/a-propos.php'),
+('FAQ', 'faq', 'views/faq.php'),
+('Contact', 'contact', 'views/contact.php'),
+('Restaurants', 'restaurants', 'views/restaurants.php'),
+('Connexion', 'connexion', 'views/login.php'),
+('Inscription', 'inscription', 'views/register.php'),
+('Mon compte restaurateur', 'mon-compte-restaurateur', 'views/mon-compte-restaurateur.php'),
+('Déconnexion', 'deconnexion', 'views/deconnexion.php'),
+('Ajouter un restaurant', 'ajouter-restaurant', 'views/ajouter-restaurant.php'),
+('Modifier un restaurant', 'modifier-restaurant', 'views/modifier-restaurant.php'),
+('Gestion de la carte',  'gestion-carte',  'views/gestion-carte.php'),
+('Ajouter un plat',      'ajouter-plat',   'views/ajouter-plat.php'),
+('Modifier un plat',     'modifier-plat',  'views/modifier-plat.php'),
+('Supprimer un plat',    'supprimer-plat', 'views/supprimer-plat.php');

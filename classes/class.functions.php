@@ -60,7 +60,7 @@
 		return $new_array;
 	} 
 	
-	function GenPass($size)
+	function GenPass($size=12)
 	{
 		// Initialisation des caractères utilisables
 		$password = '';

@@ -1212,3 +1212,15 @@ INSERT INTO pages (nom, `mod`, url) VALUES
 ('Ajouter un plat',      'ajouter-plat',   'views/ajouter-plat.php'),
 ('Modifier un plat',     'modifier-plat',  'views/modifier-plat.php'),
 ('Supprimer un plat',    'supprimer-plat', 'views/supprimer-plat.php');
+
+
+-- Ajouter la colonne de tri
+
+ALTER TABLE `categories` ADD COLUMN `ordre` int(11) NOT NULL DEFAULT 0;
+
+-- Insérer les catégories avec un ordre logique
+INSERT INTO `categories` (`id`, `name`, `icon`, `ordre`) VALUES
+(1, 'Entrées', 'entree-icon.png', 1),
+(2, 'Plats', 'plat-icon.png', 2),
+(3, 'Desserts', 'dessert-icon.png', 3),
+(4, 'Boissons', 'boisson-icon.png', 4);

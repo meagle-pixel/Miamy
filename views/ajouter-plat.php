@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_plat'])) {
                 'prix'         => (float)$prix,
                 'image'        => $image_name,
                 'categorie'    => $categorie,
-                'id_restaurant'=> $id_restaurant,
+                'id_restaurant' => $id_restaurant,
                 'disponible'   => $disponible,
             ];
 
@@ -96,10 +96,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_plat'])) {
 }
 
 // Catégories suggérées par défaut
-$categoriesSuggestions = array_unique(array_merge(
-    ['Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'],
-    $categoriesExistantes
-));
+$categoriesBase = ['Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'];
+$categoriesSuggestions = array_values(array_unique(array_merge(
+    $categoriesBase,
+    array_filter($categoriesExistantes, fn($v) => is_string($v) && $v !== '')
+)));
 sort($categoriesSuggestions);
 ?>
 
@@ -143,24 +144,22 @@ sort($categoriesSuggestions);
                                     <div class="form-group mb-3">
                                         <label>Nom du plat *</label>
                                         <input type="text" name="nom" class="form-control"
-                                               placeholder="Ex: Entrecôte grillée" required
-                                               value="<?= htmlspecialchars($_POST['nom'] ?? '') ?>">
+                                            placeholder="Ex: Entrecôte grillée" required
+                                            value="<?= htmlspecialchars($_POST['nom'] ?? '') ?>">
                                     </div>
                                 </div>
 
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <label>Catégorie</label>
-                                        <input type="text" name="categorie" class="form-control"
-                                               list="categoriesList"
-                                               placeholder="Ex: Plats, Entrées, Desserts…"
-                                               value="<?= htmlspecialchars($_POST['categorie'] ?? 'Plats') ?>">
-                                        <datalist id="categoriesList">
+                                        <select name="categorie" class="form-control">
                                             <?php foreach ($categoriesSuggestions as $cat): ?>
-                                                <option value="<?= htmlspecialchars($cat) ?>">
+                                                <option value="<?= htmlspecialchars($cat) ?>"
+                                                    <?= (($_POST['categorie'] ?? 'Plats') === $cat) ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($cat) ?>
+                                                </option>
                                             <?php endforeach; ?>
-                                        </datalist>
-                                        <small class="text-muted">Tapez ou choisissez parmi vos catégories existantes</small>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -168,8 +167,8 @@ sort($categoriesSuggestions);
                                     <div class="form-group mb-3">
                                         <label>Prix (€) *</label>
                                         <input type="number" name="prix" class="form-control"
-                                               step="0.01" min="0" placeholder="Ex: 12.50" required
-                                               value="<?= htmlspecialchars($_POST['prix'] ?? '') ?>">
+                                            step="0.01" min="0" placeholder="Ex: 12.50" required
+                                            value="<?= htmlspecialchars($_POST['prix'] ?? '') ?>">
                                     </div>
                                 </div>
 
@@ -177,7 +176,7 @@ sort($categoriesSuggestions);
                                     <div class="form-group mb-3">
                                         <label>Description</label>
                                         <textarea name="description" class="form-control" rows="3"
-                                                  placeholder="Ingrédients, allergènes, mode de cuisson…"><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
+                                            placeholder="Ingrédients, allergènes, mode de cuisson…"><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
                                     </div>
                                 </div>
 
@@ -192,9 +191,9 @@ sort($categoriesSuggestions);
                                 <div class="col-lg-12">
                                     <div class="form-check mb-4">
                                         <input class="form-check-input" type="checkbox" name="disponible"
-                                               id="disponible" <?= (!isset($_POST['submit_plat']) || isset($_POST['disponible'])) ? 'checked' : '' ?>>
+                                            id="disponible" <?= (!isset($_POST['submit_plat']) || isset($_POST['disponible'])) ? 'checked' : '' ?>>
                                         <label class="form-check-label" for="disponible">
-                                            <i class="fas fa-check-circle text-success me-1"></i> Plat disponible à la commande
+                                            <p>Plat disponible à la commande</p>
                                         </label>
                                     </div>
                                 </div>

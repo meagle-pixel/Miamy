@@ -1,17 +1,23 @@
 <?php
-class Plat {
+class Plat
+{
     private $mysqli;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->mysqli = Database::getInstance()->getConnection();
         $this->mysqli->set_charset('utf8mb4');
     }
 
     // Liste tous les plats d'un restaurant
-    public function getByRestaurant($id_restaurant) {
+    public function getByRestaurant($id_restaurant)
+    {
         $plats = [];
+        // On définit l'ordre exact : Entrées (1), Plats (2), Desserts (3), Boissons (4), Snacks (5)
         $stmt = $this->mysqli->prepare(
-            "SELECT * FROM `plats` WHERE `id_restaurant` = ? ORDER BY `categorie` ASC, `nom` ASC"
+            "SELECT * FROM `plats` 
+         WHERE `id_restaurant` = ? 
+         ORDER BY FIELD(`categorie`, 'Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'), `nom` ASC"
         );
         $stmt->bind_param("i", $id_restaurant);
         $stmt->execute();
@@ -24,7 +30,8 @@ class Plat {
     }
 
     // Récupère un plat par son ID
-    public function getById($id) {
+    public function getById($id)
+    {
         $stmt = $this->mysqli->prepare("SELECT * FROM `plats` WHERE `id` = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -34,7 +41,8 @@ class Plat {
     }
 
     // Liste les catégories distinctes d'un restaurant
-    public function getCategoriesByRestaurant($id_restaurant) {
+    public function getCategoriesByRestaurant($id_restaurant)
+    {
         $categories = [];
         $stmt = $this->mysqli->prepare(
             "SELECT DISTINCT `categorie` FROM `plats` WHERE `id_restaurant` = ? ORDER BY `categorie` ASC"
@@ -50,7 +58,8 @@ class Plat {
     }
 
     // Ajoute un plat
-    public function insert($data) {
+    public function insert($data)
+    {
         $stmt = $this->mysqli->prepare(
             "INSERT INTO `plats` (`nom`, `description`, `prix`, `image`, `categorie`, `id_restaurant`, `disponible`, `created_at`)
              VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
@@ -72,7 +81,8 @@ class Plat {
     }
 
     // Modifie un plat
-    public function update($id, $data) {
+    public function update($id, $data)
+    {
         $stmt = $this->mysqli->prepare(
             "UPDATE `plats` SET
                 `nom` = ?,
@@ -84,7 +94,7 @@ class Plat {
              WHERE `id` = ?"
         );
         $stmt->bind_param(
-            "ssdsiii",
+            "ssdssii",
             $data['nom'],
             $data['description'],
             $data['prix'],
@@ -99,7 +109,8 @@ class Plat {
     }
 
     // Supprime un plat
-    public function delete($id) {
+    public function delete($id)
+    {
         $stmt = $this->mysqli->prepare("DELETE FROM `plats` WHERE `id` = ?");
         $stmt->bind_param("i", $id);
         $result = $stmt->execute();
@@ -108,7 +119,8 @@ class Plat {
     }
 
     // Active ou désactive la disponibilité d'un plat
-    public function toggleDisponible($id) {
+    public function toggleDisponible($id)
+    {
         $stmt = $this->mysqli->prepare(
             "UPDATE `plats` SET `disponible` = IF(`disponible` = 1, 0, 1) WHERE `id` = ?"
         );

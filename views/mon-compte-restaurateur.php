@@ -101,7 +101,9 @@ if (isset($_GET['success']) && $_GET['success'] === 'deleted') {
                                                 alt="img" class="rounded" style="width:150px; height:100px; object-fit:cover;">
                                         </div>
                                         <div class="resto_info flex-grow-1">
-                                            <h4 class="mb-1"><?= htmlspecialchars($resto['name']) ?></h4>
+                                            <h4 class="mb-1">
+                                                <a href="gestion-carte.php"><?= htmlspecialchars($resto['name']) ?></a>
+                                            </h4>
                                             <p class="text-muted mb-2"><i class="fas fa-map-marker-alt me-1"></i> <?= htmlspecialchars($resto['city']) ?></p>
 
                                             <?php if ($resto['subscription_active']): ?>

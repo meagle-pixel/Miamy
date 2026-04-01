@@ -27,15 +27,15 @@
 			$mysqli = $db->getConnection();
 			$userId = (int)$userId;
 			
-			$query = "SELECT l.*, 
-					  COALESCE(a.nom, e.nom, 'Utilisateur') as user_nom,
-					  COALESCE(a.prenom, e.prenom, '') as user_prenom
+			$query = "SELECT l.*,
+					  COALESCE(a.nom, r.nom, c.nom, 'Utilisateur') as user_nom,
+					  COALESCE(a.prenom, r.prenom, c.prenom, '') as user_prenom
 					  FROM user_logs l
 					  LEFT JOIN utilisateurs u ON l.user_id = u.id
 					  LEFT JOIN administrateurs a ON (u.profil = 1 AND u.profil_id = a.id)
-					  LEFT JOIN restaurateurs e ON (u.profil = 2 AND u.profil_id = e.id)
-					  LEFT JOIN clients e ON (u.profil = 3 AND u.profil_id = e.id)
-					  WHERE l.user_id = '$userId' 
+					  LEFT JOIN restaurateurs r ON (u.profil = 2 AND u.profil_id = r.id)
+					  LEFT JOIN clients c ON (u.profil = 3 AND u.profil_id = c.id)
+					  WHERE l.user_id = '$userId'
 					  ORDER BY l.created_at DESC LIMIT $limit";
 					  
 			if($res = $mysqli->query($query)) {
@@ -442,6 +442,7 @@
 				elseif($userFound['profil'] == 2) $table = "restaurateurs";
 				elseif($userFound['profil'] == 3) $table = "clients";
 
+				$_SESSION['user-info'] = null;
 				if($table != "") {
 					$queryInfo = "SELECT * FROM `$table` WHERE `id` = '".$userFound['profil_id']."'";
 					if($resInfo = $mysqli->query($queryInfo)) {

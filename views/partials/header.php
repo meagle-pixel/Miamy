@@ -40,12 +40,13 @@
 					<div class="col-lg-6 col-md-6">
 						<ul class="topbar-others-options">
 							<?php if (isset($_SESSION['connected']) && $_SESSION['connected'] == true): ?>
-								<li><span><?= $_SESSION['user-info']['prenom'] ?? 'Restaurateur' ?></span></li>
-								<li><a href="mon-compte-restaurateur">Mon compte</a></li>
+								<?php $profil = $_SESSION['user']['profil'] ?? 3; ?>
+								<li><span><?= htmlspecialchars($_SESSION['user-info']['prenom'] ?? 'Mon compte') ?></span></li>
+								<li><a href="<?= $profil <= 2 ? 'mon-compte-restaurateur' : 'mon-compte' ?>">Mon compte</a></li>
 								<li><a href="deconnexion">Déconnexion</a></li>
 							<?php else: ?>
 								<li><a href="connexion">Connexion</a></li>
-								<li><a href="inscription">inscription</a></li>
+								<li><a href="inscription">Inscription</a></li>
 							<?php endif; ?>
 						</ul>
 					</div>
@@ -111,7 +112,12 @@
 								</div>
 
 								<div class="option-item">
+<<<<<<< HEAD
 									<a href="mon-compte" class="btn  btn_navber">Mon compte</a>
+=======
+									<?php $profil_nav = $_SESSION['user']['profil'] ?? 3; ?>
+								<a href="<?= (isset($_SESSION['connected']) && $_SESSION['connected'] && $profil_nav <= 2) ? 'mon-compte-restaurateur' : 'mon-compte' ?>" class="btn btn_navber">Mon compte</a>
+>>>>>>> 7cd713512c69f502d4401cc7a492ea04b9705602
 								</div>
 
 							</div>

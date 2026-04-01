@@ -1,0 +1,24 @@
+# Credentials - NE JAMAIS COMMITTER
+.env
+
+# Uploads utilisateurs
+assets/img/restaurants/*.jpg
+assets/img/restaurants/*.png
+assets/img/restaurants/*.webp
+assets/img/plats/*.jpg
+assets/img/plats/*.png
+assets/img/plats/*.webp
+assets/img/users/*.jpg
+assets/img/users/*.png
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log

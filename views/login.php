@@ -3,8 +3,8 @@ $message_error = "";
 
 // 2. Traitement de la connexion
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = mysqli_real_escape_string(Database::getInstance()->getConnection(), $_POST['email']);
-    $pass  = $_POST['password'];
+    $email = trim($_POST['email'] ?? '');
+    $pass  = $_POST['password'] ?? '';
 
     if (!empty($email) && !empty($pass)) {
         

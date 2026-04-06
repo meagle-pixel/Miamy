@@ -14,22 +14,18 @@ if (!$id_restaurant) {
 }
 
 // 2. Vérifier que le restaurant appartient bien à ce restaurateur
-$db     = Database::getInstance();
-$mysqli = $db->getConnection();
-$stmt   = $mysqli->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->bind_param("ii", $id_restaurant, $id_restaurateur);
-$stmt->execute();
-$result = $stmt->get_result();
+$pdo  = Database::getInstance()->getConnection();
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
+$stmt->execute([$id_restaurant, $id_restaurateur]);
+$resto = $stmt->fetch();
 
-if ($result->num_rows === 0) {
+if (!$resto) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
     exit();
 }
-$resto = $result->fetch_assoc();
-$stmt->close();
 
 // 3. Récupérer les catégories déjà utilisées pour ce restaurant (suggestions)
-$platClass          = new Plat();
+$platClass            = new Plat();
 $categoriesExistantes = $platClass->getCategoriesByRestaurant($id_restaurant);
 
 $message_success = '';
@@ -38,18 +34,17 @@ $message_error   = '';
 // 4. Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_plat'])) {
 
-    $nom        = trim($_POST['nom'] ?? '');
+    $nom         = trim($_POST['nom'] ?? '');
     $description = trim($_POST['description'] ?? '');
-    $prix       = str_replace(',', '.', trim($_POST['prix'] ?? '0'));
-    $categorie  = trim($_POST['categorie'] ?? 'Plats');
-    $disponible = isset($_POST['disponible']) ? 1 : 0;
+    $prix        = str_replace(',', '.', trim($_POST['prix'] ?? '0'));
+    $categorie   = trim($_POST['categorie'] ?? 'Plats');
+    $disponible  = isset($_POST['disponible']) ? 1 : 0;
 
     if (empty($nom)) {
         $message_error = "Le nom du plat est obligatoire.";
     } elseif (!is_numeric($prix) || $prix < 0) {
         $message_error = "Le prix doit être un nombre valide.";
     } else {
-        // Gestion de l'image
         $image_name = null;
         if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
             $allowed = ['jpg', 'jpeg', 'png', 'webp'];
@@ -58,16 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_plat'])) {
             if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
                 $slug_plat  = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
                 $image_name = $slug_plat . '-' . time() . '.' . $ext;
-
-                if ($GLOBALS['dev']) {
-                    $upload_path = $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/plats/' . $image_name;
-                } else {
-                    $upload_path = $_SERVER['DOCUMENT_ROOT'] . '/assets/img/plats/' . $image_name;
-                }
+                $upload_path = $GLOBALS['dev']
+                    ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/plats/' . $image_name
+                    : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/plats/' . $image_name;
 
                 if (!move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
-                    $image_name  = null;
-                    $message_error = "Erreur lors de l'upload de l'image. Vérifiez que le dossier assets/img/plats/ existe.";
+                    $image_name    = null;
+                    $message_error = "Erreur lors de l'upload de l'image.";
                 }
             } else {
                 $message_error = "Image invalide (formats acceptés : JPG, PNG, WebP — max 5 Mo).";
@@ -76,13 +68,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_plat'])) {
 
         if (empty($message_error)) {
             $data = [
-                'nom'          => $nom,
-                'description'  => $description,
-                'prix'         => (float)$prix,
-                'image'        => $image_name,
-                'categorie'    => $categorie,
+                'nom'           => $nom,
+                'description'   => $description,
+                'prix'          => (float)$prix,
+                'image'         => $image_name,
+                'categorie'     => $categorie,
                 'id_restaurant' => $id_restaurant,
-                'disponible'   => $disponible,
+                'disponible'    => $disponible,
             ];
 
             if ($platClass->insert($data)) {
@@ -95,8 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_plat'])) {
     }
 }
 
-// Catégories suggérées par défaut
-$categoriesBase = ['Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'];
+$categoriesBase        = ['Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'];
 $categoriesSuggestions = array_values(array_unique(array_merge(
     $categoriesBase,
     array_filter($categoriesExistantes, fn($v) => is_string($v) && $v !== '')

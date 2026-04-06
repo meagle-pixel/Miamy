@@ -1,82 +1,38 @@
 <?php
-	
+
 	function getAllLangsFromSite()
 	{
-		$sets = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `langues`;";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $sets[] = $message; }
-			$result->free();
-		}
-		
-		return $sets;
+		$pdo = Database::getInstance()->getConnection();
+		return $pdo->query("SELECT * FROM `langues`")->fetchAll();
 	}
-	
+
 	function getAllLangs()
 	{
-		$sets = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `pokemon-languages`;";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $sets[] = $message; }
-			$result->free();
-		}
-		
-		return $sets;
+		$pdo = Database::getInstance()->getConnection();
+		return $pdo->query("SELECT * FROM `pokemon-languages`")->fetchAll();
 	}
-	
+
 	function getLang($id)
 	{
-		$sets = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `pokemon-languages` WHERE `id` = '".$id."';";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $sets = $message; }
-			$result->free();
-		}
-		
-		return $sets;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `pokemon-languages` WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
+		return $stmt->fetch() ?: [];
 	}
-	
+
 	function getLangFromSite($id)
 	{
-		$sets = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `langues` WHERE `id` = '".$id."';";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $sets = $message; }
-			$result->free();
-		}
-		
-		return $sets;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `langues` WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
+		return $stmt->fetch() ?: [];
 	}
-	
+
 	function getLangFromSiteForCardLangId($id)
 	{
-		$sets = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `langues` WHERE `equi_card` = '".$id."';";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $sets = $message; }
-			$result->free();
-		}
-		
-		return $sets;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `langues` WHERE `equi_card` = ?");
+		$stmt->execute([(int)$id]);
+		return $stmt->fetch() ?: [];
 	}
 ?>

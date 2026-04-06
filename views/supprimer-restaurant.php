@@ -1,12 +1,11 @@
 <?php
-// 1. Sécurité : vérifier si connecté et restaurateur
+// 1. Sécurité
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
     exit();
 }
 
-// 2. Récupérer l'ID du restaurant depuis l'URL
-$id_restaurant = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $id_restaurateur = $_SESSION['user']['profil_id'];
 
 if (!$id_restaurant) {
@@ -14,24 +13,18 @@ if (!$id_restaurant) {
     exit();
 }
 
-// 3. Connexion BDD
-$db = Database::getInstance();
-$mysqli = $db->getConnection();
+// 2. Récupérer le restaurant et vérifier qu'il appartient au restaurateur connecté
+$pdo  = Database::getInstance()->getConnection();
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
+$stmt->execute([$id_restaurant, $id_restaurateur]);
+$resto = $stmt->fetch();
 
-// 4. Récupérer le restaurant ET vérifier qu'il appartient au restaurateur connecté
-$stmt = $mysqli->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->bind_param("ii", $id_restaurant, $id_restaurateur);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
+if (!$resto) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
     exit();
 }
 
-$resto = $result->fetch_assoc();
-
-// 5. Traitement de la confirmation de suppression
+// 3. Traitement de la confirmation de suppression
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     $restaurant = new Restaurant();
     if ($restaurant->delete($id_restaurant)) {

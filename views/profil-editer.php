@@ -1,13 +1,12 @@
 <?php
-// 1. Sécurité : vérifier si connecté
+// 1. Sécurité
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
     exit();
 }
 
 $id_restaurateur = $_SESSION['user']['profil_id'];
-$db = Database::getInstance();
-$mysqli = $db->getConnection();
+$pdo             = Database::getInstance()->getConnection();
 
 $message_success = '';
 $message_error   = '';
@@ -25,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_profil'])) {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message_error = "L'adresse email n'est pas valide.";
     } else {
-        // Mise à jour table restaurateurs
         $ok = updateRestaurateur([
             'id'        => $id_restaurateur,
             'nom'       => $nom,
@@ -34,14 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_profil'])) {
             'telephone' => $telephone,
         ]);
 
-        // Mise à jour de l'email dans la table utilisateurs (cohérence login)
         if ($ok) {
-            $email_escaped = $mysqli->real_escape_string($email);
-            $mysqli->query("UPDATE utilisateurs SET email = '$email_escaped' WHERE profil_id = '$id_restaurateur' AND profil = 2");
-        }
+            // Mise à jour de l'email dans la table utilisateurs
+            $stmt = $pdo->prepare(
+                "UPDATE utilisateurs SET email = ? WHERE profil_id = ? AND profil = 2"
+            );
+            $stmt->execute([$email, $id_restaurateur]);
 
-        if ($ok) {
-            // Rafraîchir la session
             $_SESSION['user-info']['nom']       = $nom;
             $_SESSION['user-info']['prenom']    = $prenom;
             $_SESSION['user-info']['email']     = $email;

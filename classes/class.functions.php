@@ -92,23 +92,18 @@
 	
 	function updateValueonColandTable($table,$col,$value,$id)
 	{
-		$cards = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		
+		$pdo = Database::getInstance()->getConnection();
+
 		if($table == 'gradations' && $col == 'actif' && $value == 1)
 		{
-			$query = "UPDATE `gradations` SET `date_gradation`= NOW() WHERE `id` = '".$id."';";
-		
-			$result = $mysqli->query($query);
+			$stmt = $pdo->prepare("UPDATE `gradations` SET `date_gradation` = NOW() WHERE `id` = ?");
+			$stmt->execute([(int)$id]);
 		}
-		
-		$query = "UPDATE `$table` SET `$col` = '".$value."' WHERE `id` = $id;";
-		
-		$result = $mysqli->query($query);
-		
-		return $query;
+
+		$stmt = $pdo->prepare("UPDATE `$table` SET `$col` = ? WHERE `id` = ?");
+		$stmt->execute([$value, (int)$id]);
+
+		return $stmt->rowCount();
 	}
 
 	if (!function_exists('str_contains')) {

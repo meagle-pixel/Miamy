@@ -2,166 +2,91 @@
 
 	function getMessage($id)
 	{
-		$messages = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `messages` WHERE `id` = '".$id."'";
-		
-		if($result = $mysqli->query($query))
-		{
-			while ($messagetmp = $result->fetch_assoc()) { $messages = $messagetmp; }
-			$result->free();
-		}
-		
-		if(count($messages))
-			return $messages;
-		else
-			return false;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `messages` WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
+		$row = $stmt->fetch();
+		return $row ?: false;
 	}
 
 	function setMessageRead($id)
 	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		
-		$query =  "UPDATE `messages` SET
-				  `unread` = '0'
-				  WHERE `id` = '".$id."'";
-		
-		$mysqli->query($query);
-	}
-	
-	function setMessageUnread($id)
-	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		
-		$query =  "UPDATE `messages` SET
-				  `unread` = '1'
-				  WHERE `id` = '".$id."'";
-		
-		$mysqli->query($query);
-	}
-	
-	function setMessageTrash($id)
-	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		
-		$query =  "UPDATE `messages` SET
-				  `delete` = '1'
-				  WHERE `id` = '".$id."'";
-		
-		$mysqli->query($query);
-	}
-	
-	function setMessageRecover($id)
-	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		
-		$query =  "UPDATE `messages` SET
-				  `delete` = '0'
-				  WHERE `id` = '".$id."'";
-		
-		$mysqli->query($query);
-	}
-	
-	function setMessageArchive($id)
-	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		
-		$query =  "UPDATE `messages` SET
-				  `delete` = '2'
-				  WHERE `id` = '".$id."'";
-		
-		$mysqli->query($query);
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("UPDATE `messages` SET `unread` = '0' WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
 	}
 
-	function getMessagesReceivedFromUser($user_id,$desc=true)
+	function setMessageUnread($id)
 	{
-		$messages = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		if($desc)
-			$query = "SELECT * FROM `messages` WHERE `destinataire` = '".$user_id."' AND `delete` = '0' ORDER BY `date` DESC";
-		else
-			$query = "SELECT * FROM `messages` WHERE `destinataire` = '".$user_id."' AND `delete` = '0' ORDER BY `date` ASC";
-		
-		if($result = $mysqli->query($query))
-		{
-			while ($messagetmp = $result->fetch_assoc()) { $messages[] = $messagetmp; }
-			$result->free();
-		}
-		
-		if(count($messages))
-			return $messages;
-		else
-			return false;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("UPDATE `messages` SET `unread` = '1' WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
 	}
-	
+
+	function setMessageTrash($id)
+	{
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("UPDATE `messages` SET `delete` = '1' WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
+	}
+
+	function setMessageRecover($id)
+	{
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("UPDATE `messages` SET `delete` = '0' WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
+	}
+
+	function setMessageArchive($id)
+	{
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("UPDATE `messages` SET `delete` = '2' WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
+	}
+
+	function getMessagesReceivedFromUser($user_id, $desc = true)
+	{
+		$pdo   = Database::getInstance()->getConnection();
+		$order = $desc ? 'DESC' : 'ASC';
+		$stmt  = $pdo->prepare(
+			"SELECT * FROM `messages` WHERE `destinataire` = ? AND `delete` = '0' ORDER BY `date` $order"
+		);
+		$stmt->execute([(int)$user_id]);
+		$rows = $stmt->fetchAll();
+		return count($rows) ? $rows : false;
+	}
+
 	function getMessagesReceivedUnreadFromUser($user_id)
 	{
-		$messages = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `messages` WHERE `destinataire` = '".$user_id."' AND `unread` = '1' AND `delete` = '0'";
-		
-		if($result = $mysqli->query($query))
-		{
-			while ($messagetmp = $result->fetch_assoc()) { $messages[] = $messagetmp; }
-			$result->free();
-		}
-		
-		if(count($messages))
-			return $messages;
-		else
-			return false;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"SELECT * FROM `messages` WHERE `destinataire` = ? AND `unread` = '1' AND `delete` = '0'"
+		);
+		$stmt->execute([(int)$user_id]);
+		$rows = $stmt->fetchAll();
+		return count($rows) ? $rows : false;
 	}
-	
+
 	function getMessagesSentFromUser($user_id)
 	{
-		$messages = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `messages` WHERE `expediteur` = '".$user_id."' AND `delete` = '0'";
-		
-		if($result = $mysqli->query($query))
-		{
-			while ($messagetmp = $result->fetch_assoc()) { $messages[] = $messagetmp; }
-			$result->free();
-		}
-		
-		if(count($messages))
-			return $messages;
-		else
-			return false;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"SELECT * FROM `messages` WHERE `expediteur` = ? AND `delete` = '0'"
+		);
+		$stmt->execute([(int)$user_id]);
+		$rows = $stmt->fetchAll();
+		return count($rows) ? $rows : false;
 	}
-	
+
 	function getMessagesDeleteFromUser($user_id)
 	{
-		$messages = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `messages` WHERE `destinataire` = '".$user_id."' AND `delete` = '1'";
-		
-		if($result = $mysqli->query($query))
-		{
-			while ($messagetmp = $result->fetch_assoc()) { $messages[] = $messagetmp; }
-			$result->free();
-		}
-		
-		if(count($messages))
-			return $messages;
-		else
-			return false;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"SELECT * FROM `messages` WHERE `destinataire` = ? AND `delete` = '1'"
+		);
+		$stmt->execute([(int)$user_id]);
+		$rows = $stmt->fetchAll();
+		return count($rows) ? $rows : false;
 	}
-	
 
 ?>

@@ -14,7 +14,6 @@ if (file_exists($envFile)) {
 
 // On détecte si on est sur l'adresse IP locale
 if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['HTTP_HOST'] == 'localhost') {
-
     // CONFIGURATION LOCALHOST (Docker)
     $GLOBALS["db_host"]     = $_ENV['DEV_DB_HOST'] ?? 'mysql-server';
     $GLOBALS["db_username"] = $_ENV['DEV_DB_USER'] ?? 'root';
@@ -22,7 +21,6 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['HTTP_HOST'] == 'localhos
     $GLOBALS["db_name"]     = $_ENV['DEV_DB_NAME'] ?? 'Miamy';
     $GLOBALS["url"]         = $_ENV['DEV_URL']     ?? 'http://localhost/Miamy';
     $GLOBALS["dev"]         = true;
-
 } else {
     // CONFIGURATION PRODUCTION (o2switch)
     $GLOBALS["db_host"]     = $_ENV['PROD_DB_HOST'] ?? 'localhost';

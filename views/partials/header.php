@@ -112,12 +112,8 @@
 								</div>
 
 								<div class="option-item">
-<<<<<<< HEAD
-									<a href="mon-compte" class="btn  btn_navber">Mon compte</a>
-=======
 									<?php $profil_nav = $_SESSION['user']['profil'] ?? 3; ?>
 								<a href="<?= (isset($_SESSION['connected']) && $_SESSION['connected'] && $profil_nav <= 2) ? 'mon-compte-restaurateur' : 'mon-compte' ?>" class="btn btn_navber">Mon compte</a>
->>>>>>> 7cd713512c69f502d4401cc7a492ea04b9705602
 								</div>
 
 							</div>

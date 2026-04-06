@@ -25,29 +25,25 @@ if (!$plat) {
 $id_restaurant = $plat['id_restaurant'];
 
 // 3. Vérifier que le restaurant appartient bien à ce restaurateur
-$db     = Database::getInstance();
-$mysqli = $db->getConnection();
-$stmt   = $mysqli->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->bind_param("ii", $id_restaurant, $id_restaurateur);
-$stmt->execute();
-$result = $stmt->get_result();
+$pdo  = Database::getInstance()->getConnection();
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
+$stmt->execute([$id_restaurant, $id_restaurateur]);
+$resto = $stmt->fetch();
 
-if ($result->num_rows === 0) {
+if (!$resto) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
     exit();
 }
-$resto = $result->fetch_assoc();
-$stmt->close();
 
 // 4. Catégories existantes
-$categoriesExistantes = $platClass->getCategoriesByRestaurant($id_restaurant);
-$categoriesBase = ['Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'];
+$categoriesExistantes  = $platClass->getCategoriesByRestaurant($id_restaurant);
+$categoriesBase        = ['Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'];
 $categoriesSuggestions = array_values(array_unique(array_merge(
     $categoriesBase,
     array_filter($categoriesExistantes, fn($v) => is_string($v) && $v !== '')
 )));
 
-$errors = []; 
+$errors = [];
 
 // 5. Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
@@ -58,17 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
     $categorie   = trim($_POST['categorie'] ?? 'Plats');
     $disponible  = isset($_POST['disponible']) ? 1 : 0;
 
-    // Validation des champs
-    if (empty($nom)) {
-        $errors[] = "Le nom du plat est obligatoire.";
-    }
+    if (empty($nom))                             $errors[] = "Le nom du plat est obligatoire.";
+    if (!is_numeric($prix) || $prix < 0)         $errors[] = "Le prix doit être un nombre valide et positif.";
 
-    if (!is_numeric($prix) || $prix < 0) {
-        $errors[] = "Le prix doit être un nombre valide et positif.";
-    }
-
-    // Gestion de l'image
-    $image_name = $plat['image']; // Par défaut on garde l'ancienne
+    $image_name = $plat['image'];
 
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
@@ -79,9 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
         } elseif ($_FILES['image']['size'] > 5000000) {
             $errors[] = "L'image est trop volumineuse (maximum 5 Mo).";
         } else {
-            $slug_plat  = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
-            $new_image  = $slug_plat . '-' . time() . '.' . $ext;
-            $upload_dir = $GLOBALS['dev'] ? '/Miamy/assets/img/plats/' : '/assets/img/plats/';
+            $slug_plat   = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
+            $new_image   = $slug_plat . '-' . time() . '.' . $ext;
+            $upload_dir  = $GLOBALS['dev'] ? '/Miamy/assets/img/plats/' : '/assets/img/plats/';
             $upload_path = $_SERVER['DOCUMENT_ROOT'] . $upload_dir . $new_image;
 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
@@ -92,7 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
         }
     }
 
-    // Si aucune erreur, on procède à l'update
     if (empty($errors)) {
         $data = [
             'nom'         => $nom,
@@ -145,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
                         <div class="alert alert-danger">
                             <ul class="mb-0">
                                 <?php foreach ($errors as $error): ?>
-                                    <li><i class="fas fa-times-circle me-2"></i><?= $error ?></li>
+                                    <li><i class="fas fa-times-circle me-2"></i><?= htmlspecialchars($error) ?></li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>

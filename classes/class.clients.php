@@ -2,188 +2,141 @@
 
 	function getAllClients($onlynb = false)
 	{
-		$etats = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `clients`";
-		
-		if($result = $mysqli->query($query)){
-			while ($societe = $result->fetch_assoc()) { $etats[] = $societe; }
-			$result->free();
-		}
-		if($onlynb)
-			return count($etats);
-		return $etats;
+		$pdo  = Database::getInstance()->getConnection();
+		$data = $pdo->query("SELECT * FROM `clients`")->fetchAll();
+		return $onlynb ? count($data) : $data;
 	}
-	
+
 	function deleteClient($id)
 	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$query = "DELETE FROM `clients` 
-		 WHERE `id` = '".$id."';";
-		
-		return $mysqli->query($query);
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("DELETE FROM `clients` WHERE `id` = ?");
+		return $stmt->execute([(int)$id]);
 	}
-	
+
 	function getClient($id)
 	{
-		$client = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `clients` WHERE `id` = '".$id."';";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $client[] = $message; }
-			$result->free();
-		}
-		
-		return $client[0];
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
+		return $stmt->fetch() ?: [];
 	}
-	
+
 	function getClientByEmail($email)
 	{
-		$client = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `clients` WHERE `email` = '".$email."';";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $client[] = $message; }
-			$result->free();
-		}
-		
-		return $client[0];
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `email` = ?");
+		$stmt->execute([$email]);
+		return $stmt->fetch() ?: [];
 	}
-	
-	
+
 	function insertClient($client)
-	{			
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$query = "INSERT INTO `clients` (`id`, `email`, `motdepasse`, `civilite`,`nom`, `prenom`, `telephone`, `adresse`, `adresse_comp`, `codepostal`, `ville`, `dateinscription`, `dateconnect`, `dateaction`) 
-		VALUES (NULL, '".$client['email']."', '".password_hash($client['motdepasse'],PASSWORD_DEFAULT )."', '".$client['civilite']."',  '".$client['nom']."', '".$client['prenom']."', '".$client['telephone']."', '".$client['adresse']."', '".$client['adresse_comp']."', '".$client['codepostal']."','".$client['ville']."',NOW(), NOW(), NOW());";
-		
-		$mysqli->query($query);
-		
-		$idc = $mysqli->insert_id;
-		
-		return $idc;
+	{
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"INSERT INTO `clients`
+			(`id`, `email`, `motdepasse`, `civilite`, `nom`, `prenom`, `telephone`,
+			 `adresse`, `adresse_comp`, `codepostal`, `ville`,
+			 `dateinscription`, `dateconnect`, `dateaction`)
+			VALUES
+			(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())"
+		);
+		$stmt->execute([
+			$client['email'],
+			password_hash($client['motdepasse'], PASSWORD_DEFAULT),
+			$client['civilite'],
+			$client['nom'],
+			$client['prenom'],
+			$client['telephone'],
+			$client['adresse'],
+			$client['adresse_comp'],
+			$client['codepostal'],
+			$client['ville'],
+		]);
+		return $pdo->lastInsertId();
 	}
-	
+
 	function updateClientDataLite($id)
 	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$query = "SELECT * FROM `clients` WHERE `id` = '".$id."'";
-		if($result = $mysqli->query($query)){
-			while ($results = $result->fetch_assoc()) {
-				$_SESSION['connected'] = true;
-				$_SESSION['user'] = $results;
-			}
-			$result->free();
-		}
-		else
-		{
-			$_SESSION['connected'] = false;
-			$_SESSION['user'] = false;
-		}
-		
-		$query = "UPDATE `clients` set `dateaction` = NOW() WHERE `id` = '".$id."'";
-		$mysqli->query($query);
-		
-		insertIP($id,2);
-	}
-	
-	function trytoconnectClient($email,$pass)
-	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$query = "SELECT * FROM `clients` WHERE `email` = '".$email."'";
-		
-		if($result = $mysqli->query($query)){
-			while ($results = $result->fetch_assoc()) {
-				$_SESSION['connected'] = true;
-				$_SESSION['user'] = $results;
-			}
-			$result->free();
-		}
-		else
-		{
-			$_SESSION['connected'] = false;
-			$_SESSION['user'] = false;
-		}
-		
-		if (isset($_SESSION['user']['motdepasse']) && password_verify($pass, $_SESSION['user']['motdepasse'])) {
-			return true;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
+		$result = $stmt->fetch();
+
+		if ($result) {
+			$_SESSION['connected'] = true;
+			$_SESSION['user']      = $result;
 		} else {
 			$_SESSION['connected'] = false;
-			$_SESSION['user'] = false;
-			return false;
+			$_SESSION['user']      = false;
 		}
+
+		$upd = $pdo->prepare("UPDATE `clients` SET `dateaction` = NOW() WHERE `id` = ?");
+		$upd->execute([(int)$id]);
+
+		insertIP($id, 2);
 	}
-	
-	function updateClient($client)
-	{		
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$query = "UPDATE `clients`
-		SET `email` = '".$client['email']."', 
-		`civilite` = '".$client['civilite']."',
-		`nom` = '".$client['nom']."', 
-		`prenom` = '".$client['prenom']."',
-		`telephone` = '".$client['telephone']."',
-		`adresse` = '".$client['adresse']."', 
-		`adresse_comp` = '".$client['adresse_comp']."',
-		`codepostal` = '".$client['codepostal']."', 
-		`ville` = '".$client['ville']."'
-		WHERE `id` = '".$client['id']."';";
-		
-		$mysqli->query($query);
-		
-		if(isset($client['motdepasse']))
-		{
-			$db = Database::getInstance();
-			$mysqli = $db->getConnection(); 
-			$query = "UPDATE `clients`
-			SET `motdepasse` = '".password_hash($client['motdepasse'],PASSWORD_DEFAULT )."'
-			WHERE `id` = '".$client['id']."';";
-			
-			$mysqli->query($query);
-		}
-	}
-	
-	function changePassword($id,$pass)
+
+	function trytoconnectClient($email, $pass)
 	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$query = "UPDATE `clients`
-		SET `motdepasse` = '".password_hash($pass,PASSWORD_DEFAULT )."'
-		WHERE `id` = '".$id."';";
-		
-		$mysqli->query($query);
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `email` = ?");
+		$stmt->execute([$email]);
+		$user = $stmt->fetch();
+
+		if ($user && password_verify($pass, $user['motdepasse'])) {
+			$_SESSION['connected'] = true;
+			$_SESSION['user']      = $user;
+			return true;
+		}
+
+		$_SESSION['connected'] = false;
+		$_SESSION['user']      = false;
+		return false;
 	}
-	
+
+	function updateClient($client)
+	{
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"UPDATE `clients` SET
+			`email` = ?, `civilite` = ?, `nom` = ?, `prenom` = ?,
+			`telephone` = ?, `adresse` = ?, `adresse_comp` = ?,
+			`codepostal` = ?, `ville` = ?
+			WHERE `id` = ?"
+		);
+		$stmt->execute([
+			$client['email'],
+			$client['civilite'],
+			$client['nom'],
+			$client['prenom'],
+			$client['telephone'],
+			$client['adresse'],
+			$client['adresse_comp'],
+			$client['codepostal'],
+			$client['ville'],
+			(int)$client['id'],
+		]);
+
+		if (isset($client['motdepasse'])) {
+			$upd = $pdo->prepare("UPDATE `clients` SET `motdepasse` = ? WHERE `id` = ?");
+			$upd->execute([password_hash($client['motdepasse'], PASSWORD_DEFAULT), (int)$client['id']]);
+		}
+	}
+
+	function changePassword($id, $pass)
+	{
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("UPDATE `clients` SET `motdepasse` = ? WHERE `id` = ?");
+		$stmt->execute([password_hash($pass, PASSWORD_DEFAULT), (int)$id]);
+	}
+
 	function existEmailClient($email)
 	{
-		$client = '';
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = $mysqli->prepare("SELECT * FROM `clients` WHERE `email` = '".$email."'");
-		$query->execute();
-		$query->store_result();
-
-		$rows = $query->num_rows;
-
-		if($rows > 0)
-			return true;
-		else
-			return false;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT id FROM `clients` WHERE `email` = ?");
+		$stmt->execute([$email]);
+		return $stmt->fetch() !== false;
 	}
-
 
 ?>

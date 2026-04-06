@@ -1,95 +1,72 @@
 <?php
-// 1. Sécurité : vérifier si connecté et restaurateur
+// 1. Sécurité
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
     exit();
 }
 
-// 2. Récupérer l'ID du restaurant depuis l'URL
-$id_restaurant = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $id_restaurateur = $_SESSION['user']['profil_id'];
+$pdo             = Database::getInstance()->getConnection();
 
-// 3. Connexion BDD
-$db = Database::getInstance();
-$mysqli = $db->getConnection();
+// 2. Récupérer le restaurant et vérifier qu'il appartient au restaurateur connecté
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
+$stmt->execute([$id_restaurant, $id_restaurateur]);
+$resto = $stmt->fetch();
 
-// 4. Récupérer le restaurant ET vérifier qu'il appartient au restaurateur connecté
-$query = "SELECT * FROM restaurants WHERE id = '$id_restaurant' AND id_restaurateur = '$id_restaurateur'";
-$result = $mysqli->query($query);
-
-if ($result->num_rows === 0) {
+if (!$resto) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
     exit();
 }
 
-$resto = $result->fetch_assoc();
-
-// 5. Récupérer les catégories pour le select
-$categories = [];
-$result_cat = $mysqli->query("SELECT * FROM categories ORDER BY name ASC");
-if ($result_cat) {
-    while ($row = $result_cat->fetch_assoc()) {
-        $categories[] = $row;
-    }
-}
+// 3. Récupérer les catégories
+$categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
 
 $message_success = '';
-$message_error = '';
+$message_error   = '';
 
-// 6. Traitement du formulaire
+// 4. Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
 
-    $name = trim($_POST['name'] ?? '');
-    $city = trim($_POST['city'] ?? '');
+    $name        = trim($_POST['name'] ?? '');
+    $city        = trim($_POST['city'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $category_id = (int)($_POST['category_id'] ?? 0);
 
-    // Validation
     if (empty($name) || empty($city)) {
         $message_error = "Le nom et la ville sont obligatoires.";
     } else {
 
-        // Gestion de l'image (si nouvelle image uploadée)
-        $image_name = $resto['main_image']; // Garder l'ancienne par défaut
+        $image_name = $resto['main_image'];
 
         if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
             $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-            $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            $ext     = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
 
             if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
-                $image_name = $resto['slug'] . '-' . time() . '.' . $ext;
-
-                // Chemin adapté local/prod
-                if ($GLOBALS['dev']) {
-                    $upload_path = $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/restaurants/' . $image_name;
-                } else {
-                    $upload_path = $_SERVER['DOCUMENT_ROOT'] . '/assets/img/restaurants/' . $image_name;
-                }
+                $image_name  = $resto['slug'] . '-' . time() . '.' . $ext;
+                $upload_path = $GLOBALS['dev']
+                    ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/restaurants/' . $image_name
+                    : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/restaurants/' . $image_name;
 
                 move_uploaded_file($_FILES['image']['tmp_name'], $upload_path);
             }
         }
 
-        // Requête UPDATE
-        $name = $mysqli->real_escape_string($name);
-        $city = $mysqli->real_escape_string($city);
-        $description = $mysqli->real_escape_string($description);
+        $upd = $pdo->prepare(
+            "UPDATE restaurants SET
+                name = ?, city = ?, description = ?, category_id = ?, main_image = ?
+             WHERE id = ? AND id_restaurateur = ?"
+        );
 
-        $query = "UPDATE restaurants SET 
-                    name = '$name', 
-                    city = '$city', 
-                    description = '$description', 
-                    category_id = '$category_id',
-                    main_image = '$image_name'
-                  WHERE id = '$id_restaurant' AND id_restaurateur = '$id_restaurateur'";
-
-        if ($mysqli->query($query)) {
+        if ($upd->execute([$name, $city, $description, $category_id, $image_name, $id_restaurant, $id_restaurateur])) {
             $message_success = "Restaurant modifié avec succès !";
             // Recharger les données
-            $result = $mysqli->query("SELECT * FROM restaurants WHERE id = '$id_restaurant'");
-            $resto = $result->fetch_assoc();
+            $stmt2 = $pdo->prepare("SELECT * FROM restaurants WHERE id = ?");
+            $stmt2->execute([$id_restaurant]);
+            $resto = $stmt2->fetch();
         } else {
-            $message_error = "Erreur lors de la modification : " . $mysqli->error;
+            $message_error = "Erreur lors de la modification.";
         }
     }
 }

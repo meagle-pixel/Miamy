@@ -1,42 +1,29 @@
 <?php
 class Category {
-    private $db;
-    private $mysqli;
+    private $pdo;
 
     public function __construct() {
-        $this->db = Database::getInstance();
-        $this->mysqli = $this->db->getConnection();
-        $this->mysqli->set_charset('utf8');
+        $this->pdo = Database::getInstance()->getConnection();
     }
 
     public function listAll() {
-        $categories = [];
-        $query = "SELECT * FROM `categories` ORDER BY `name` ASC";
-        if ($result = $this->mysqli->query($query)) {
-            while ($row = $result->fetch_assoc()) { $categories[] = $row; }
-            $result->free();
-        }
-        return $categories;
+        return $this->pdo->query("SELECT * FROM `categories` ORDER BY `name` ASC")->fetchAll();
     }
 
     public function getById($id) {
-        $stmt = $this->mysqli->prepare("SELECT * FROM `categories` WHERE `id` = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        $stmt = $this->pdo->prepare("SELECT * FROM `categories` WHERE `id` = ?");
+        $stmt->execute([(int)$id]);
+        return $stmt->fetch();
     }
 
     public function insert($name, $icon = null) {
-        $stmt = $this->mysqli->prepare("INSERT INTO `categories` (`name`, `icon`) VALUES (?, ?)");
-        $stmt->bind_param("ss", $name, $icon);
-        $stmt->execute();
-        return $this->mysqli->insert_id;
+        $stmt = $this->pdo->prepare("INSERT INTO `categories` (`name`, `icon`) VALUES (?, ?)");
+        $stmt->execute([$name, $icon]);
+        return $this->pdo->lastInsertId();
     }
 
     public function delete($id) {
-        $stmt = $this->mysqli->prepare("DELETE FROM `categories` WHERE `id` = ?");
-        $stmt->bind_param("i", $id);
-        return $stmt->execute();
+        $stmt = $this->pdo->prepare("DELETE FROM `categories` WHERE `id` = ?");
+        return $stmt->execute([(int)$id]);
     }
 }

@@ -5,7 +5,7 @@ if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSI
     exit();
 }
 
-$id_restaurant  = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $id_restaurateur = $_SESSION['user']['profil_id'];
 
 if (!$id_restaurant) {
@@ -14,19 +14,15 @@ if (!$id_restaurant) {
 }
 
 // 2. Vérifier que le restaurant appartient bien à ce restaurateur
-$db     = Database::getInstance();
-$mysqli = $db->getConnection();
-$stmt   = $mysqli->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->bind_param("ii", $id_restaurant, $id_restaurateur);
-$stmt->execute();
-$result = $stmt->get_result();
+$pdo  = Database::getInstance()->getConnection();
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
+$stmt->execute([$id_restaurant, $id_restaurateur]);
+$resto = $stmt->fetch();
 
-if ($result->num_rows === 0) {
+if (!$resto) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
     exit();
 }
-$resto = $result->fetch_assoc();
-$stmt->close();
 
 // 3. Récupérer les plats
 $platClass = new Plat();
@@ -71,7 +67,6 @@ if (isset($_GET['success'])) {
 <section id="dashboard_main_arae" class="section_padding">
     <div class="container">
 
-        <!-- En-tête restaurant -->
         <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
                 <img src="<?= $GLOBALS['url'] ?>/assets/img/restaurants/<?= !empty($resto['main_image']) ? $resto['main_image'] : 'default-resto.jpg' ?>"
@@ -112,7 +107,6 @@ if (isset($_GET['success'])) {
                 </a>
             </div>
         <?php else: ?>
-            <!-- Résumé -->
             <div class="row mb-4">
                 <div class="col-md-4 mb-3">
                     <div class="bg-white shadow-sm rounded p-3 text-center border">
@@ -134,7 +128,6 @@ if (isset($_GET['success'])) {
                 </div>
             </div>
 
-            <!-- Plats regroupés par catégorie -->
             <?php foreach ($platsParCategorie as $categorie => $platsCateg): ?>
                 <div class="mb-5">
                     <div class="d-flex align-items-center mb-3">
@@ -151,7 +144,6 @@ if (isset($_GET['success'])) {
                             <div class="col-lg-12 mb-3">
                                 <div class="d-md-flex align-items-center bg-white shadow-sm rounded overflow-hidden border p-3 gap-3">
 
-                                    <!-- Image -->
                                     <div class="flex-shrink-0 mb-3 mb-md-0">
                                         <?php if (!empty($plat['image'])): ?>
                                             <img src="<?= $GLOBALS['url'] ?>/assets/img/plats/<?= htmlspecialchars($plat['image']) ?>"
@@ -165,7 +157,6 @@ if (isset($_GET['success'])) {
                                         <?php endif; ?>
                                     </div>
 
-                                    <!-- Infos -->
                                     <div class="flex-grow-1">
                                         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                                             <div>
@@ -185,7 +176,6 @@ if (isset($_GET['success'])) {
                                                 <strong class="text-primary"><?= number_format($plat['prix'], 2, ',', ' ') ?> €</strong>
                                             </div>
 
-                                            <!-- Actions -->
                                             <div class="d-flex gap-2 flex-wrap align-items-center">
                                                 <a href="modifier-plat?id=<?= $plat['id'] ?>"
                                                    class="btn btn-outline-secondary btn_sm" title="Modifier">

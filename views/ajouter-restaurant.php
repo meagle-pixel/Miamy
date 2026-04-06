@@ -6,69 +6,53 @@ if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSI
 }
 
 $message_success = '';
-$message_error = '';
+$message_error   = '';
 
 // 2. Récupérer les catégories pour le select
-$categories = [];
-$db = Database::getInstance();
-$mysqli = $db->getConnection();
-$result = $mysqli->query("SELECT * FROM categories ORDER BY name ASC");
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $categories[] = $row;
-    }
-}
+$pdo        = Database::getInstance()->getConnection();
+$categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
 
 // 3. Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_restaurant'])) {
 
-    $name = trim($_POST['name'] ?? '');
-    $city = trim($_POST['city'] ?? '');
-    $description = trim($_POST['description'] ?? '');
-    $category_id = (int)($_POST['category_id'] ?? 0);
+    $name            = trim($_POST['name'] ?? '');
+    $city            = trim($_POST['city'] ?? '');
+    $description     = trim($_POST['description'] ?? '');
+    $category_id     = (int)($_POST['category_id'] ?? 0);
     $id_restaurateur = $_SESSION['user']['profil_id'];
 
-    // Validation
     if (empty($name) || empty($city)) {
         $message_error = "Le nom et la ville sont obligatoires.";
     } else {
-        // Création du slug
         $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name)));
-        $slug = $slug . '-' . uniqid(); // Rendre unique
+        $slug = $slug . '-' . uniqid();
 
         // Gestion de l'image
         $image_name = 'default-resto.jpg';
         if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
             $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-            $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            $ext     = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
 
             if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
-                $image_name = $slug . '.' . $ext;
-
-                // Chemin adapté local/prod
-                if ($GLOBALS['dev']) {
-                    $upload_path = $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/restaurants/' . $image_name;
-                } else {
-                    $upload_path = $_SERVER['DOCUMENT_ROOT'] . '/assets/img/restaurants/' . $image_name;
-                }
+                $image_name  = $slug . '.' . $ext;
+                $upload_path = $GLOBALS['dev']
+                    ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/restaurants/' . $image_name
+                    : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/restaurants/' . $image_name;
 
                 move_uploaded_file($_FILES['image']['tmp_name'], $upload_path);
             }
         }
 
-        // Insertion en BDD
-        $name = $mysqli->real_escape_string($name);
-        $slug = $mysqli->real_escape_string($slug);
-        $city = $mysqli->real_escape_string($city);
-        $description = $mysqli->real_escape_string($description);
+        // Insertion en BDD avec requête préparée
+        $stmt = $pdo->prepare(
+            "INSERT INTO restaurants (name, slug, description, city, main_image, category_id, id_restaurateur, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
+        );
 
-        $query = "INSERT INTO restaurants (name, slug, description, city, main_image, category_id, id_restaurateur, created_at) 
-                  VALUES ('$name', '$slug', '$description', '$city', '$image_name', '$category_id', '$id_restaurateur', NOW())";
-
-        if ($mysqli->query($query)) {
+        if ($stmt->execute([$name, $slug, $description, $city, $image_name, $category_id, $id_restaurateur])) {
             $message_success = "Restaurant ajouté avec succès !";
         } else {
-            $message_error = "Erreur lors de l'ajout : " . $mysqli->error;
+            $message_error = "Erreur lors de l'ajout du restaurant.";
         }
     }
 }

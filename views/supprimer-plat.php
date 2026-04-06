@@ -24,19 +24,15 @@ if (!$plat || $plat['id_restaurant'] !== $id_restaurant) {
 }
 
 // 3. Vérifier que le restaurant appartient bien à ce restaurateur
-$db     = Database::getInstance();
-$mysqli = $db->getConnection();
-$stmt   = $mysqli->prepare("SELECT name FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->bind_param("ii", $id_restaurant, $id_restaurateur);
-$stmt->execute();
-$result = $stmt->get_result();
+$pdo  = Database::getInstance()->getConnection();
+$stmt = $pdo->prepare("SELECT name FROM restaurants WHERE id = ? AND id_restaurateur = ?");
+$stmt->execute([$id_restaurant, $id_restaurateur]);
+$resto = $stmt->fetch();
 
-if ($result->num_rows === 0) {
+if (!$resto) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
     exit();
 }
-$resto = $result->fetch_assoc();
-$stmt->close();
 
 $message_error = '';
 

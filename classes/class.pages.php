@@ -6,59 +6,32 @@
 
 	function insertPage($nom, $mod, $url)
 	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection();
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"INSERT INTO `pages` (`id`, `nom`, `mod`, `url`) VALUES (NULL, ?, ?, ?)"
+		);
+		$stmt->execute([$nom, $mod, $url]);
+		$idp = $pdo->lastInsertId();
 
-		// Sécurisation
-		$nom = $mysqli->real_escape_string($nom);
-		$mod = $mysqli->real_escape_string($mod);
-		$url = $mysqli->real_escape_string($url);
-
-		$query = "INSERT INTO `pages` 
-		(`id`, `nom`, `mod`, `url`) 
-		VALUES 
-		(NULL, '".$nom."', '".$mod."', '".$url."');";
-
-		$mysqli->query($query);
-
-		$idp = $mysqli->insert_id;
-
-		// LOG : Création de page
-		if($idp) {
+		if ($idp && function_exists('logUserAction')) {
 			$userId = $_SESSION['user']['id'] ?? 0;
-			if(function_exists('logUserAction')) {
-				logUserAction($userId, 'create_page', "Création de la page : $nom (Module: $mod)");
-			}
+			logUserAction($userId, 'create_page', "Création de la page : $nom (Module: $mod)");
 		}
 
-		return $idp ? $idp : false;
+		return $idp ?: false;
 	}
-	
+
 	function updatePage($id, $nom, $mod, $url)
 	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection();
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"UPDATE `pages` SET `nom` = ?, `mod` = ?, `url` = ? WHERE `id` = ?"
+		);
+		$res = $stmt->execute([$nom, $mod, $url, (int)$id]);
 
-		// Sécurisation
-		$id = (int)$id;
-		$nom = $mysqli->real_escape_string($nom);
-		$mod = $mysqli->real_escape_string($mod);
-		$url = $mysqli->real_escape_string($url);
-
-		$query = "UPDATE `pages` 
-		SET `nom` = '".$nom."', 
-		`mod` = '".$mod."',
-		`url` = '".$url."'
-		WHERE `id` = '".$id."';";
-
-		$res = $mysqli->query($query);
-
-		// LOG : Modification de page
-		if($res) {
+		if ($res && function_exists('logUserAction')) {
 			$userId = $_SESSION['user']['id'] ?? 0;
-			if(function_exists('logUserAction')) {
-				logUserAction($userId, 'update_page', "Modification de la page ID $id : $nom");
-			}
+			logUserAction($userId, 'update_page', "Modification de la page ID $id : $nom");
 		}
 
 		return true;
@@ -66,188 +39,93 @@
 
 	function getPages($onlynb = false)
 	{
-		$autorisations = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `pages` ORDER BY `nom` ASC";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $autorisations[] = $message; }
-			$result->free();
-		}
-
-		if($onlynb)
-			return count($autorisations);
-		return $autorisations;
+		$pdo  = Database::getInstance()->getConnection();
+		$data = $pdo->query("SELECT * FROM `pages` ORDER BY `nom` ASC")->fetchAll();
+		return $onlynb ? count($data) : $data;
 	}
-	
+
 	function getPageById($id)
 	{
-		$url = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		
-		$id = (int)$id; // Sécu
-		$query = "SELECT * FROM `pages` WHERE `id` = '".$id."'";
-		
-		if($result = $mysqli->query($query))
-		{
-			while ($urltmp = $result->fetch_assoc()) { $url = $urltmp; }
-			$result->free();
-		}
-		
-		return $url;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `pages` WHERE `id` = ?");
+		$stmt->execute([(int)$id]);
+		return $stmt->fetch() ?: [];
 	}
-	
-	function getPage($mod, $profil=false)
+
+	function getPage($mod, $profil = false)
 	{
-		$url = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		
-		$mod = $mysqli->real_escape_string($mod); // Sécu
-		$query = "SELECT * FROM `pages` WHERE `mod` = '".$mod."'";
-		
-		if($result = $mysqli->query($query))
-		{
-			while ($urltmp = $result->fetch_assoc()) { $url = $urltmp; }
-			$result->free();
-		}
-		
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `pages` WHERE `mod` = ?");
+		$stmt->execute([$mod]);
+		$url = $stmt->fetch() ?: [];
+
 		$url['ok'] = true;
-		
-		if($profil) 
-		{
-			if(!isset($url['id']))
-			{
+
+		if ($profil) {
+			if (!isset($url['id'])) {
 				$url['url'] = 'views/acces.php';
 				$url['nom'] = 'Page inaccessible';
-				$url['ok'] = false;
-			}
-			else
-			{
-				if(!isClear($profil, $url['id']))
-				{
+				$url['ok']  = false;
+			} else {
+				if (!isClear($profil, $url['id'])) {
 					$url['url'] = 'views/acces.php';
 					$url['nom'] = 'Page inaccessible';
-					$url['ok'] = false;
+					$url['ok']  = false;
 				}
 			}
 		}
 		return $url;
 	}
-	
+
 	function getProfils($onlynb = false)
 	{
-		$autorisations = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `profils`";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $autorisations[] = $message; }
-			$result->free();
-		}
-
-		if($onlynb)
-			return count($autorisations);
-		return $autorisations;
+		$pdo  = Database::getInstance()->getConnection();
+		$data = $pdo->query("SELECT * FROM `profils`")->fetchAll();
+		return $onlynb ? count($data) : $data;
 	}
-	
+
 	function getAutorisations($onlynb = false)
 	{
-		$autorisations = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `autorisations`";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $autorisations[] = $message; }
-			$result->free();
-		}
-
-		if($onlynb)
-			return count($autorisations);
-		return $autorisations;
+		$pdo  = Database::getInstance()->getConnection();
+		$data = $pdo->query("SELECT * FROM `autorisations`")->fetchAll();
+		return $onlynb ? count($data) : $data;
 	}
-	
+
 	function getAutorisation($page, $profil)
 	{
-		$autorisations = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		
-		$page = (int)$page;
-		$profil = (int)$profil;
-		
-		$query = "SELECT * FROM `autorisations` WHERE `page` = '".$page."' AND `profil` = '".$profil."'";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $autorisations[] = $message; }
-			$result->free();
-		}
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `autorisations` WHERE `page` = ? AND `profil` = ?");
+		$stmt->execute([(int)$page, (int)$profil]);
+		$rows = $stmt->fetchAll();
 
-		if(count($autorisations) && $autorisations[0]['etat'] == "1")
-			return true;
-		return false;
+		return count($rows) && $rows[0]['etat'] == "1";
 	}
-	
+
 	function changeAutorisation($page, $profil)
 	{
-		$autorisations = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		
-		$page = (int)$page;
-		$profil = (int)$profil;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `autorisations` WHERE `page` = ? AND `profil` = ?");
+		$stmt->execute([(int)$page, (int)$profil]);
+		$rows      = $stmt->fetchAll();
+		$actionLog = "";
 
-		$query = "SELECT * FROM `autorisations` WHERE `page` = '".$page."' AND `profil` = '".$profil."'";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $autorisations[] = $message; }
-			$result->free();
-		}
-
-		$actionLog = ""; // Pour savoir quoi logguer
-
-		if(count($autorisations) && $autorisations[0]['etat'] == "1")
-		{ 
-			$query = "UPDATE `autorisations` SET
-			 `etat` = '0'
-			 WHERE `page` = '".$page."' AND `profil` = '".$profil."'";
-		
-			$mysqli->query($query);
+		if (count($rows) && $rows[0]['etat'] == "1") {
+			$upd = $pdo->prepare("UPDATE `autorisations` SET `etat` = '0' WHERE `page` = ? AND `profil` = ?");
+			$upd->execute([(int)$page, (int)$profil]);
 			$actionLog = "Retrait accès";
-		}
-		elseif(count($autorisations) && $autorisations[0]['etat'] == "0")
-		{
-			$query = "UPDATE `autorisations` SET
-			 `etat` = '1'
-			 WHERE `page` = '".$page."' AND `profil` = '".$profil."'";
-		
-			$mysqli->query($query);
+		} elseif (count($rows) && $rows[0]['etat'] == "0") {
+			$upd = $pdo->prepare("UPDATE `autorisations` SET `etat` = '1' WHERE `page` = ? AND `profil` = ?");
+			$upd->execute([(int)$page, (int)$profil]);
 			$actionLog = "Ajout accès";
-		}
-		elseif(!count($autorisations))
-		{
-			$query = "INSERT INTO `autorisations` (`id`, `page`, `profil`,`etat`) VALUES (NULL, '".$page."', '".$profil."','1');";
-			$mysqli->query($query);
+		} else {
+			$ins = $pdo->prepare("INSERT INTO `autorisations` (`id`, `page`, `profil`, `etat`) VALUES (NULL, ?, ?, '1')");
+			$ins->execute([(int)$page, (int)$profil]);
 			$actionLog = "Ajout accès (Initial)";
 		}
-		
-		// LOG : Changement de droits
-		if($actionLog != "") {
+
+		if ($actionLog !== "" && function_exists('logUserAction')) {
 			$userId = $_SESSION['user']['id'] ?? 0;
-			if(function_exists('logUserAction')) {
-				logUserAction($userId, 'update_permission', "$actionLog pour Page ID $page / Profil ID $profil");
-			}
+			logUserAction($userId, 'update_permission', "$actionLog pour Page ID $page / Profil ID $profil");
 		}
 	}
 ?>

@@ -2,63 +2,57 @@
 
 	function getAdress($id)
 	{
-		$terrains = array();
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$mysqli->set_charset( 'utf8');
-		$query = "SELECT * FROM `adresses` WHERE id='".$id."'";
-		
-		if($result = $mysqli->query($query)){
-			while ($message = $result->fetch_assoc()) { $terrains = $message; }
-			$result->free();
-		}
-
-		return $terrains;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare("SELECT * FROM `adresses` WHERE id = ?");
+		$stmt->execute([(int)$id]);
+		return $stmt->fetch() ?: [];
 	}
-	
+
 	function insertAdress($adresse)
 	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$query = "INSERT INTO `adresses` (`id`,`libelle`,`adresse`, `adresse_comp`, `codepostal`, `ville`) 
-		 VALUES (NULL, '".$adresse['libelle']."', '".$adresse['adresse']."','".$adresse['adresse_comp']."', '".$adresse['codepostal']."','".$adresse['ville']."');";
-		
-		$mysqli->query($query);
-		
-		return $mysqli->insert_id;
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"INSERT INTO `adresses` (`id`, `libelle`, `adresse`, `adresse_comp`, `codepostal`, `ville`)
+			 VALUES (NULL, ?, ?, ?, ?, ?)"
+		);
+		$stmt->execute([
+			$adresse['libelle'],
+			$adresse['adresse'],
+			$adresse['adresse_comp'],
+			$adresse['codepostal'],
+			$adresse['ville'],
+		]);
+		return $pdo->lastInsertId();
 	}
-	
+
 	function updateAdress($adresse)
 	{
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$query = "UPDATE `adresses` SET `libelle` = '".$adresse['libelle']."',
-		`adresse` = '".$adresse['adresse']."',
-		`adresse_comp` = '".$adresse['adresse_comp']."',
-		`codepostal` = '".$adresse['codepostal']."',
-		`ville` = '".$adresse['ville']."'
-		WHERE `id` = '".$adresse['id']."';";
-		
-		$mysqli->query($query);
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"UPDATE `adresses` SET
+			`libelle` = ?, `adresse` = ?, `adresse_comp` = ?, `codepostal` = ?, `ville` = ?
+			WHERE `id` = ?"
+		);
+		$stmt->execute([
+			$adresse['libelle'],
+			$adresse['adresse'],
+			$adresse['adresse_comp'],
+			$adresse['codepostal'],
+			$adresse['ville'],
+			(int)$adresse['id'],
+		]);
 	}
-	
+
 	function deleteAdresses($ids)
 	{
-		$adresses = explode(',',$ids);
-		
-		$db = Database::getInstance();
-		$mysqli = $db->getConnection(); 
-		$query = "DELETE FROM `adresses` 
-		WHERE `id` = '".$adresses[0]."';";
-		
-		$mysqli->query($query);
-		
-		if(isset($adresses[1]))
-		{
-			$query = "DELETE FROM `adresses` 
-			WHERE `id` = '".$adresses[1]."';";
-			
-			$mysqli->query($query);
+		$adresses = explode(',', $ids);
+		$pdo      = Database::getInstance()->getConnection();
+
+		$stmt = $pdo->prepare("DELETE FROM `adresses` WHERE `id` = ?");
+		$stmt->execute([(int)$adresses[0]]);
+
+		if (isset($adresses[1])) {
+			$stmt->execute([(int)$adresses[1]]);
 		}
 	}
 ?>

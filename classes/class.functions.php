@@ -15,14 +15,14 @@
 		}
 	}
 
-	function sanitizeString($var)
+	function sanitizeString($let)
 	{
-		$var = str_replace("'",'’',$var);
-		$var = stripslashes($var);
-		$var = htmlentities($var);
-		$var = strip_tags($var);
+		$let = str_replace("'",'’',$let);
+		$let = stripslashes($let);
+		$let = htmlentities($let);
+		$let = strip_tags($let);
 		
-		return $var;
+		return $let;
 	}
 
 	function array_sort($array, $on, $order=SORT_ASC)

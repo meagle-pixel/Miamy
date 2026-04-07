@@ -339,7 +339,7 @@ $custom_js = <<<HTML
         const btn        = $(this);
         const platId     = btn.data('plat-id');
         const disponible = parseInt(btn.data('disponible'), 10);
-        const card       = btn.closest('[data-plat-id]');
+        const card       = btn.closest('div[data-plat-id]');
         const badge      = card.find('[data-badge-disponible]');
 
         // Désactive le bouton le temps de la requête

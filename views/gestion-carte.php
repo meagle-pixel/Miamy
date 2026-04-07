@@ -128,21 +128,48 @@ if (isset($_GET['success'])) {
                 </div>
             </div>
 
-            <?php foreach ($platsParCategorie as $categorie => $platsCateg): ?>
-                <div class="mb-5">
+            <?php
+            // Toutes les catégories dans l'ordre voulu — toujours affichées même si vides
+            $toutesCategories = ['Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'];
+            // On ajoute les éventuelles catégories personnalisées non standards
+            foreach ($platsParCategorie as $cat => $_) {
+                if (!in_array($cat, $toutesCategories)) $toutesCategories[] = $cat;
+            }
+            foreach ($toutesCategories as $categorie):
+                $platsCateg = $platsParCategorie[$categorie] ?? [];
+            ?>
+                <div class="mb-5" data-categorie-section="<?= htmlspecialchars($categorie) ?>">
                     <div class="d-flex align-items-center mb-3">
                         <h4 class="mb-0 me-3">
                             <span class="badge bg-secondary fs-6">
                                 <i class="fas fa-utensils me-2"></i><?= htmlspecialchars($categorie) ?>
                             </span>
                         </h4>
-                        <small class="text-muted"><?= count($platsCateg) ?> plat<?= count($platsCateg) > 1 ? 's' : '' ?></small>
+                        <small class="text-muted">
+                            <span data-count-number><?= count($platsCateg) ?></span>
+                            plat<span data-count-plural><?= count($platsCateg) > 1 ? 's' : '' ?></span>
+                        </small>
                     </div>
 
-                    <div class="row">
+                    <div class="row sortable-list" data-categorie="<?= htmlspecialchars($categorie) ?>">
+
+                        <!-- Placeholder affiché quand la catégorie est vide -->
+                        <div class="empty-placeholder col-12 text-center py-4 text-muted border border-dashed rounded"
+                             style="<?= !empty($platsCateg) ? 'display:none;' : '' ?> border-style:dashed !important; background:#f8f9fa;">
+                            <i class="fas fa-utensils fa-2x mb-2 opacity-25"></i>
+                            <p class="mb-0">Aucun plat dans cette catégorie.<br>
+                                <small>Glissez-en un ici depuis une autre catégorie.</small>
+                            </p>
+                        </div>
+
                         <?php foreach ($platsCateg as $plat): ?>
-                            <div class="col-lg-12 mb-3">
+                            <div class="col-lg-12 mb-3" data-plat-id="<?= $plat['id'] ?>">
                                 <div class="d-md-flex align-items-center bg-white shadow-sm rounded overflow-hidden border p-3 gap-3">
+
+                                    <!-- Poignée de glisser-déposer -->
+                                    <div class="flex-shrink-0 d-flex align-items-center pe-2" style="cursor:grab;" title="Glisser pour changer de catégorie">
+                                        <i class="fas fa-grip-vertical drag-handle text-muted fs-5"></i>
+                                    </div>
 
                                     <div class="flex-shrink-0 mb-3 mb-md-0">
                                         <?php if (!empty($plat['image'])): ?>
@@ -162,10 +189,11 @@ if (isset($_GET['success'])) {
                                             <div>
                                                 <h5 class="mb-1">
                                                     <?= htmlspecialchars($plat['nom']) ?>
+                                                    <!-- data-badge-disponible permet au JS de mettre à jour le badge sans recharger -->
                                                     <?php if (!$plat['disponible']): ?>
-                                                        <span class="badge bg-danger ms-2" style="font-size:.7rem;">Indisponible</span>
+                                                        <span class="badge bg-danger ms-2" style="font-size:.7rem;" data-badge-disponible>Indisponible</span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-success ms-2" style="font-size:.7rem;">Disponible</span>
+                                                        <span class="badge bg-success ms-2" style="font-size:.7rem;" data-badge-disponible>Disponible</span>
                                                     <?php endif; ?>
                                                 </h5>
                                                 <?php if (!empty($plat['description'])): ?>
@@ -177,6 +205,15 @@ if (isset($_GET['success'])) {
                                             </div>
 
                                             <div class="d-flex gap-2 flex-wrap align-items-center">
+                                                <!-- Bouton toggle disponibilité -->
+                                                <button type="button"
+                                                    class="btn btn_sm <?= $plat['disponible'] ? 'btn-outline-warning' : 'btn-outline-success' ?> btn-toggle-dispo"
+                                                    data-plat-id="<?= $plat['id'] ?>"
+                                                    data-disponible="<?= (int)$plat['disponible'] ?>"
+                                                    title="<?= $plat['disponible'] ? 'Marquer comme indisponible' : 'Marquer comme disponible' ?>">
+                                                    <i class="fas <?= $plat['disponible'] ? 'fa-eye-slash' : 'fa-eye' ?> me-1"></i>
+                                                    <?= $plat['disponible'] ? 'Indispo' : 'Dispo' ?>
+                                                </button>
                                                 <a href="modifier-plat?id=<?= $plat['id'] ?>"
                                                    class="btn btn-outline-secondary btn_sm" title="Modifier">
                                                     <i class="fas fa-edit me-1"></i> Modifier
@@ -198,3 +235,154 @@ if (isset($_GET['success'])) {
 
     </div>
 </section>
+
+<?php
+$url = $GLOBALS['url'];
+$custom_js = <<<HTML
+<!-- SortableJS : drag & drop entre catégories -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<style>
+    .drag-handle        { cursor: grab !important; }
+    .drag-handle:active { cursor: grabbing !important; }
+    /* Carte "fantôme" pendant le glisser */
+    .drag-ghost         { opacity: 0.4; background: #e8f4ff !important; border: 2px dashed #0d6efd !important; border-radius: 8px; }
+    /* Zone de dépôt mise en évidence quand un plat la survole */
+    .sortable-list.drag-over { background: #f0f7ff; border-radius: 8px; min-height: 60px; outline: 2px dashed #0d6efd; }
+</style>
+<script>
+(function () {
+    const BASE_URL = "{$url}";
+
+    // Met à jour le compteur "X plat(s)" d'une section catégorie
+    function updateCount(categorie, delta) {
+        const section = document.querySelector('[data-categorie-section="' + categorie + '"]');
+        if (!section) return;
+        const numEl = section.querySelector('[data-count-number]');
+        const plrEl = section.querySelector('[data-count-plural]');
+        if (!numEl) return;
+        const count = parseInt(numEl.textContent, 10) + delta;
+        numEl.textContent = count;
+        if (plrEl) plrEl.textContent = count > 1 ? 's' : '';
+    }
+
+    // Affiche le placeholder si la liste est vide, le cache sinon
+    function checkEmpty(listEl) {
+        const placeholder = listEl.querySelector('.empty-placeholder');
+        if (!placeholder) return;
+        const hasDishes = listEl.querySelectorAll('[data-plat-id]').length > 0;
+        placeholder.style.display = hasDishes ? 'none' : '';
+    }
+
+    // Initialise SortableJS sur chaque liste de catégorie
+    document.querySelectorAll('.sortable-list').forEach(function (el) {
+        Sortable.create(el, {
+            group:      'plats',     // même groupe = glisser entre sections
+            animation:  150,
+            handle:     '.drag-handle',
+            ghostClass: 'drag-ghost',
+            filter:     '.empty-placeholder', // le placeholder n'est pas draggable
+            dragoverBubble: true,
+
+            onStart: function (evt) {
+                // Indique visuellement les zones de dépôt disponibles
+                document.querySelectorAll('.sortable-list').forEach(function (l) {
+                    l.classList.add('drag-over');
+                });
+            },
+
+            onEnd: function (evt) {
+                // Retire la mise en évidence
+                document.querySelectorAll('.sortable-list').forEach(function (l) {
+                    l.classList.remove('drag-over');
+                });
+
+                const platId   = evt.item.dataset.platId;
+                const newCateg = evt.to.dataset.categorie;
+                const oldCateg = evt.from.dataset.categorie;
+
+                if (newCateg === oldCateg) return; // Juste un réordonnancement, rien à faire
+
+                // --- Mise à jour optimiste de l'interface ---
+                updateCount(oldCateg, -1);
+                updateCount(newCateg, +1);
+                checkEmpty(evt.from); // cache le placeholder si la source se vide
+                checkEmpty(evt.to);   // cache le placeholder si la destination reçoit un plat
+
+                // --- Appel AJAX pour persister en base ---
+                $.post(BASE_URL + '/actions/update-plat-categorie.php', {
+                    id_plat:   platId,
+                    categorie: newCateg
+                }, function (resp) {
+                    if (!resp.success) {
+                        revert(evt, oldCateg, newCateg);
+                        alert('Erreur lors du changement de catégorie. Le plat a été replacé.');
+                    }
+                }, 'json').fail(function () {
+                    revert(evt, oldCateg, newCateg);
+                    alert('Erreur réseau. Veuillez réessayer.');
+                });
+            }
+        });
+    });
+
+    // Annule visuellement un déplacement si l'AJAX échoue
+    function revert(evt, oldCateg, newCateg) {
+        const ref = evt.from.children[evt.oldDraggableIndex] || null;
+        evt.from.insertBefore(evt.item, ref);
+        updateCount(newCateg, -1);
+        updateCount(oldCateg, +1);
+        checkEmpty(evt.to);
+    }
+
+    // --- Toggle disponible / indisponible ---
+    $(document).on('click', '.btn-toggle-dispo', function () {
+        const btn        = $(this);
+        const platId     = btn.data('plat-id');
+        const disponible = parseInt(btn.data('disponible'), 10);
+        const card       = btn.closest('[data-plat-id]');
+        const badge      = card.find('[data-badge-disponible]');
+
+        // Désactive le bouton le temps de la requête
+        btn.prop('disabled', true);
+
+        $.post(BASE_URL + '/actions/toggle-disponible-plat.php', { id_plat: platId },
+        function (resp) {
+            if (resp.success) {
+                const dispo = resp.disponible; // 1 = disponible, 0 = indisponible
+                btn.data('disponible', dispo);
+
+                // Mettre à jour le badge
+                if (dispo) {
+                    badge.removeClass('bg-danger').addClass('bg-success').text('Disponible');
+                } else {
+                    badge.removeClass('bg-success').addClass('bg-danger').text('Indisponible');
+                }
+
+                // Mettre à jour le bouton
+                if (dispo) {
+                    btn.removeClass('btn-outline-success').addClass('btn-outline-warning')
+                       .attr('title', 'Marquer comme indisponible')
+                       .html('<i class="fas fa-eye-slash me-1"></i>Indispo');
+                } else {
+                    btn.removeClass('btn-outline-warning').addClass('btn-outline-success')
+                       .attr('title', 'Marquer comme disponible')
+                       .html('<i class="fas fa-eye me-1"></i>Dispo');
+                }
+
+                // Griser légèrement la carte si indisponible
+                card.find('.d-md-flex').toggleClass('opacity-50', !dispo);
+            } else {
+                alert('Erreur lors de la mise à jour. Veuillez réessayer.');
+            }
+        }, 'json')
+        .fail(function () {
+            alert('Erreur réseau. Veuillez réessayer.');
+        })
+        .always(function () {
+            btn.prop('disabled', false);
+        });
+    });
+})();
+</script>
+HTML;
+?>

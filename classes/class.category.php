@@ -11,19 +11,19 @@ class Category {
     }
 
     public function getById($id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM `categories` WHERE `id` = ?");
-        $stmt->execute([(int)$id]);
+        $stmt = $this->pdo->prepare("SELECT * FROM `categories` WHERE `id` = :id");
+        $stmt->execute(['id' => (int)$id]);
         return $stmt->fetch();
     }
 
     public function insert($name, $icon = null) {
-        $stmt = $this->pdo->prepare("INSERT INTO `categories` (`name`, `icon`) VALUES (?, ?)");
-        $stmt->execute([$name, $icon]);
+        $stmt = $this->pdo->prepare("INSERT INTO `categories` (`name`, `icon`) VALUES (:name, :icon)");
+        $stmt->execute(['name' => $name, 'icon' => $icon]);
         return $this->pdo->lastInsertId();
     }
 
     public function delete($id) {
-        $stmt = $this->pdo->prepare("DELETE FROM `categories` WHERE `id` = ?");
-        return $stmt->execute([(int)$id]);
+        $stmt = $this->pdo->prepare("DELETE FROM `categories` WHERE `id` = :id");
+        return $stmt->execute(['id' => (int)$id]);
     }
 }

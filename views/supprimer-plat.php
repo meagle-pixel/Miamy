@@ -1,7 +1,7 @@
 <?php
 // 1. Sécurité
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
 }
 
@@ -10,7 +10,7 @@ $id_restaurant   = isset($_GET['id_restaurant']) ? (int)$_GET['id_restaurant'] :
 $id_restaurateur = $_SESSION['user']['profil_id'];
 
 if (!$id_plat || !$id_restaurant) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 
@@ -19,18 +19,21 @@ $platClass = new Plat();
 $plat      = $platClass->getById($id_plat);
 
 if (!$plat || $plat['id_restaurant'] !== $id_restaurant) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 
 // 3. Vérifier que le restaurant appartient bien à ce restaurateur
 $pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT name FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->execute([$id_restaurant, $id_restaurateur]);
+$stmt = $pdo->prepare("SELECT name FROM restaurants WHERE id = :id AND id_restaurateur = :id_restaurateur");
+$stmt->execute([
+    'id'              => $id_restaurant,
+    'id_restaurateur' => $id_restaurateur,
+]);
 $resto = $stmt->fetch();
 
 if (!$resto) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 
@@ -39,7 +42,7 @@ $message_error = '';
 // 4. Traitement de la confirmation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     if ($platClass->delete($id_plat)) {
-        echo "<script>window.location.href='" . $GLOBALS['url'] . "/gestion-carte?id={$id_restaurant}&success=deleted';</script>";
+        header('Location: ' . $GLOBALS['url'] . '/gestion-carte?id=' . $id_restaurant . '&success=deleted');
         exit();
     } else {
         $message_error = "Une erreur est survenue lors de la suppression.";

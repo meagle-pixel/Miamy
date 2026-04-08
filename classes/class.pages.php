@@ -8,9 +8,9 @@
 	{
 		$pdo  = Database::getInstance()->getConnection();
 		$stmt = $pdo->prepare(
-			"INSERT INTO `pages` (`id`, `nom`, `mod`, `url`) VALUES (NULL, ?, ?, ?)"
+			"INSERT INTO `pages` (`id`, `nom`, `mod`, `url`) VALUES (NULL, :nom, :mod, :url)"
 		);
-		$stmt->execute([$nom, $mod, $url]);
+		$stmt->execute(['nom' => $nom, 'mod' => $mod, 'url' => $url]);
 		$idp = $pdo->lastInsertId();
 
 		if ($idp && function_exists('logUserAction')) {
@@ -25,9 +25,9 @@
 	{
 		$pdo  = Database::getInstance()->getConnection();
 		$stmt = $pdo->prepare(
-			"UPDATE `pages` SET `nom` = ?, `mod` = ?, `url` = ? WHERE `id` = ?"
+			"UPDATE `pages` SET `nom` = :nom, `mod` = :mod, `url` = :url WHERE `id` = :id"
 		);
-		$res = $stmt->execute([$nom, $mod, $url, (int)$id]);
+		$res = $stmt->execute(['nom' => $nom, 'mod' => $mod, 'url' => $url, 'id' => (int)$id]);
 
 		if ($res && function_exists('logUserAction')) {
 			$userId = $_SESSION['user']['id'] ?? 0;
@@ -47,16 +47,16 @@
 	function getPageById($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `pages` WHERE `id` = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `pages` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$id]);
 		return $stmt->fetch() ?: [];
 	}
 
 	function getPage($mod, $profil = false)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `pages` WHERE `mod` = ?");
-		$stmt->execute([$mod]);
+		$stmt = $pdo->prepare("SELECT * FROM `pages` WHERE `mod` = :mod");
+		$stmt->execute(['mod' => $mod]);
 		$url = $stmt->fetch() ?: [];
 
 		$url['ok'] = true;
@@ -94,8 +94,8 @@
 	function getAutorisation($page, $profil)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `autorisations` WHERE `page` = ? AND `profil` = ?");
-		$stmt->execute([(int)$page, (int)$profil]);
+		$stmt = $pdo->prepare("SELECT * FROM `autorisations` WHERE `page` = :page AND `profil` = :profil");
+		$stmt->execute(['page' => (int)$page, 'profil' => (int)$profil]);
 		$rows = $stmt->fetchAll();
 
 		return count($rows) && $rows[0]['etat'] == "1";
@@ -104,22 +104,22 @@
 	function changeAutorisation($page, $profil)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `autorisations` WHERE `page` = ? AND `profil` = ?");
-		$stmt->execute([(int)$page, (int)$profil]);
+		$stmt = $pdo->prepare("SELECT * FROM `autorisations` WHERE `page` = :page AND `profil` = :profil");
+		$stmt->execute(['page' => (int)$page, 'profil' => (int)$profil]);
 		$rows      = $stmt->fetchAll();
 		$actionLog = "";
 
 		if (count($rows) && $rows[0]['etat'] == "1") {
-			$upd = $pdo->prepare("UPDATE `autorisations` SET `etat` = '0' WHERE `page` = ? AND `profil` = ?");
-			$upd->execute([(int)$page, (int)$profil]);
+			$upd = $pdo->prepare("UPDATE `autorisations` SET `etat` = '0' WHERE `page` = :page AND `profil` = :profil");
+			$upd->execute(['page' => (int)$page, 'profil' => (int)$profil]);
 			$actionLog = "Retrait accès";
 		} elseif (count($rows) && $rows[0]['etat'] == "0") {
-			$upd = $pdo->prepare("UPDATE `autorisations` SET `etat` = '1' WHERE `page` = ? AND `profil` = ?");
-			$upd->execute([(int)$page, (int)$profil]);
+			$upd = $pdo->prepare("UPDATE `autorisations` SET `etat` = '1' WHERE `page` = :page AND `profil` = :profil");
+			$upd->execute(['page' => (int)$page, 'profil' => (int)$profil]);
 			$actionLog = "Ajout accès";
 		} else {
-			$ins = $pdo->prepare("INSERT INTO `autorisations` (`id`, `page`, `profil`, `etat`) VALUES (NULL, ?, ?, '1')");
-			$ins->execute([(int)$page, (int)$profil]);
+			$ins = $pdo->prepare("INSERT INTO `autorisations` (`id`, `page`, `profil`, `etat`) VALUES (NULL, :page, :profil, '1')");
+			$ins->execute(['page' => (int)$page, 'profil' => (int)$profil]);
 			$actionLog = "Ajout accès (Initial)";
 		}
 

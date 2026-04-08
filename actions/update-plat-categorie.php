@@ -28,9 +28,12 @@ $pdo  = Database::getInstance()->getConnection();
 $stmt = $pdo->prepare(
     "SELECT p.id FROM plats p
      JOIN restaurants r ON r.id = p.id_restaurant
-     WHERE p.id = ? AND r.id_restaurateur = ?"
+     WHERE p.id = :id_plat AND r.id_restaurateur = :id_restaurateur"
 );
-$stmt->execute([$id_plat, $id_restaurateur]);
+$stmt->execute([
+    'id_plat'         => $id_plat,
+    'id_restaurateur' => $id_restaurateur,
+]);
 
 if (!$stmt->fetch()) {
     echo json_encode(['success' => false, 'message' => 'Plat introuvable ou accès refusé']);
@@ -38,7 +41,10 @@ if (!$stmt->fetch()) {
 }
 
 // Mettre à jour la catégorie
-$stmt = $pdo->prepare("UPDATE plats SET categorie = ? WHERE id = ?");
-$ok   = $stmt->execute([$nouvelle_cat, $id_plat]);
+$stmt = $pdo->prepare("UPDATE plats SET categorie = :categorie WHERE id = :id");
+$ok   = $stmt->execute([
+    'categorie' => $nouvelle_cat,
+    'id'        => $id_plat,
+]);
 
 echo json_encode(['success' => (bool)$ok]);

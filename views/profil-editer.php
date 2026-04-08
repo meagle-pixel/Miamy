@@ -1,7 +1,7 @@
 <?php
 // 1. Sécurité
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
 }
 

@@ -1,7 +1,7 @@
 <?php
 // 1. Sécurité
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
 }
 
@@ -9,18 +9,21 @@ $id_restaurant   = isset($_GET['id_restaurant']) ? (int)$_GET['id_restaurant'] :
 $id_restaurateur = $_SESSION['user']['profil_id'];
 
 if (!$id_restaurant) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 
 // 2. Vérifier que le restaurant appartient bien à ce restaurateur
 $pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->execute([$id_restaurant, $id_restaurateur]);
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = :id AND id_restaurateur = :id_restaurateur");
+$stmt->execute([
+    'id'             => $id_restaurant,
+    'id_restaurateur' => $id_restaurateur,
+]);
 $resto = $stmt->fetch();
 
 if (!$resto) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 
@@ -78,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_plat'])) {
             ];
 
             if ($platClass->insert($data)) {
-                echo "<script>window.location.href='" . $GLOBALS['url'] . "/gestion-carte?id={$id_restaurant}&success=added';</script>";
+                header('Location: ' . $GLOBALS['url'] . '/gestion-carte?id=' . $id_restaurant . '&success=added');
                 exit();
             } else {
                 $message_error = "Erreur lors de l'ajout du plat.";

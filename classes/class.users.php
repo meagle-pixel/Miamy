@@ -11,9 +11,14 @@
 			$ip  = $_SERVER['REMOTE_ADDR'] ?? '';
 
 			$stmt = $pdo->prepare(
-				"INSERT INTO user_logs (user_id, action_type, message, ip_address) VALUES (?, ?, ?, ?)"
+				"INSERT INTO user_logs (user_id, action_type, message, ip_address) VALUES (:user_id, :action_type, :message, :ip_address)"
 			);
-			$stmt->execute([(int)$userId, $actionType, $message, $ip]);
+			$stmt->execute([
+				'user_id'     => (int)$userId,
+				'action_type' => $actionType,
+				'message'     => $message,
+				'ip_address'  => $ip,
+			]);
 		}
 	}
 
@@ -30,10 +35,10 @@
 				 LEFT JOIN administrateurs a ON (u.profil = 1 AND u.profil_id = a.id)
 				 LEFT JOIN restaurateurs r ON (u.profil = 2 AND u.profil_id = r.id)
 				 LEFT JOIN clients c ON (u.profil = 3 AND u.profil_id = c.id)
-				 WHERE l.user_id = ?
+				 WHERE l.user_id = :user_id
 				 ORDER BY l.created_at DESC LIMIT $limit"
 			);
-			$stmt->execute([(int)$userId]);
+			$stmt->execute(['user_id' => (int)$userId]);
 			return $stmt->fetchAll();
 		}
 	}
@@ -77,13 +82,13 @@
 			"INSERT INTO `utilisateurs`
 			(`id`, `email`, `motdepasse`, `profil`, `profil_id`, `dateinscription`, `dateconnect`, `dateaction`, `token`, `actif`)
 			VALUES
-			(NULL, ?, ?, ?, ?, NOW(), NULL, NULL, '', '1')"
+			(NULL, :email, :motdepasse, :profil, :profil_id, NOW(), NULL, NULL, '', '1')"
 		);
 		$stmt->execute([
-			$utilisateur['email'],
-			$pass,
-			$utilisateur['profil'],
-			$utilisateur['profil_id'],
+			'email'     => $utilisateur['email'],
+			'motdepasse'=> $pass,
+			'profil'    => $utilisateur['profil'],
+			'profil_id' => $utilisateur['profil_id'],
 		]);
 		$idu = $pdo->lastInsertId();
 
@@ -103,15 +108,15 @@
 		// Administrateurs
 		$stmt = $pdo->prepare(
 			"SELECT DISTINCT id, nom, prenom FROM `administrateurs`
-			 WHERE `nom` LIKE ? OR `prenom` LIKE ?"
+			 WHERE `nom` LIKE :like OR `prenom` LIKE :like"
 		);
 		$like = '%' . $request . '%';
-		$stmt->execute([$like, $like]);
+		$stmt->execute(['like' => $like]);
 		$admins = $stmt->fetchAll();
 
 		foreach ($admins as $admin) {
-			$s = $pdo->prepare("SELECT id FROM `utilisateurs` WHERE `profil` = 1 AND `profil_id` = ?");
-			$s->execute([(int)$admin['id']]);
+			$s = $pdo->prepare("SELECT id FROM `utilisateurs` WHERE `profil` = 1 AND `profil_id` = :profil_id");
+			$s->execute(['profil_id' => (int)$admin['id']]);
 			foreach ($s->fetchAll() as $contact) {
 				$contacts[] = ['id' => $contact['id'], 'nom' => $admin['prenom'] . ' ' . $admin['nom']];
 			}
@@ -141,8 +146,8 @@
 	function getUserID($id, $profil)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `profil` = ? AND `profil_id` = ?");
-		$stmt->execute([(int)$profil, (int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `profil` = :profil AND `profil_id` = :profil_id");
+		$stmt->execute(['profil' => (int)$profil, 'profil_id' => (int)$id]);
 		return $stmt->fetch() ?: [];
 	}
 
@@ -152,35 +157,40 @@
 		$pdo = Database::getInstance()->getConnection();
 
 		$stmt = $pdo->prepare(
-			"SELECT * FROM `ips` WHERE `user` = ? AND user_type = ? AND `ip` = ? AND date < NOW() + INTERVAL 1 DAY"
+			"SELECT * FROM `ips` WHERE `user` = :user AND user_type = :user_type AND `ip` = :ip AND date < NOW() + INTERVAL 1 DAY"
 		);
-		$stmt->execute([(int)$id, (int)$type, $ip]);
+		$stmt->execute(['user' => (int)$id, 'user_type' => (int)$type, 'ip' => $ip]);
 		$existing = $stmt->fetchAll();
 
 		if (!empty($existing)) {
-			$upd = $pdo->prepare("UPDATE `ips` SET `date` = NOW() WHERE `ip` = ?");
-			$upd->execute([$ip]);
+			$upd = $pdo->prepare("UPDATE `ips` SET `date` = NOW() WHERE `ip` = :ip");
+			$upd->execute(['ip' => $ip]);
 		} else {
 			$ins = $pdo->prepare(
-				"INSERT INTO `ips` (`ip`, `user`, `user_type`, `infos`, `date`) VALUES (?, ?, ?, ?, NOW())"
+				"INSERT INTO `ips` (`ip`, `user`, `user_type`, `infos`, `date`) VALUES (:ip, :user, :user_type, :infos, NOW())"
 			);
-			$ins->execute([$ip, (int)$id, (int)$type, getenv("HTTP_USER_AGENT")]);
+			$ins->execute([
+				'ip'        => $ip,
+				'user'      => (int)$id,
+				'user_type' => (int)$type,
+				'infos'     => getenv("HTTP_USER_AGENT"),
+			]);
 		}
 	}
 
 	function userIPS($id, $type = 1)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `ips` WHERE `user` = ? AND user_type = ?");
-		$stmt->execute([(int)$id, (int)$type]);
+		$stmt = $pdo->prepare("SELECT * FROM `ips` WHERE `user` = :user AND user_type = :user_type");
+		$stmt->execute(['user' => (int)$id, 'user_type' => (int)$type]);
 		return $stmt->fetchAll();
 	}
 
 	function isClear($profil, $page)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `autorisations` WHERE `page` = ? AND `profil` = ?");
-		$stmt->execute([(int)$page, (int)$profil]);
+		$stmt = $pdo->prepare("SELECT * FROM `autorisations` WHERE `page` = :page AND `profil` = :profil");
+		$stmt->execute(['page' => (int)$page, 'profil' => (int)$profil]);
 		$aut = $stmt->fetch();
 
 		if (empty($aut) || $aut['etat'] == 0)
@@ -191,16 +201,16 @@
 	function editUser($user)
 	{
 		$pdo   = Database::getInstance()->getConnection();
-		$query = "UPDATE `utilisateurs` SET `email` = ?";
-		$params = [$user['email']];
+		$query = "UPDATE `utilisateurs` SET `email` = :email";
+		$params = ['email' => $user['email']];
 
 		if ($user['motdepasse'] != '') {
-			$query  .= ", `motdepasse` = ?";
-			$params[] = $user['motdepasse'];
+			$query   .= ", `motdepasse` = :motdepasse";
+			$params['motdepasse'] = $user['motdepasse'];
 		}
 
-		$query   .= " WHERE `id` = ?";
-		$params[] = (int)$user['id'];
+		$query        .= " WHERE `id` = :id";
+		$params['id']  = (int)$user['id'];
 
 		$stmt = $pdo->prepare($query);
 		$res  = $stmt->execute($params);
@@ -215,30 +225,30 @@
 	function activeUser($key)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("UPDATE `utilisateurs` SET `actif` = '1' WHERE `key` = ?");
-		$stmt->execute([$key]);
+		$stmt = $pdo->prepare("UPDATE `utilisateurs` SET `actif` = '1' WHERE `key` = :key");
+		$stmt->execute(['key' => $key]);
 	}
 
 	function getUser($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `id` = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$id]);
 		$user = $stmt->fetch();
 
 		if (!$user) return [];
 
 		if ($user['profil'] == 1) {
-			$s = $pdo->prepare("SELECT * FROM `administrateurs` WHERE `id` = ?");
-			$s->execute([(int)$user['profil_id']]);
+			$s = $pdo->prepare("SELECT * FROM `administrateurs` WHERE `id` = :id");
+			$s->execute(['id' => (int)$user['profil_id']]);
 			$user['userinfo'] = $s->fetch();
 		} elseif ($user['profil'] == 2) {
-			$s = $pdo->prepare("SELECT * FROM `restaurateurs` WHERE `id` = ?");
-			$s->execute([(int)$user['profil_id']]);
+			$s = $pdo->prepare("SELECT * FROM `restaurateurs` WHERE `id` = :id");
+			$s->execute(['id' => (int)$user['profil_id']]);
 			$user['userinfo'] = $s->fetch();
 		} elseif ($user['profil'] == 3) {
-			$s = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = ?");
-			$s->execute([(int)$user['profil_id']]);
+			$s = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = :id");
+			$s->execute(['id' => (int)$user['profil_id']]);
 			$user['userinfo'] = $s->fetch();
 		}
 
@@ -248,8 +258,8 @@
 	function isRegistered($email)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT id FROM `utilisateurs` WHERE `email` = ?");
-		$stmt->execute([$email]);
+		$stmt = $pdo->prepare("SELECT id FROM `utilisateurs` WHERE `email` = :email");
+		$stmt->execute(['email' => $email]);
 		return $stmt->fetch() !== false;
 	}
 
@@ -258,8 +268,8 @@
 		$pdo       = Database::getInstance()->getConnection();
 		$base_salt = $GLOBALS["base_salt"] ?? "";
 
-		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `email` = ? AND actif = '1'");
-		$stmt->execute([$email]);
+		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `email` = :email AND actif = '1'");
+		$stmt->execute(['email' => $email]);
 		$userFound = $stmt->fetch();
 
 		if ($userFound) {
@@ -275,8 +285,8 @@
 			$_SESSION['connected'] = true;
 			$_SESSION['user']      = $userFound;
 
-			$upd = $pdo->prepare("UPDATE utilisateurs SET `dateconnect` = NOW() WHERE id = ?");
-			$upd->execute([(int)$userFound['id']]);
+			$upd = $pdo->prepare("UPDATE utilisateurs SET `dateconnect` = NOW() WHERE id = :id");
+			$upd->execute(['id' => (int)$userFound['id']]);
 
 			logUserAction($userFound['id'], 'login', "Connexion au site réussie");
 
@@ -287,8 +297,8 @@
 
 			$_SESSION['user-info'] = null;
 			if ($table !== '') {
-				$s = $pdo->prepare("SELECT * FROM `$table` WHERE `id` = ?");
-				$s->execute([(int)$userFound['profil_id']]);
+				$s = $pdo->prepare("SELECT * FROM `$table` WHERE `id` = :id");
+				$s->execute(['id' => (int)$userFound['profil_id']]);
 				$_SESSION['user-info'] = $s->fetch() ?: null;
 
 				if ($userFound['profil'] < 3) {
@@ -307,8 +317,8 @@
 	function updateUserData($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `id` = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$id]);
 		$result = $stmt->fetch();
 
 		if ($result) {
@@ -319,12 +329,12 @@
 			$_SESSION['user']      = false;
 		}
 
-		$s = $pdo->prepare("SELECT * FROM `administrateurs` WHERE `id` = ?");
-		$s->execute([(int)($_SESSION['user']['profil_id'] ?? 0)]);
+		$s = $pdo->prepare("SELECT * FROM `administrateurs` WHERE `id` = :id");
+		$s->execute(['id' => (int)($_SESSION['user']['profil_id'] ?? 0)]);
 		$_SESSION['user']['infos'] = $s->fetch();
 
-		$upd = $pdo->prepare("UPDATE `utilisateurs` SET `dateaction` = NOW() WHERE `id` = ?");
-		$upd->execute([(int)$id]);
+		$upd = $pdo->prepare("UPDATE `utilisateurs` SET `dateaction` = NOW() WHERE `id` = :id");
+		$upd->execute(['id' => (int)$id]);
 	}
 
 	function getAllProfils($onlynb = false)
@@ -337,8 +347,8 @@
 	function updateUserDataLite($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `id` = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `utilisateurs` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$id]);
 		$result = $stmt->fetch();
 
 		if ($result) {
@@ -349,8 +359,8 @@
 			$_SESSION['user']      = false;
 		}
 
-		$upd = $pdo->prepare("UPDATE `utilisateurs` SET `dateaction` = NOW() WHERE `id` = ?");
-		$upd->execute([(int)$id]);
+		$upd = $pdo->prepare("UPDATE `utilisateurs` SET `dateaction` = NOW() WHERE `id` = :id");
+		$upd->execute(['id' => (int)$id]);
 
 		insertIP($id);
 	}
@@ -371,8 +381,8 @@
 	function getAdmin($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `administrateurs` WHERE id = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `administrateurs` WHERE id = :id");
+		$stmt->execute(['id' => (int)$id]);
 		return $stmt->fetch() ?: [];
 	}
 
@@ -380,13 +390,13 @@
 	{
 		$pdo = Database::getInstance()->getConnection();
 
-		$s = $pdo->prepare("SELECT id FROM utilisateurs WHERE profil_id = ? AND profil = ?");
-		$s->execute([(int)$id, (int)$profil]);
+		$s = $pdo->prepare("SELECT id FROM utilisateurs WHERE profil_id = :profil_id AND profil = :profil");
+		$s->execute(['profil_id' => (int)$id, 'profil' => (int)$profil]);
 		$row            = $s->fetch();
 		$userIdToDelete = $row['id'] ?? 0;
 
-		$stmt = $pdo->prepare("DELETE FROM `utilisateurs` WHERE `profil_id` = ? AND `profil` = ?");
-		$ok   = $stmt->execute([(int)$id, (int)$profil]);
+		$stmt = $pdo->prepare("DELETE FROM `utilisateurs` WHERE `profil_id` = :profil_id AND `profil` = :profil");
+		$ok   = $stmt->execute(['profil_id' => (int)$id, 'profil' => (int)$profil]);
 
 		if ($ok) {
 			$actorId = $_SESSION['user']['id'] ?? 1;
@@ -399,8 +409,8 @@
 	function deleteAdmin($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("DELETE FROM `administrateurs` WHERE `id` = ?");
-		return $stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("DELETE FROM `administrateurs` WHERE `id` = :id");
+		return $stmt->execute(['id' => (int)$id]);
 	}
 
 	// 1. Demande de réinitialisation
@@ -408,17 +418,17 @@
 	{
 		$pdo  = Database::getInstance()->getConnection();
 
-		$check = $pdo->prepare("SELECT id FROM utilisateurs WHERE email = ?");
-		$check->execute([$email]);
+		$check = $pdo->prepare("SELECT id FROM utilisateurs WHERE email = :email");
+		$check->execute(['email' => $email]);
 		if (!$check->fetch()) return true;
 
 		$token = bin2hex(random_bytes(32));
 
-		$del = $pdo->prepare("DELETE FROM password_resets WHERE email = ?");
-		$del->execute([$email]);
+		$del = $pdo->prepare("DELETE FROM password_resets WHERE email = :email");
+		$del->execute(['email' => $email]);
 
-		$ins = $pdo->prepare("INSERT INTO password_resets (email, token, created_at) VALUES (?, ?, NOW())");
-		if ($ins->execute([$email, $token])) {
+		$ins = $pdo->prepare("INSERT INTO password_resets (email, token, created_at) VALUES (:email, :token, NOW())");
+		if ($ins->execute(['email' => $email, 'token' => $token])) {
 			$link    = $GLOBALS['url'] . "/reset-password?token=" . $token;
 			$subject = "Réinitialisation de votre mot de passe - Miamy";
 			$body    = "<p>Bonjour,</p>";
@@ -441,9 +451,9 @@
 	{
 		$pdo  = Database::getInstance()->getConnection();
 		$stmt = $pdo->prepare(
-			"SELECT email FROM password_resets WHERE token = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)"
+			"SELECT email FROM password_resets WHERE token = :token AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)"
 		);
-		$stmt->execute([$token]);
+		$stmt->execute(['token' => $token]);
 		$row = $stmt->fetch();
 		return $row ? $row['email'] : false;
 	}
@@ -459,13 +469,13 @@
 		$options   = ['cost' => 9];
 		$pass      = password_hash($newPassword . $email . $base_salt, PASSWORD_BCRYPT, $options);
 
-		$stmt = $pdo->prepare("UPDATE `utilisateurs` SET `motdepasse` = ? WHERE `email` = ?");
-		if ($stmt->execute([$pass, $email])) {
-			$del = $pdo->prepare("DELETE FROM password_resets WHERE email = ?");
-			$del->execute([$email]);
+		$stmt = $pdo->prepare("UPDATE `utilisateurs` SET `motdepasse` = :motdepasse WHERE `email` = :email");
+		if ($stmt->execute(['motdepasse' => $pass, 'email' => $email])) {
+			$del = $pdo->prepare("DELETE FROM password_resets WHERE email = :email");
+			$del->execute(['email' => $email]);
 
-			$s = $pdo->prepare("SELECT id FROM utilisateurs WHERE email = ?");
-			$s->execute([$email]);
+			$s = $pdo->prepare("SELECT id FROM utilisateurs WHERE email = :email");
+			$s->execute(['email' => $email]);
 			if ($u = $s->fetch()) {
 				logUserAction($u['id'], 'reset_password', "Mot de passe réinitialisé via token");
 			}
@@ -480,14 +490,18 @@
 
 		if (empty($data['motdepasse'])) return false;
 
-		$base_salt     = $GLOBALS["base_salt"];
-		$options       = ['cost' => 9];
+		$base_salt      = $GLOBALS["base_salt"];
+		$options        = ['cost' => 9];
 		$hashedPassword = password_hash($data['motdepasse'] . $data['email'] . $base_salt, PASSWORD_BCRYPT, $options);
 
 		$stmt = $pdo->prepare(
-			"UPDATE `utilisateurs` SET `motdepasse` = ? WHERE `profil_id` = ? AND `profil` = ?"
+			"UPDATE `utilisateurs` SET `motdepasse` = :motdepasse WHERE `profil_id` = :profil_id AND `profil` = :profil"
 		);
-		$result = $stmt->execute([$hashedPassword, (int)$data['id'], (int)$data['profil']]);
+		$result = $stmt->execute([
+			'motdepasse' => $hashedPassword,
+			'profil_id'  => (int)$data['id'],
+			'profil'     => (int)$data['profil'],
+		]);
 
 		if ($result) {
 			$actorId = $_SESSION['user']['id'] ?? 0;

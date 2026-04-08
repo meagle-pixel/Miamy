@@ -10,17 +10,18 @@
 			"INSERT INTO `commandes`
 			(`id`, `ref_commande`, `id_client`, `status`, `totalttc`, `id_promo`,
 			 `date_commande`, `id_transporteur`, `id_modepaiement`, `json_panier`)
-			VALUES (NULL, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)"
+			VALUES (NULL, :ref_commande, :id_client, :status, :totalttc, :id_promo,
+			        NOW(), :id_transporteur, :id_modepaiement, :json_panier)"
 		);
 		$stmt->execute([
-			$panier['ref_commande'],
-			$panier['id_client'],
-			$panier['status'],
-			$totalttc,
-			$panier['id_promo'],
-			$panier['id_transporteur'],
-			$panier['id_modepaiement'],
-			$json_panier,
+			'ref_commande'    => $panier['ref_commande'],
+			'id_client'       => $panier['id_client'],
+			'status'          => $panier['status'],
+			'totalttc'        => $totalttc,
+			'id_promo'        => $panier['id_promo'],
+			'id_transporteur' => $panier['id_transporteur'],
+			'id_modepaiement' => $panier['id_modepaiement'],
+			'json_panier'     => $json_panier,
 		]);
 		return $pdo->lastInsertId();
 	}
@@ -30,10 +31,13 @@
 		$pdo  = Database::getInstance()->getConnection();
 		$stmt = $pdo->prepare(
 			"SELECT * FROM `tarifs_transport`
-			 WHERE ? BETWEEN `prix_mini` AND `prix_maxi`
-			 AND `id_transporteur` = ?"
+			 WHERE :valeur_declaree BETWEEN `prix_mini` AND `prix_maxi`
+			 AND `id_transporteur` = :id_transporteur"
 		);
-		$stmt->execute([$valeur_declaree, $id_transporteur]);
+		$stmt->execute([
+			'valeur_declaree' => $valeur_declaree,
+			'id_transporteur' => $id_transporteur,
+		]);
 		$row = $stmt->fetch();
 		return $row['tarif'] ?? null;
 	}
@@ -69,8 +73,11 @@
 	function editCommande($commande)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("UPDATE `commandes` SET `email` = ? WHERE `id` = ?");
-		return $stmt->execute([$commande['email'], (int)$commande['id']]);
+		$stmt = $pdo->prepare("UPDATE `commandes` SET `email` = :email WHERE `id` = :id");
+		return $stmt->execute([
+			'email' => $commande['email'],
+			'id'    => (int)$commande['id'],
+		]);
 	}
 
 	function getCommandes()
@@ -82,16 +89,16 @@
 	function getCommande($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `commandes` WHERE `id` = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `commandes` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$id]);
 		return $stmt->fetch() ?: [];
 	}
 
 	function getTracking($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `tracking` WHERE `id_commande` = ? AND `customer` = '0'");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `tracking` WHERE `id_commande` = :id_commande AND `customer` = '0'");
+		$stmt->execute(['id_commande' => (int)$id]);
 		$row = $stmt->fetch();
 		return $row['tracking'] ?? false;
 	}
@@ -99,8 +106,8 @@
 	function getTrackingClient($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `tracking` WHERE `id_commande` = ? AND `customer` = '1'");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `tracking` WHERE `id_commande` = :id_commande AND `customer` = '1'");
+		$stmt->execute(['id_commande' => (int)$id]);
 		$row = $stmt->fetch();
 		return $row['tracking'] ?? false;
 	}
@@ -108,44 +115,56 @@
 	function getCommandesClient($id_client)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `commandes` WHERE `id_client` = ?");
-		$stmt->execute([(int)$id_client]);
+		$stmt = $pdo->prepare("SELECT * FROM `commandes` WHERE `id_client` = :id_client");
+		$stmt->execute(['id_client' => (int)$id_client]);
 		return $stmt->fetchAll();
 	}
 
 	function setTrackingClient($id_commande, $tracking)
 	{
-		$pdo     = Database::getInstance()->getConnection();
+		$pdo      = Database::getInstance()->getConnection();
 		$tracking = ($tracking === '') ? 'Aucun' : $tracking;
 
 		if (getTrackingClient($id_commande)) {
-			$stmt = $pdo->prepare("UPDATE `tracking` SET `tracking` = ? WHERE `id_commande` = ? AND customer = 1");
-			return $stmt->execute([$tracking, (int)$id_commande]);
+			$stmt = $pdo->prepare("UPDATE `tracking` SET `tracking` = :tracking WHERE `id_commande` = :id_commande AND customer = 1");
+			return $stmt->execute([
+				'tracking'    => $tracking,
+				'id_commande' => (int)$id_commande,
+			]);
 		} else {
-			$stmt = $pdo->prepare("INSERT INTO `tracking` (`id`, `id_commande`, `tracking`, `customer`) VALUES (NULL, ?, ?, '1')");
-			return $stmt->execute([(int)$id_commande, $tracking]);
+			$stmt = $pdo->prepare("INSERT INTO `tracking` (`id`, `id_commande`, `tracking`, `customer`) VALUES (NULL, :id_commande, :tracking, '1')");
+			return $stmt->execute([
+				'id_commande' => (int)$id_commande,
+				'tracking'    => $tracking,
+			]);
 		}
 	}
 
 	function setTracking($id_commande, $tracking)
 	{
-		$pdo     = Database::getInstance()->getConnection();
+		$pdo      = Database::getInstance()->getConnection();
 		$tracking = ($tracking === '') ? 'Aucun' : $tracking;
 
 		if (getTracking($id_commande)) {
-			$stmt = $pdo->prepare("UPDATE `tracking` SET `tracking` = ? WHERE `id_commande` = ? AND customer = 0");
-			return $stmt->execute([$tracking, (int)$id_commande]);
+			$stmt = $pdo->prepare("UPDATE `tracking` SET `tracking` = :tracking WHERE `id_commande` = :id_commande AND customer = 0");
+			return $stmt->execute([
+				'tracking'    => $tracking,
+				'id_commande' => (int)$id_commande,
+			]);
 		} else {
-			$stmt = $pdo->prepare("INSERT INTO `tracking` (`id`, `id_commande`, `tracking`, `customer`) VALUES (NULL, ?, ?, '0')");
-			return $stmt->execute([(int)$id_commande, $tracking]);
+			$stmt = $pdo->prepare("INSERT INTO `tracking` (`id`, `id_commande`, `tracking`, `customer`) VALUES (NULL, :id_commande, :tracking, '0')");
+			return $stmt->execute([
+				'id_commande' => (int)$id_commande,
+				'tracking'    => $tracking,
+			]);
 		}
 	}
 
 	function getStatus($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `status` WHERE `id` = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `status` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$id]);
 		return $stmt->fetch() ?: [];
 	}
 
@@ -158,8 +177,11 @@
 	function setStatus($id_commande, $status)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("UPDATE `commandes` SET `status` = ? WHERE `id` = ?");
-		return $stmt->execute([$status, (int)$id_commande]);
+		$stmt = $pdo->prepare("UPDATE `commandes` SET `status` = :status WHERE `id` = :id");
+		return $stmt->execute([
+			'status' => $status,
+			'id'     => (int)$id_commande,
+		]);
 	}
 
 ?>

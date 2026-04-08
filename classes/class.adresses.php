@@ -3,8 +3,8 @@
 	function getAdress($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `adresses` WHERE id = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `adresses` WHERE id = :id");
+		$stmt->execute(['id' => (int)$id]);
 		return $stmt->fetch() ?: [];
 	}
 
@@ -13,14 +13,14 @@
 		$pdo  = Database::getInstance()->getConnection();
 		$stmt = $pdo->prepare(
 			"INSERT INTO `adresses` (`id`, `libelle`, `adresse`, `adresse_comp`, `codepostal`, `ville`)
-			 VALUES (NULL, ?, ?, ?, ?, ?)"
+			 VALUES (NULL, :libelle, :adresse, :adresse_comp, :codepostal, :ville)"
 		);
 		$stmt->execute([
-			$adresse['libelle'],
-			$adresse['adresse'],
-			$adresse['adresse_comp'],
-			$adresse['codepostal'],
-			$adresse['ville'],
+			'libelle'      => $adresse['libelle'],
+			'adresse'      => $adresse['adresse'],
+			'adresse_comp' => $adresse['adresse_comp'],
+			'codepostal'   => $adresse['codepostal'],
+			'ville'        => $adresse['ville'],
 		]);
 		return $pdo->lastInsertId();
 	}
@@ -30,16 +30,17 @@
 		$pdo  = Database::getInstance()->getConnection();
 		$stmt = $pdo->prepare(
 			"UPDATE `adresses` SET
-			`libelle` = ?, `adresse` = ?, `adresse_comp` = ?, `codepostal` = ?, `ville` = ?
-			WHERE `id` = ?"
+			`libelle` = :libelle, `adresse` = :adresse, `adresse_comp` = :adresse_comp,
+			`codepostal` = :codepostal, `ville` = :ville
+			WHERE `id` = :id"
 		);
 		$stmt->execute([
-			$adresse['libelle'],
-			$adresse['adresse'],
-			$adresse['adresse_comp'],
-			$adresse['codepostal'],
-			$adresse['ville'],
-			(int)$adresse['id'],
+			'libelle'      => $adresse['libelle'],
+			'adresse'      => $adresse['adresse'],
+			'adresse_comp' => $adresse['adresse_comp'],
+			'codepostal'   => $adresse['codepostal'],
+			'ville'        => $adresse['ville'],
+			'id'           => (int)$adresse['id'],
 		]);
 	}
 
@@ -48,11 +49,11 @@
 		$adresses = explode(',', $ids);
 		$pdo      = Database::getInstance()->getConnection();
 
-		$stmt = $pdo->prepare("DELETE FROM `adresses` WHERE `id` = ?");
-		$stmt->execute([(int)$adresses[0]]);
+		$stmt = $pdo->prepare("DELETE FROM `adresses` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$adresses[0]]);
 
 		if (isset($adresses[1])) {
-			$stmt->execute([(int)$adresses[1]]);
+			$stmt->execute(['id' => (int)$adresses[1]]);
 		}
 	}
 ?>

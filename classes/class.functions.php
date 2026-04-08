@@ -17,11 +17,11 @@
 
 	function sanitizeString($let)
 	{
-		$let = str_replace("'",'’',$let);
+		$let = str_replace("'", "\u{2019}", $let);
 		$let = stripslashes($let);
 		$let = htmlentities($let);
 		$let = strip_tags($let);
-		
+
 		return $let;
 	}
 
@@ -58,50 +58,50 @@
 		}
 
 		return $new_array;
-	} 
-	
+	}
+
 	function GenPass($size=12)
 	{
 		// Initialisation des caractères utilisables
 		$password = '';
-		
+
 		$characters = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",",","?",".",";","!","&","-","+","_");
 
 		for($i=0;$i<$size;$i++)
 		{
 			$password .= ($i%2) ? strtoupper($characters[array_rand($characters)]) : $characters[array_rand($characters)];
 		}
-			
+
 		return $password;
 	}
-	
+
 	function splitDateToTimestamp($date)
 	{
 		$dates = array();
-		
+
 		$datestmp = explode('-',$date);
-		
+
 		foreach($datestmp as $date)
 		{
 			$datetmp = trim($date);
 			$dates[] = DateTime::createFromFormat('!d/m/Y H:i', $datetmp )->getTimestamp();
 		}
-		
+
 		return $dates;
 	}
-	
+
 	function updateValueonColandTable($table,$col,$value,$id)
 	{
 		$pdo = Database::getInstance()->getConnection();
 
 		if($table == 'gradations' && $col == 'actif' && $value == 1)
 		{
-			$stmt = $pdo->prepare("UPDATE `gradations` SET `date_gradation` = NOW() WHERE `id` = ?");
-			$stmt->execute([(int)$id]);
+			$stmt = $pdo->prepare("UPDATE `gradations` SET `date_gradation` = NOW() WHERE `id` = :id");
+			$stmt->execute(['id' => (int)$id]);
 		}
 
-		$stmt = $pdo->prepare("UPDATE `$table` SET `$col` = ? WHERE `id` = ?");
-		$stmt->execute([$value, (int)$id]);
+		$stmt = $pdo->prepare("UPDATE `$table` SET `$col` = :value WHERE `id` = :id");
+		$stmt->execute(['value' => $value, 'id' => (int)$id]);
 
 		return $stmt->rowCount();
 	}
@@ -111,7 +111,7 @@
 			return $needle !== '' && mb_strpos($haystack, $needle) !== false;
 		}
 	}
-	
+
 	function dateTimeFrFromTimestamp($timestamp)
 	{
 		date_default_timezone_set('Europe/Paris');
@@ -124,7 +124,7 @@
 
 		return $date;
 	}
-	
+
 	function get_friendly_time_ago($distant_timestamp, $max_units = 1) {
 		$distant_timestamp = strtotime($distant_timestamp);
 		$i = 0;

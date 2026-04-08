@@ -1,7 +1,7 @@
 <?php
 // 1. Sécurité
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
 }
 
@@ -10,12 +10,15 @@ $id_restaurateur = $_SESSION['user']['profil_id'];
 $pdo             = Database::getInstance()->getConnection();
 
 // 2. Récupérer le restaurant et vérifier qu'il appartient au restaurateur connecté
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->execute([$id_restaurant, $id_restaurateur]);
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = :id AND id_restaurateur = :id_restaurateur");
+$stmt->execute([
+    'id'              => $id_restaurant,
+    'id_restaurateur' => $id_restaurateur,
+]);
 $resto = $stmt->fetch();
 
 if (!$resto) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 
@@ -55,15 +58,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
 
         $upd = $pdo->prepare(
             "UPDATE restaurants SET
-                name = ?, city = ?, description = ?, category_id = ?, main_image = ?
-             WHERE id = ? AND id_restaurateur = ?"
+                name = :name, city = :city, description = :description, category_id = :category_id, main_image = :main_image
+             WHERE id = :id AND id_restaurateur = :id_restaurateur"
         );
 
-        if ($upd->execute([$name, $city, $description, $category_id, $image_name, $id_restaurant, $id_restaurateur])) {
+        if ($upd->execute([
+            'name'            => $name,
+            'city'            => $city,
+            'description'     => $description,
+            'category_id'     => $category_id,
+            'main_image'      => $image_name,
+            'id'              => $id_restaurant,
+            'id_restaurateur' => $id_restaurateur,
+        ])) {
             $message_success = "Restaurant modifié avec succès !";
             // Recharger les données
-            $stmt2 = $pdo->prepare("SELECT * FROM restaurants WHERE id = ?");
-            $stmt2->execute([$id_restaurant]);
+            $stmt2 = $pdo->prepare("SELECT * FROM restaurants WHERE id = :id");
+            $stmt2->execute(['id' => $id_restaurant]);
             $resto = $stmt2->fetch();
         } else {
             $message_error = "Erreur lors de la modification.";

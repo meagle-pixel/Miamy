@@ -15,8 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $redirect_url = ($profil == 1 || $profil == 2) ? 'mon-compte-restaurateur' : 'mon-compte';
 
-            // Redirection JavaScript
-            echo "<script type='text/javascript'>window.location.href='" . $GLOBALS['url'] . "/" . $redirect_url . "';</script>";
+            header('Location: ' . $GLOBALS['url'] . '/' . $redirect_url);
             exit();
         } else {
             $message_error = "Identifiants invalides ou compte non activé.";

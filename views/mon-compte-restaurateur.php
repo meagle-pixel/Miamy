@@ -1,7 +1,7 @@
 <?php
 // 1. Sécurité : On vérifie si l'utilisateur est connecté et est un restaurateur
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    echo "<script type='text/javascript'>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
 }
 

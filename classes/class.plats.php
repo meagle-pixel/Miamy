@@ -12,26 +12,26 @@ class Plat
     {
         $stmt = $this->pdo->prepare(
             "SELECT * FROM `plats`
-             WHERE `id_restaurant` = ?
+             WHERE `id_restaurant` = :id_restaurant
              ORDER BY FIELD(`categorie`, 'Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'), `nom` ASC"
         );
-        $stmt->execute([(int)$id_restaurant]);
+        $stmt->execute(['id_restaurant' => (int)$id_restaurant]);
         return $stmt->fetchAll();
     }
 
     public function getById($id)
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM `plats` WHERE `id` = ?");
-        $stmt->execute([(int)$id]);
+        $stmt = $this->pdo->prepare("SELECT * FROM `plats` WHERE `id` = :id");
+        $stmt->execute(['id' => (int)$id]);
         return $stmt->fetch();
     }
 
     public function getCategoriesByRestaurant($id_restaurant)
     {
         $stmt = $this->pdo->prepare(
-            "SELECT DISTINCT `categorie` FROM `plats` WHERE `id_restaurant` = ? ORDER BY `categorie` ASC"
+            "SELECT DISTINCT `categorie` FROM `plats` WHERE `id_restaurant` = :id_restaurant ORDER BY `categorie` ASC"
         );
-        $stmt->execute([(int)$id_restaurant]);
+        $stmt->execute(['id_restaurant' => (int)$id_restaurant]);
         return array_column($stmt->fetchAll(), 'categorie');
     }
 
@@ -39,16 +39,16 @@ class Plat
     {
         $stmt = $this->pdo->prepare(
             "INSERT INTO `plats` (`nom`, `description`, `prix`, `image`, `categorie`, `id_restaurant`, `disponible`, `created_at`)
-             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
+             VALUES (:nom, :description, :prix, :image, :categorie, :id_restaurant, :disponible, NOW())"
         );
         $result = $stmt->execute([
-            $data['nom'],
-            $data['description'],
-            $data['prix'],
-            $data['image'],
-            $data['categorie'],
-            (int)$data['id_restaurant'],
-            (int)$data['disponible'],
+            'nom'           => $data['nom'],
+            'description'   => $data['description'],
+            'prix'          => $data['prix'],
+            'image'         => $data['image'],
+            'categorie'     => $data['categorie'],
+            'id_restaurant' => (int)$data['id_restaurant'],
+            'disponible'    => (int)$data['disponible'],
         ]);
         return $result ? $this->pdo->lastInsertId() : false;
     }
@@ -57,36 +57,36 @@ class Plat
     {
         $stmt = $this->pdo->prepare(
             "UPDATE `plats` SET
-                `nom` = ?,
-                `description` = ?,
-                `prix` = ?,
-                `image` = ?,
-                `categorie` = ?,
-                `disponible` = ?
-             WHERE `id` = ?"
+                `nom` = :nom,
+                `description` = :description,
+                `prix` = :prix,
+                `image` = :image,
+                `categorie` = :categorie,
+                `disponible` = :disponible
+             WHERE `id` = :id"
         );
         return $stmt->execute([
-            $data['nom'],
-            $data['description'],
-            $data['prix'],
-            $data['image'],
-            $data['categorie'],
-            (int)$data['disponible'],
-            (int)$id,
+            'nom'         => $data['nom'],
+            'description' => $data['description'],
+            'prix'        => $data['prix'],
+            'image'       => $data['image'],
+            'categorie'   => $data['categorie'],
+            'disponible'  => (int)$data['disponible'],
+            'id'          => (int)$id,
         ]);
     }
 
     public function delete($id)
     {
-        $stmt = $this->pdo->prepare("DELETE FROM `plats` WHERE `id` = ?");
-        return $stmt->execute([(int)$id]);
+        $stmt = $this->pdo->prepare("DELETE FROM `plats` WHERE `id` = :id");
+        return $stmt->execute(['id' => (int)$id]);
     }
 
     public function toggleDisponible($id)
     {
         $stmt = $this->pdo->prepare(
-            "UPDATE `plats` SET `disponible` = IF(`disponible` = 1, 0, 1) WHERE `id` = ?"
+            "UPDATE `plats` SET `disponible` = IF(`disponible` = 1, 0, 1) WHERE `id` = :id"
         );
-        return $stmt->execute([(int)$id]);
+        return $stmt->execute(['id' => (int)$id]);
     }
 }

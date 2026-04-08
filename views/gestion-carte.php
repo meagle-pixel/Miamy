@@ -27,7 +27,7 @@ $resto = $stmt->fetch();
 
 
 if (!$resto) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 

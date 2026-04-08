@@ -10,23 +10,23 @@
 	function deleteClient($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("DELETE FROM `clients` WHERE `id` = ?");
-		return $stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("DELETE FROM `clients` WHERE `id` = :id");
+		return $stmt->execute(['id' => (int)$id]);
 	}
 
 	function getClient($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$id]);
 		return $stmt->fetch() ?: [];
 	}
 
 	function getClientByEmail($email)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `email` = ?");
-		$stmt->execute([$email]);
+		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `email` = :email");
+		$stmt->execute(['email' => $email]);
 		return $stmt->fetch() ?: [];
 	}
 
@@ -39,19 +39,20 @@
 			 `adresse`, `adresse_comp`, `codepostal`, `ville`,
 			 `dateinscription`, `dateconnect`, `dateaction`)
 			VALUES
-			(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())"
+			(NULL, :email, :motdepasse, :civilite, :nom, :prenom, :telephone,
+			 :adresse, :adresse_comp, :codepostal, :ville, NOW(), NOW(), NOW())"
 		);
 		$stmt->execute([
-			$client['email'],
-			password_hash($client['motdepasse'], PASSWORD_DEFAULT),
-			$client['civilite'],
-			$client['nom'],
-			$client['prenom'],
-			$client['telephone'],
-			$client['adresse'],
-			$client['adresse_comp'],
-			$client['codepostal'],
-			$client['ville'],
+			'email'        => $client['email'],
+			'motdepasse'   => password_hash($client['motdepasse'], PASSWORD_DEFAULT),
+			'civilite'     => $client['civilite'],
+			'nom'          => $client['nom'],
+			'prenom'       => $client['prenom'],
+			'telephone'    => $client['telephone'],
+			'adresse'      => $client['adresse'],
+			'adresse_comp' => $client['adresse_comp'],
+			'codepostal'   => $client['codepostal'],
+			'ville'        => $client['ville'],
 		]);
 		return $pdo->lastInsertId();
 	}
@@ -59,8 +60,8 @@
 	function updateClientDataLite($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$id]);
 		$result = $stmt->fetch();
 
 		if ($result) {
@@ -71,8 +72,8 @@
 			$_SESSION['user']      = false;
 		}
 
-		$upd = $pdo->prepare("UPDATE `clients` SET `dateaction` = NOW() WHERE `id` = ?");
-		$upd->execute([(int)$id]);
+		$upd = $pdo->prepare("UPDATE `clients` SET `dateaction` = NOW() WHERE `id` = :id");
+		$upd->execute(['id' => (int)$id]);
 
 		insertIP($id, 2);
 	}
@@ -80,8 +81,8 @@
 	function trytoconnectClient($email, $pass)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `email` = ?");
-		$stmt->execute([$email]);
+		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `email` = :email");
+		$stmt->execute(['email' => $email]);
 		$user = $stmt->fetch();
 
 		if ($user && password_verify($pass, $user['motdepasse'])) {
@@ -100,42 +101,48 @@
 		$pdo  = Database::getInstance()->getConnection();
 		$stmt = $pdo->prepare(
 			"UPDATE `clients` SET
-			`email` = ?, `civilite` = ?, `nom` = ?, `prenom` = ?,
-			`telephone` = ?, `adresse` = ?, `adresse_comp` = ?,
-			`codepostal` = ?, `ville` = ?
-			WHERE `id` = ?"
+			`email` = :email, `civilite` = :civilite, `nom` = :nom, `prenom` = :prenom,
+			`telephone` = :telephone, `adresse` = :adresse, `adresse_comp` = :adresse_comp,
+			`codepostal` = :codepostal, `ville` = :ville
+			WHERE `id` = :id"
 		);
 		$stmt->execute([
-			$client['email'],
-			$client['civilite'],
-			$client['nom'],
-			$client['prenom'],
-			$client['telephone'],
-			$client['adresse'],
-			$client['adresse_comp'],
-			$client['codepostal'],
-			$client['ville'],
-			(int)$client['id'],
+			'email'        => $client['email'],
+			'civilite'     => $client['civilite'],
+			'nom'          => $client['nom'],
+			'prenom'       => $client['prenom'],
+			'telephone'    => $client['telephone'],
+			'adresse'      => $client['adresse'],
+			'adresse_comp' => $client['adresse_comp'],
+			'codepostal'   => $client['codepostal'],
+			'ville'        => $client['ville'],
+			'id'           => (int)$client['id'],
 		]);
 
 		if (isset($client['motdepasse'])) {
-			$upd = $pdo->prepare("UPDATE `clients` SET `motdepasse` = ? WHERE `id` = ?");
-			$upd->execute([password_hash($client['motdepasse'], PASSWORD_DEFAULT), (int)$client['id']]);
+			$upd = $pdo->prepare("UPDATE `clients` SET `motdepasse` = :motdepasse WHERE `id` = :id");
+			$upd->execute([
+				'motdepasse' => password_hash($client['motdepasse'], PASSWORD_DEFAULT),
+				'id'         => (int)$client['id'],
+			]);
 		}
 	}
 
 	function changePassword($id, $pass)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("UPDATE `clients` SET `motdepasse` = ? WHERE `id` = ?");
-		$stmt->execute([password_hash($pass, PASSWORD_DEFAULT), (int)$id]);
+		$stmt = $pdo->prepare("UPDATE `clients` SET `motdepasse` = :motdepasse WHERE `id` = :id");
+		$stmt->execute([
+			'motdepasse' => password_hash($pass, PASSWORD_DEFAULT),
+			'id'         => (int)$id,
+		]);
 	}
 
 	function existEmailClient($email)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT id FROM `clients` WHERE `email` = ?");
-		$stmt->execute([$email]);
+		$stmt = $pdo->prepare("SELECT id FROM `clients` WHERE `email` = :email");
+		$stmt->execute(['email' => $email]);
 		return $stmt->fetch() !== false;
 	}
 

@@ -1,7 +1,7 @@
 <?php
 // 1. Sécurité
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
 }
 
@@ -9,18 +9,21 @@ $id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $id_restaurateur = $_SESSION['user']['profil_id'];
 
 if (!$id_restaurant) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 
 // 2. Récupérer le restaurant et vérifier qu'il appartient au restaurateur connecté
 $pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->execute([$id_restaurant, $id_restaurateur]);
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = :id AND id_restaurateur = :id_restaurateur");
+$stmt->execute([
+    'id'              => $id_restaurant,
+    'id_restaurateur' => $id_restaurateur,
+]);
 $resto = $stmt->fetch();
 
 if (!$resto) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 
@@ -28,7 +31,7 @@ if (!$resto) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
     $restaurant = new Restaurant();
     if ($restaurant->delete($id_restaurant)) {
-        echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur?success=deleted';</script>";
+        header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur?success=deleted');
         exit();
     } else {
         $message_error = "Une erreur est survenue lors de la suppression.";

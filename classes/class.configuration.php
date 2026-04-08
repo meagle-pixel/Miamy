@@ -3,16 +3,16 @@
 	function getConfigurationById($id)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `configuration` WHERE `id` = ?");
-		$stmt->execute([(int)$id]);
+		$stmt = $pdo->prepare("SELECT * FROM `configuration` WHERE `id` = :id");
+		$stmt->execute(['id' => (int)$id]);
 		return $stmt->fetch() ?: [];
 	}
 
 	function getConfigurationByName($name)
 	{
 		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `configuration` WHERE `name` = ?");
-		$stmt->execute([$name]);
+		$stmt = $pdo->prepare("SELECT * FROM `configuration` WHERE `name` = :name");
+		$stmt->execute(['name' => $name]);
 		$row = $stmt->fetch();
 		return $row['value'] ?? null;
 	}

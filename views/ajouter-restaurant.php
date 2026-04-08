@@ -1,7 +1,7 @@
 <?php
 // 1. Sécurité : vérifier si connecté et restaurateur
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
 }
 
@@ -46,10 +46,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_restaurant']))
         // Insertion en BDD avec requête préparée
         $stmt = $pdo->prepare(
             "INSERT INTO restaurants (name, slug, description, city, main_image, category_id, id_restaurateur, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
+             VALUES (:name, :slug, :description, :city, :main_image, :category_id, :id_restaurateur, NOW())"
         );
 
-        if ($stmt->execute([$name, $slug, $description, $city, $image_name, $category_id, $id_restaurateur])) {
+        if ($stmt->execute([
+            'name'            => $name,
+            'slug'            => $slug,
+            'description'     => $description,
+            'city'            => $city,
+            'main_image'      => $image_name,
+            'category_id'     => $category_id,
+            'id_restaurateur' => $id_restaurateur,
+        ])) {
             $message_success = "Restaurant ajouté avec succès !";
         } else {
             $message_error = "Erreur lors de l'ajout du restaurant.";

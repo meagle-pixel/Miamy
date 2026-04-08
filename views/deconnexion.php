@@ -10,7 +10,7 @@ $_SESSION = array();
 session_destroy();
 
 // Redirection vers l'accueil
-echo "<script>window.location.href='" . $GLOBALS['url'] . "/accueil';</script>";
+header('Location: ' . $GLOBALS['url'] . '/accueil');
 exit();
 
 ?>

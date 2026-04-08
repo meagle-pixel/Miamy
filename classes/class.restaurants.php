@@ -23,37 +23,37 @@ class Restaurant {
     }
 
     public function getById($id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM `restaurants` WHERE `id` = ?");
-        $stmt->execute([(int)$id]);
+        $stmt = $this->pdo->prepare("SELECT * FROM `restaurants` WHERE `id` = :id");
+        $stmt->execute(['id' => (int)$id]);
         return $stmt->fetch();
     }
 
     public function getBySlug($slug) {
-        $stmt = $this->pdo->prepare("SELECT * FROM `restaurants` WHERE `slug` = ?");
-        $stmt->execute([$slug]);
+        $stmt = $this->pdo->prepare("SELECT * FROM `restaurants` WHERE `slug` = :slug");
+        $stmt->execute(['slug' => $slug]);
         return $stmt->fetch();
     }
 
     public function update($id, $data) {
         $stmt = $this->pdo->prepare(
             "UPDATE `restaurants` SET
-             `name` = ?, `city` = ?, `category_id` = ?,
-             `description` = ?, `is_featured` = ?, `subscription_active` = ?
-             WHERE `id` = ?"
+             `name` = :name, `city` = :city, `category_id` = :category_id,
+             `description` = :description, `is_featured` = :is_featured, `subscription_active` = :subscription_active
+             WHERE `id` = :id"
         );
         return $stmt->execute([
-            $data['name'],
-            $data['city'],
-            (int)$data['category_id'],
-            $data['description'],
-            (int)$data['is_featured'],
-            (int)$data['subscription_active'],
-            (int)$id,
+            'name'                => $data['name'],
+            'city'                => $data['city'],
+            'category_id'         => (int)$data['category_id'],
+            'description'         => $data['description'],
+            'is_featured'         => (int)$data['is_featured'],
+            'subscription_active' => (int)$data['subscription_active'],
+            'id'                  => (int)$id,
         ]);
     }
 
     public function delete($id) {
-        $stmt = $this->pdo->prepare("DELETE FROM `restaurants` WHERE `id` = ?");
-        return $stmt->execute([(int)$id]);
+        $stmt = $this->pdo->prepare("DELETE FROM `restaurants` WHERE `id` = :id");
+        return $stmt->execute(['id' => (int)$id]);
     }
 }

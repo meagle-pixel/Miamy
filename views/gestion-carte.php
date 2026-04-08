@@ -1,23 +1,30 @@
 <?php
 // 1. Sécurité
+// 1. Vérification de la session (Vigile 1)
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/connexion';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
 }
 
+// On récupère les IDs
 $id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $id_restaurateur = $_SESSION['user']['profil_id'];
 
+// 2. Vérification de l'ID restaurant (Vigile 2)
 if (!$id_restaurant) {
-    echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
 
 // 2. Vérifier que le restaurant appartient bien à ce restaurateur
 $pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = ? AND id_restaurateur = ?");
-$stmt->execute([$id_restaurant, $id_restaurateur]);
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = :id AND id_restaurateur = :id_proprio");
+$stmt->execute([
+    'id'         => $id_restaurant,
+    'id_proprio' => $id_restaurateur
+]);
 $resto = $stmt->fetch();
+
 
 if (!$resto) {
     echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
@@ -70,7 +77,7 @@ if (isset($_GET['success'])) {
         <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
                 <img src="<?= $GLOBALS['url'] ?>/assets/img/restaurants/<?= !empty($resto['main_image']) ? $resto['main_image'] : 'default-resto.jpg' ?>"
-                     alt="img" class="rounded shadow-sm" style="width:70px; height:50px; object-fit:cover;">
+                    alt="img" class="rounded shadow-sm" style="width:70px; height:50px; object-fit:cover;">
                 <div>
                     <h3 class="mb-0"><?= htmlspecialchars($resto['name']) ?></h3>
                     <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i><?= htmlspecialchars($resto['city']) ?></small>
@@ -155,7 +162,7 @@ if (isset($_GET['success'])) {
 
                         <!-- Placeholder affiché quand la catégorie est vide -->
                         <div class="empty-placeholder col-12 text-center py-4 text-muted border border-dashed rounded"
-                             style="<?= !empty($platsCateg) ? 'display:none;' : '' ?> border-style:dashed !important; background:#f8f9fa;">
+                            style="<?= !empty($platsCateg) ? 'display:none;' : '' ?> border-style:dashed !important; background:#f8f9fa;">
                             <i class="fas fa-utensils fa-2x mb-2 opacity-25"></i>
                             <p class="mb-0">Aucun plat dans cette catégorie.<br>
                                 <small>Glissez-en un ici depuis une autre catégorie.</small>
@@ -174,11 +181,11 @@ if (isset($_GET['success'])) {
                                     <div class="flex-shrink-0 mb-3 mb-md-0">
                                         <?php if (!empty($plat['image'])): ?>
                                             <img src="<?= $GLOBALS['url'] ?>/assets/img/plats/<?= htmlspecialchars($plat['image']) ?>"
-                                                 alt="<?= htmlspecialchars($plat['nom']) ?>"
-                                                 class="rounded" style="width:110px; height:80px; object-fit:cover;">
+                                                alt="<?= htmlspecialchars($plat['nom']) ?>"
+                                                class="rounded" style="width:110px; height:80px; object-fit:cover;">
                                         <?php else: ?>
                                             <div class="rounded bg-light d-flex align-items-center justify-content-center"
-                                                 style="width:110px; height:80px;">
+                                                style="width:110px; height:80px;">
                                                 <i class="fas fa-utensils fa-2x text-muted"></i>
                                             </div>
                                         <?php endif; ?>
@@ -215,11 +222,11 @@ if (isset($_GET['success'])) {
                                                     <?= $plat['disponible'] ? 'Indispo' : 'Dispo' ?>
                                                 </button>
                                                 <a href="modifier-plat?id=<?= $plat['id'] ?>"
-                                                   class="btn btn-outline-secondary btn_sm" title="Modifier">
+                                                    class="btn btn-outline-secondary btn_sm" title="Modifier">
                                                     <i class="fas fa-edit me-1"></i> Modifier
                                                 </a>
                                                 <a href="supprimer-plat?id=<?= $plat['id'] ?>&id_restaurant=<?= $id_restaurant ?>"
-                                                   class="btn btn-outline-danger btn_sm" title="Supprimer">
+                                                    class="btn btn-outline-danger btn_sm" title="Supprimer">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             </div>

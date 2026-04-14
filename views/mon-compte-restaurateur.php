@@ -48,17 +48,17 @@ if (isset($_GET['success']) && $_GET['success'] === 'deleted') {
                     <div class="dashboard_menu">
                         <ul class="list-unstyled">
                             <li class="mb-2">
-                                <a href="mon-compte-restaurateur" class="btn btn_theme w-100 text-start active">
+                                <a href="mon-compte-restaurateur" class="btn btn_theme w-100 text-start">
                                     <i class="fas fa-tachometer-alt me-2"></i> Mes établissements
                                 </a>
                             </li>
                             <li class="mb-2">
-                                <a href="profil-editer" class="btn btn_navber w-100 text-start bg-light text-dark border">
+                                <a href="profil-editer" class="btn btn_theme w-100 text-start">
                                     <i class="fas fa-user-edit me-2"></i> Modifier mon profil
                                 </a>
                             </li>
                             <li class="mb-2">
-                                <a href="deconnexion" class="btn btn_navber w-100 text-start bg-danger text-white border-0">
+                                <a href="deconnexion" class="btn w-100 text-start btn-deconnexion">
                                     <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
                                 </a>
                             </li>
@@ -119,10 +119,13 @@ if (isset($_GET['success']) && $_GET['success'] === 'deleted') {
                                                 <a href="configurer-qr-codes/<?= $resto['id'] ?>" class="btn btn_navber btn_sm me-2">
                                                     <i class="fas fa-qrcode me-1"></i> QR Codes
                                                 </a>
-                                                <a href="modifier-restaurant?id=<?= $resto['id'] ?>" class="btn btn_sm btn-outline-secondary">
+                                                <a href="details?id=<?= $resto['id'] ?>" class="btn btn-info btn_sm me-2">
+                                                    <i class="fas fa-info-circle me-1"></i> Détails
+                                                </a>
+                                                <a href="modifier-restaurant?id=<?= $resto['id'] ?>" class="btn btn-warning btn_sm me-2">
                                                     <i class="fas fa-edit me-1"></i> Modifier
                                                 </a>
-                                                <a href="supprimer-restaurant?id=<?= $resto['id'] ?>" class="btn btn_sm btn-outline-danger ms-2">
+                                                <a href="supprimer-restaurant?id=<?= $resto['id'] ?>" class="btn btn-danger btn_sm me-2">
                                                     <i class="fas fa-trash me-1"></i> Supprimer
                                                 </a>
                                             </div>

@@ -1,6 +1,10 @@
+
+CREATE DATABASE Miamy;
+USE Miamy;
+
 -- ============================================================
 -- Miamy - Base de données propre
--- Généré le : 2026-04-01
+-- Généré le : 2026-04-14
 -- ============================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -9,14 +13,8 @@ SET time_zone = "+00:00";
 SET NAMES utf8mb4;
 
 -- ============================================================
--- SUPPRESSION ET RECRÉATION DES TABLES
--- ============================================================
-
-
--- ============================================================
 -- STRUCTURE DES TABLES
 -- ============================================================
-
 
 CREATE TABLE `administrateurs` (
     `id`        int(11)      NOT NULL AUTO_INCREMENT,
@@ -226,18 +224,33 @@ CREATE TABLE `utilisateurs` (
 -- --------------------------------------------------------
 
 CREATE TABLE `plats` (
-    `id`            int(11)        NOT NULL AUTO_INCREMENT,
-    `nom`           varchar(150)   NOT NULL,
-    `description`   text           DEFAULT NULL,
-    `prix`          decimal(8,2)   NOT NULL DEFAULT 0.00,
-    `image`         varchar(255)   DEFAULT NULL,
-    `categorie`     varchar(100)   NOT NULL DEFAULT 'Plats',
-    `id_restaurant` int(11)        NOT NULL,
-    `disponible`    tinyint(1)     NOT NULL DEFAULT 1,
-    `created_at`    timestamp      NULL DEFAULT current_timestamp(),
+    `id`            int(11)      NOT NULL AUTO_INCREMENT,
+    `nom`           varchar(150) NOT NULL,
+    `description`   text         DEFAULT NULL,
+    `prix`          decimal(8,2) NOT NULL DEFAULT 0.00,
+    `image`         varchar(255) DEFAULT NULL,
+    `categorie`     varchar(100) NOT NULL DEFAULT 'Plats',
+    `id_restaurant` int(11)      NOT NULL,
+    `disponible`    tinyint(1)   NOT NULL DEFAULT 1,
+    `created_at`    timestamp    NULL DEFAULT current_timestamp(),
     PRIMARY KEY (`id`),
     KEY `id_restaurant` (`id_restaurant`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+CREATE TABLE `horaires` (
+    `id`            int(11)    NOT NULL AUTO_INCREMENT,
+    `id_restaurant` int(11)    NOT NULL,
+    `jour`          tinyint(1) NOT NULL COMMENT '0=Lundi, 6=Dimanche',
+    `ouvert`        tinyint(1) NOT NULL DEFAULT 1,
+    `debut`         time       DEFAULT NULL,
+    `fin`           time       DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_resto_jour` (`id_restaurant`, `jour`),
+    KEY `idx_resto_jour` (`id_restaurant`, `jour`),
+    CONSTRAINT `fk_horaires_restaurant` FOREIGN KEY (`id_restaurant`) REFERENCES `restaurants`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================
 -- CONTRAINTES
@@ -282,7 +295,7 @@ INSERT INTO `status` (`id`, `libelle`) VALUES
 INSERT INTO `moyens_paiement` (`id`, `nom`) VALUES
 (1, 'Carte Bancaire');
 
--- Catégories de restaurants (types de cuisine)
+-- Catégories de restaurants
 INSERT INTO `categories` (`name`, `icon`, `ordre`) VALUES
 ('Français',      'fa-wine-glass',     1),
 ('Italien',       'fa-pizza-slice',    2),
@@ -305,29 +318,31 @@ INSERT INTO `categories` (`name`, `icon`, `ordre`) VALUES
 
 -- Pages du site
 INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
-('Accueil',               'accueil',                'views/home.php'),
-('À propos',              'a-propos',               'views/a-propos.php'),
-('FAQ',                   'faq',                    'views/faq.php'),
-('Contact',               'contact',                'views/contact.php'),
-('Liste des restaurants', 'liste-restaurants',      'views/liste-restaurants.php'),
-('Connexion',             'connexion',              'views/login.php'),
-('Inscription',           'inscription',            'views/register.php'),
-('Déconnexion',           'deconnexion',            'views/deconnexion.php'),
-('Mon compte',            'mon-compte',             'views/mon-compte.php'),
-('Mon compte restaurateur','mon-compte-restaurateur','views/mon-compte-restaurateur.php'),
-('Profil',                'profil',                 'views/profile.php'),
-('Modifier profil',       'profil-editer',          'views/profil-editer.php'),
-('Ajouter un restaurant', 'ajouter-restaurant',     'views/ajouter-restaurant.php'),
-('Modifier un restaurant','modifier-restaurant',    'views/modifier-restaurant.php'),
-('Supprimer un restaurant','supprimer-restaurant',  'views/supprimer-restaurant.php'),
-('Gestion de la carte',   'gestion-carte',          'views/gestion-carte.php'),
-('Ajouter un plat',       'ajouter-plat',           'views/ajouter-plat.php'),
-('Modifier un plat',      'modifier-plat',          'views/modifier-plat.php'),
-('Supprimer un plat',     'supprimer-plat',         'views/supprimer-plat.php'),
-('Commande',              'commande',               'views/commande.php'),
-('Mes commandes',         'commandes',              'views/commandes.php');
+('Accueil',                'accueil',                 'views/home.php'),
+('À propos',               'a-propos',                'views/a-propos.php'),
+('FAQ',                    'faq',                     'views/faq.php'),
+('Contact',                'contact',                 'views/contact.php'),
+('Liste des restaurants',  'liste-restaurants',       'views/liste-restaurants.php'),
+('Connexion',              'connexion',               'views/login.php'),
+('Inscription',            'inscription',             'views/register.php'),
+('Déconnexion',            'deconnexion',             'views/deconnexion.php'),
+('Mon compte',             'mon-compte',              'views/mon-compte.php'),
+('Mon compte restaurateur','mon-compte-restaurateur', 'views/mon-compte-restaurateur.php'),
+('Profil',                 'profil',                  'views/profile.php'),
+('Modifier profil',        'profil-editer',           'views/profil-editer.php'),
+('Ajouter un restaurant',  'ajouter-restaurant',      'views/ajouter-restaurant.php'),
+('Modifier un restaurant', 'modifier-restaurant',     'views/modifier-restaurant.php'),
+('Supprimer un restaurant','supprimer-restaurant',    'views/supprimer-restaurant.php'),
+('Gestion de la carte',    'gestion-carte',           'views/gestion-carte.php'),
+('Ajouter un plat',        'ajouter-plat',            'views/ajouter-plat.php'),
+('Modifier un plat',       'modifier-plat',           'views/modifier-plat.php'),
+('Supprimer un plat',      'supprimer-plat',          'views/supprimer-plat.php'),
+('Commande',               'commande',                'views/commande.php'),
+('Mes commandes',          'commandes',               'views/commandes.php'),
+('Détails restaurant',     'details',                 'views/details.php');
 
--- Autorisations (toutes les pages accessibles au profil admin = 1)
+-- Autorisations admin (profil 1 = accès à tout)
 INSERT INTO `autorisations` (`page`, `profil`, `etat`)
 SELECT `id`, 1, 1 FROM `pages`;
 
+COMMIT;

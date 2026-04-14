@@ -123,8 +123,8 @@ if (isset($_GET['success'])) {
                 </div>
                 <div class="col-md-4 mb-3">
                     <div class="bg-white shadow-sm rounded p-3 text-center border">
-                        <h2 class="text-success mb-0"><?= count(array_filter($plats, fn($p) => $p['disponible'])) ?></h2>
-                        <small class="text-muted">Disponible<?= count(array_filter($plats, fn($p) => $p['disponible'])) > 1 ? 's' : '' ?></small>
+                        <h2 class="text-success mb-0" id="total-dispo"><?= count(array_filter($plats, fn($p) => $p['disponible'])) ?></h2>
+                        <small class="text-muted" id="label-dispo">Disponible<?= count(array_filter($plats, fn($p) => $p['disponible'])) > 1 ? 's' : '' ?></small>
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -378,6 +378,15 @@ $custom_js = <<<HTML
 
                 // Griser légèrement la carte si indisponible
                 card.find('.d-md-flex').toggleClass('opacity-50', !dispo);
+
+                // Mettre à jour le compteur global "Disponibles" en haut de page
+                const totalDispoEl = document.getElementById('total-dispo');
+                const labelDispoEl = document.getElementById('label-dispo');
+                if (totalDispoEl) {
+                    const count = parseInt(totalDispoEl.textContent, 10) + (dispo ? 1 : -1);
+                    totalDispoEl.textContent = count;
+                    if (labelDispoEl) labelDispoEl.textContent = 'Disponible' + (count > 1 ? 's' : '');
+                }
             } else {
                 alert('Erreur lors de la mise à jour. Veuillez réessayer.');
             }

@@ -1,4 +1,5 @@
 <?php
+require_once('classes/class.horaires.php');
 
 	function get_ip() {
 		// IP si internet partagé

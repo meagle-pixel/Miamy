@@ -89,4 +89,19 @@ class Plat
         );
         return $stmt->execute(['id' => (int)$id]);
     }
+
+
+    public function getDerniersPlats($id_restaurant, $limite = 3)
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT * FROM `plats` 
+         WHERE `id_restaurant` = :id_restaurant 
+         ORDER BY `created_at` DESC 
+         LIMIT :limite"
+        );
+        $stmt->bindValue(':id_restaurant', (int)$id_restaurant, \PDO::PARAM_INT);
+        $stmt->bindValue(':limite', (int)$limite, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }

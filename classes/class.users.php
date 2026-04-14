@@ -1,9 +1,5 @@
 <?php
 
-	/* ==========================================================================
-	   GESTION DES UTILISATEURS & LOGS
-	   ========================================================================== */
-
 	// --- FONCTIONS LOGS ---
 	if (!function_exists('logUserAction')) {
 		function logUserAction($userId, $actionType, $message) {

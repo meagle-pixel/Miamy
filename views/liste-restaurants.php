@@ -1,92 +1,114 @@
+<?php
+// Récupération des restaurants actifs
+$restoClass  = new Restaurant();
+$restaurants = $restoClass->listRestaurants(activeOnly: false);
 
+// Récupération des horaires du jour (0=Lundi … 6=Dimanche)
+$jourAujourdhui = (int)date('N') - 1; // date('N') → 1=Lundi, 7=Dimanche
+$pdo = Database::getInstance()->getConnection();
 
-    <!-- Common Banner Area -->
-    <section id="common_banner">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="common_bannner_text">
-                        <h2>Restaurants</h2>
-                        <ul>
-                            <li><a href="index.php">Accueil</a></li>
-                            <li><span><i class="fas fa-circle"></i></span>Restaurants</li>
-                        </ul>
-                    </div>
+$horairesAujourdhui = [];
+if (!empty($restaurants)) {
+    $ids  = implode(',', array_map(fn($r) => (int)$r['id'], $restaurants));
+    $stmt = $pdo->query(
+        "SELECT * FROM horaires WHERE id_restaurant IN ($ids) AND jour = $jourAujourdhui"
+    );
+    foreach ($stmt->fetchAll() as $h) {
+        $horairesAujourdhui[(int)$h['id_restaurant']] = $h;
+    }
+}
+?>
+
+<!-- Common Banner Area -->
+<section id="common_banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="common_bannner_text">
+                    <h2>Restaurants</h2>
+                    <ul>
+                        <li><a href="accueil">Accueil</a></li>
+                        <li><span><i class="fas fa-circle"></i></span>Restaurants</li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Food Areas -->
-    <section class="section_padding">
-        <div class="container">
-            <!-- Section Heading -->
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-12">
-                    <div class="section_heading_center">
-                        <h2>Restaurants</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="row">
-                        <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                            <div class="theme_common_box_two img_hover">
-                                <div class="theme_two_box_img">
-                                    <a href="liste-plats.php">
-                                        <img src="assets/img/restos/restaurant-1.jpg" alt="img">
-                                    </a>
-                                </div>
-                                <div class="theme_two_box_content">
-                                    <h4><a href="liste-plats.php">Chez Titi</a></h4>
-                                    
-                                    <h3>Fuveau
-										<span>
-											<a href="liste-plats.php" class="btn btn_theme btn_sm cart_btn">Voir</a>
-										</span>
-									</h3>
-                                </div>
-                            </div>
-                        </div>
-						<div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                            <div class="theme_common_box_two img_hover">
-                                <div class="theme_two_box_img">
-                                    <a href="liste-plats.php">
-                                        <img src="assets/img/restos/restaurant-2.jpg" alt="img">
-                                    </a>
-                                </div>
-                                <div class="theme_two_box_content">
-                                    <h4><a href="liste-plats.php">Susake</a></h4>
-                                    
-                                    <h3>Fuveau
-										<span>
-											<a href="liste-plats.php" class="btn btn_theme btn_sm cart_btn">Voir</a>
-										</span>
-									</h3>
-                                </div>
-                            </div>
-                        </div>
-						<div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                            <div class="theme_common_box_two img_hover">
-                                <div class="theme_two_box_img">
-                                    <a href="liste-plats.php">
-                                        <img src="assets/img/restos/restaurant-3.jpg" alt="img">
-                                    </a>
-                                </div>
-                                <div class="theme_two_box_content">
-                                    <h4><a href="liste-plats.php">Le frelon d'or</a></h4>
-                                    
-                                    <h3>Fuveau
-										<span>
-											<a href="liste-plats.php" class="btn btn_theme btn_sm cart_btn">Voir</a>
-										</span>
-									</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<!-- Liste des restaurants -->
+<section class="section_padding">
+    <div class="container">
+
+        <div class="row mb-4">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+                <div class="section_heading_center">
+                    <h2>Nos restaurants</h2>
+                    <p><?= count($restaurants) ?> restaurant<?= count($restaurants) > 1 ? 's' : '' ?> disponible<?= count($restaurants) > 1 ? 's' : '' ?></p>
                 </div>
             </div>
         </div>
-    </section>
+
+        <?php if (empty($restaurants)): ?>
+            <div class="alert alert-info text-center py-5">
+                <i class="fas fa-store-slash fa-3x mb-3 text-muted"></i>
+                <h4>Aucun restaurant disponible pour le moment.</h4>
+            </div>
+        <?php else: ?>
+            <div class="row">
+                <?php foreach ($restaurants as $resto):
+                    $image   = !empty($resto['main_image']) ? $resto['main_image'] : 'default-resto.jpg';
+                    $horaire = $horairesAujourdhui[$resto['id']] ?? null;
+
+                    // Calcul statut ouverture
+                    if ($horaire === null) {
+                        $statutHtml = '';
+                    } elseif (!$horaire['ouvert']) {
+                        $statutHtml = '<span class="badge bg-danger"><i class="fas fa-clock me-1"></i>Fermé aujourd\'hui</span>';
+                    } else {
+                        $debut      = substr($horaire['debut'], 0, 5);
+                        $fin        = substr($horaire['fin'],   0, 5);
+                        $statutHtml = '<span class="badge bg-success"><i class="fas fa-clock me-1"></i>'
+                                    . 'Ouvert · ' . $debut . ' – ' . $fin
+                                    . '</span>';
+                    }
+                ?>
+                    <div class="col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
+                        <div class="theme_common_box_two img_hover">
+                            <div class="theme_two_box_img">
+                                <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id'] ?>">
+                                    <img src="<?= $GLOBALS['url'] ?>/assets/img/restaurants/<?= htmlspecialchars($image) ?>"
+                                         alt="<?= htmlspecialchars($resto['name']) ?>">
+                                </a>
+                                <?php if ($resto['is_featured']): ?>
+                                    <div class="discount_tab">
+                                        <span><i class="fas fa-star"></i> Coup de cœur</span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="theme_two_box_content">
+                                <h4>
+                                    <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id'] ?>">
+                                        <?= htmlspecialchars($resto['name']) ?>
+                                    </a>
+                                </h4>
+                                <?php if ($statutHtml): ?>
+                                    <p class="mb-1"><?= $statutHtml ?></p>
+                                <?php endif; ?>
+                                <h3>
+                                    <i class="fas fa-map-marker-alt me-1 text-muted" style="font-size:.85rem;"></i>
+                                    <?= htmlspecialchars($resto['city'] ?? '') ?>
+                                    <span>
+                                        <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id'] ?>"
+                                           class="btn btn_theme btn_sm cart_btn">Voir</a>
+                                    </span>
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+    </div>
+</section>

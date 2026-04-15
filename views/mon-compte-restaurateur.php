@@ -42,8 +42,8 @@ if (isset($_GET['success']) && $_GET['success'] === 'deleted') {
                 <div class="dashboard_sidebar shadow-sm p-4 bg-white rounded">
                     <div class="dashboard_sidebar_user text-center mb-4">
                         <img src="<?= $GLOBALS['url'] ?>/assets/img/common/user-placeholder.png" alt="img" class="rounded-circle mb-3" style="width:100px;">
-                        <h3><?= htmlspecialchars($restaurateur['prenom'] . ' ' . $restaurateur['nom']) ?></h3>
-                        <p class="text-muted"><?= htmlspecialchars($restaurateur['email']) ?></p>
+                        <h3><?= htmlspecialchars(($restaurateur['prenom'] ?? '') . ' ' . ($restaurateur['nom'] ?? 'Administrateur')) ?></h3>
+                        <p class="text-muted"><?= htmlspecialchars($restaurateur['email'] ?? $_SESSION['user']['email'] ?? '') ?></p>
                     </div>
                     <div class="dashboard_menu">
                         <ul class="list-unstyled">

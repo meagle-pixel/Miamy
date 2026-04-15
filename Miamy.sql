@@ -1,4 +1,3 @@
-
 CREATE DATABASE Miamy;
 USE Miamy;
 
@@ -10,6 +9,7 @@ USE Miamy;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
+
 SET NAMES utf8mb4;
 
 -- ============================================================
@@ -346,3 +346,6 @@ INSERT INTO `autorisations` (`page`, `profil`, `etat`)
 SELECT `id`, 1, 1 FROM `pages`;
 
 COMMIT;
+
+INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
+('Admin Panel', 'admin-panel', 'views/admin-panel.php');

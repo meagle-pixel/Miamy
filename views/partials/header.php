@@ -42,6 +42,9 @@
 							<?php if (isset($_SESSION['connected']) && $_SESSION['connected'] == true): ?>
 								<?php $profil = $_SESSION['user']['profil'] ?? 3; ?>
 								<li><span><?= htmlspecialchars($_SESSION['user-info']['prenom'] ?? 'Mon compte') ?></span></li>
+								<?php if ($profil === 1): ?>
+									<li><a href="admin-panel">Administrateur</a></li>
+								<?php endif; ?>
 								<li><a href="<?= $profil <= 2 ? 'mon-compte-restaurateur' : 'mon-compte' ?>">Mon compte</a></li>
 								<li><a href="deconnexion">Déconnexion</a></li>
 							<?php else: ?>
@@ -113,7 +116,7 @@
 
 								<div class="option-item">
 									<?php $profil_nav = $_SESSION['user']['profil'] ?? 3; ?>
-								<a href="<?= (isset($_SESSION['connected']) && $_SESSION['connected'] && $profil_nav <= 2) ? 'mon-compte-restaurateur' : 'mon-compte' ?>" class="btn btn_navber">Mon compte</a>
+									<a href="<?= (isset($_SESSION['connected']) && $_SESSION['connected'] && $profil_nav <= 2) ? 'mon-compte-restaurateur' : 'mon-compte' ?>" class="btn btn_navber">Mon compte</a>
 								</div>
 
 							</div>

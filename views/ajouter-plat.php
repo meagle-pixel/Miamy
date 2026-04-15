@@ -56,9 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_plat'])) {
             if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
                 $slug_plat  = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
                 $image_name = $slug_plat . '-' . time() . '.' . $ext;
-                $upload_path = $GLOBALS['dev']
-                    ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/plats/' . $image_name
-                    : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/plats/' . $image_name;
+                $upload_dir = $GLOBALS['dev']
+                    ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/plats/'
+                    : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/plats/';
+                $upload_path = $upload_dir . $image_name;
+
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
 
                 if (!move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
                     $image_name    = null;

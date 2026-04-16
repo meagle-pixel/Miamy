@@ -41,7 +41,7 @@ try {
             <div class="col-lg-3 col-md-4 col-sm-6">
                 <div class="card_custom service_card text-center mb-4">
                     <h3><?= htmlspecialchars($cat['name']) ?></h3>
-                    <a href="liste-restaurants.php?cat=<?= $cat['id'] ?>" class="btn btn_theme btn_sm">Voir</a>
+                    <a href="liste-restaurants.php?cat=<?= $cat['id_categorie'] ?>" class="btn btn_theme btn_sm">Voir</a>
                 </div>
             </div>
             <?php endforeach; ?>

@@ -25,7 +25,7 @@ if (!$plat || $plat['id_restaurant'] !== $id_restaurant) {
 
 // 3. Vérifier que le restaurant appartient bien à ce restaurateur
 $pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT name FROM restaurants WHERE id = :id AND id_restaurateur = :id_restaurateur");
+$stmt = $pdo->prepare("SELECT name FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
 $stmt->execute([
     'id'              => $id_restaurant,
     'id_restaurateur' => $id_restaurateur,

@@ -36,16 +36,6 @@ CREATE TABLE `autorisations` (
 
 -- --------------------------------------------------------
 
-CREATE TABLE `categories` (
-    `id`    int(11)      NOT NULL AUTO_INCREMENT,
-    `name`  varchar(100) NOT NULL,
-    `icon`  varchar(100) DEFAULT NULL,
-    `ordre` int(11)      NOT NULL DEFAULT 0,
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
--- --------------------------------------------------------
-
 CREATE TABLE `civilites` (
     `id`      int(11)      NOT NULL AUTO_INCREMENT,
     `libelle` varchar(250) NOT NULL,
@@ -81,15 +71,6 @@ CREATE TABLE `configuration` (
 
 -- --------------------------------------------------------
 
-CREATE TABLE `ips` (
-    `ip`        varchar(50) NOT NULL,
-    `user`      int(11)     NOT NULL,
-    `user_type` int(11)     NOT NULL,
-    `infos`     text        NOT NULL,
-    `date`      timestamp   NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
--- --------------------------------------------------------
 
 CREATE TABLE `langues` (
     `id`   int(11)     NOT NULL AUTO_INCREMENT,
@@ -150,39 +131,65 @@ CREATE TABLE `promos` (
 
 -- --------------------------------------------------------
 
-CREATE TABLE `restaurants` (
-    `id`                  int(11)      NOT NULL AUTO_INCREMENT,
-    `name`                varchar(150) NOT NULL,
-    `slug`                varchar(150) NOT NULL,
-    `description`         text         DEFAULT NULL,
-    `city`                varchar(100) DEFAULT NULL,
-    `main_image`          varchar(255) DEFAULT 'default-resto.jpg',
-    `category_id`         int(11)      DEFAULT NULL,
-    `rating`              decimal(2,1) DEFAULT 0.0,
-    `review_count`        int(11)      DEFAULT 0,
-    `is_featured`         tinyint(1)   DEFAULT 0,
-    `subscription_active` tinyint(1)   DEFAULT 0,
-    `created_at`          timestamp    NULL DEFAULT current_timestamp(),
-    `id_restaurateur`     int(11)      NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `slug` (`slug`),
-    KEY `category_id` (`category_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+-- On désactive les vérifications pour pouvoir tout supprimer proprement
+SET FOREIGN_KEY_CHECKS = 0;
 
--- --------------------------------------------------------
+DROP TABLE IF EXISTS `restaurant_categories`;
+DROP TABLE IF EXISTS `restaurants`;
+DROP TABLE IF EXISTS `categories`;
+DROP TABLE IF EXISTS `restaurateurs`;
 
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 1. Table CATEGORIES
+CREATE TABLE `categories` (
+    `id_categorie` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(100) NOT NULL,
+    `icon` varchar(100) DEFAULT NULL,
+    `ordre` int(11) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id_categorie`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- 2. Table RESTAURATEURS
 CREATE TABLE `restaurateurs` (
-    `id`              int(11)      NOT NULL AUTO_INCREMENT,
-    `nom`             varchar(100) DEFAULT NULL,
-    `prenom`          varchar(100) DEFAULT NULL,
-    `email`           varchar(150) DEFAULT NULL,
-    `telephone`       varchar(20)  DEFAULT NULL,
-    `dateinscription` timestamp    NULL DEFAULT current_timestamp(),
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `nom` varchar(100) DEFAULT NULL,
+    `prenom` varchar(100) DEFAULT NULL,
+    `email` varchar(150) DEFAULT NULL,
+    `telephone` varchar(20) DEFAULT NULL,
+    `dateinscription` timestamp NULL DEFAULT current_timestamp(),
     PRIMARY KEY (`id`),
     UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- --------------------------------------------------------
+-- 3. Table RESTAURANTS
+CREATE TABLE `restaurants` (
+    `id_restaurant` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(150) NOT NULL,
+    `slug` varchar(150) NOT NULL,
+    `description` text DEFAULT NULL,
+    `city` varchar(100) DEFAULT NULL,
+    `main_image` varchar(255) DEFAULT 'default-resto.jpg',
+    `rating` decimal(2,1) DEFAULT 0.0,
+    `review_count` int(11) DEFAULT 0,
+    `is_featured` tinyint(1) DEFAULT 0,
+    `subscription_active` tinyint(1) DEFAULT 0,
+    `created_at` timestamp NULL DEFAULT current_timestamp(),
+    `id_restaurateur` int(11) NOT NULL,
+    PRIMARY KEY (`id_restaurant`),
+    UNIQUE KEY `slug` (`slug`),
+    CONSTRAINT `fk_resto_patron` FOREIGN KEY (`id_restaurateur`) REFERENCES `restaurateurs` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- 4. Table de LIAISON
+CREATE TABLE `restaurant_categories`(
+   `id_categorie` int(11) NOT NULL,
+   `id_restaurant` int(11) NOT NULL,
+   PRIMARY KEY (`id_categorie`, `id_restaurant`),
+   CONSTRAINT `fk_cle_categorie` FOREIGN KEY (`id_categorie`) REFERENCES `categories` (`id_categorie`),
+   CONSTRAINT `fk_cle_restaurant` FOREIGN KEY (`id_restaurant`) REFERENCES `restaurants` (`id_restaurant`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 
 CREATE TABLE `status` (
     `id`      int(11)      NOT NULL AUTO_INCREMENT,
@@ -249,18 +256,17 @@ CREATE TABLE `horaires` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_resto_jour` (`id_restaurant`, `jour`),
     KEY `idx_resto_jour` (`id_restaurant`, `jour`),
-    CONSTRAINT `fk_horaires_restaurant` FOREIGN KEY (`id_restaurant`) REFERENCES `restaurants`(`id`) ON DELETE CASCADE
+    CONSTRAINT `fk_horaires_restaurant` FOREIGN KEY (`id_restaurant`) REFERENCES `restaurants`(`id_restaurant`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================
 -- CONTRAINTES
 -- ============================================================
 
-ALTER TABLE `restaurants`
-    ADD CONSTRAINT `restaurants_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
+
 
 ALTER TABLE `plats`
-    ADD CONSTRAINT `plats_ibfk_1` FOREIGN KEY (`id_restaurant`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE;
+    ADD CONSTRAINT `plats_ibfk_1` FOREIGN KEY (`id_restaurant`) REFERENCES `restaurants` (`id_restaurant`) ON DELETE CASCADE;
 
 -- ============================================================
 -- DONNÉES DE RÉFÉRENCE

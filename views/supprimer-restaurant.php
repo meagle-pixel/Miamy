@@ -15,7 +15,7 @@ if (!$id_restaurant) {
 
 // 2. Récupérer le restaurant et vérifier qu'il appartient au restaurateur connecté
 $pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = :id AND id_restaurateur = :id_restaurateur");
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
 $stmt->execute([
     'id'              => $id_restaurant,
     'id_restaurateur' => $id_restaurateur,

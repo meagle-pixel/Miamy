@@ -45,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_restaurant']))
 
         // Insertion en BDD avec requête préparée
         $stmt = $pdo->prepare(
-            "INSERT INTO restaurants (name, slug, description, city, main_image, category_id, id_restaurateur, created_at)
-             VALUES (:name, :slug, :description, :city, :main_image, :category_id, :id_restaurateur, NOW())"
+            "INSERT INTO restaurants (name, slug, description, city, main_image, id_restaurateur, created_at)
+             VALUES (:name, :slug, :description, :city, :main_image, :id_restaurateur, NOW())"
         );
 
         if ($stmt->execute([
@@ -55,9 +55,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_restaurant']))
             'description'     => $description,
             'city'            => $city,
             'main_image'      => $image_name,
-            'category_id'     => $category_id,
             'id_restaurateur' => $id_restaurateur,
         ])) {
+            $new_id = $pdo->lastInsertId();
+
+            // Liaison avec la catégorie via la table intermédiaire
+            if ($category_id > 0) {
+                $stmt_cat = $pdo->prepare(
+                    "INSERT INTO restaurant_categories (id_restaurant, id_categorie) VALUES (:id_restaurant, :id_categorie)"
+                );
+                $stmt_cat->execute([
+                    'id_restaurant' => $new_id,
+                    'id_categorie'  => $category_id,
+                ]);
+            }
+
             $message_success = "Restaurant ajouté avec succès !";
         } else {
             $message_error = "Erreur lors de l'ajout du restaurant.";
@@ -120,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_restaurant']))
                                             <select name="category_id" class="form-control">
                                                 <option value="0">-- Sélectionner --</option>
                                                 <?php foreach ($categories as $cat): ?>
-                                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                                    <option value="<?= $cat['id_categorie'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>

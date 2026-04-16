@@ -10,7 +10,7 @@ $id_restaurateur = $_SESSION['user']['profil_id'];
 $pdo             = Database::getInstance()->getConnection();
 
 // 2. Récupérer le restaurant et vérifier qu'il appartient au restaurateur connecté
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = :id AND id_restaurateur = :id_restaurateur");
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
 $stmt->execute([
     'id'              => $id_restaurant,
     'id_restaurateur' => $id_restaurateur,
@@ -21,6 +21,11 @@ if (!$resto) {
     header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
     exit();
 }
+
+// Charger la catégorie actuelle via la table intermédiaire
+$stmt_cur_cat = $pdo->prepare("SELECT id_categorie FROM restaurant_categories WHERE id_restaurant = :id LIMIT 1");
+$stmt_cur_cat->execute(['id' => $id_restaurant]);
+$current_category_id = (int)($stmt_cur_cat->fetchColumn() ?: 0);
 
 // 3. Récupérer les catégories
 $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
@@ -58,22 +63,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
 
         $upd = $pdo->prepare(
             "UPDATE restaurants SET
-                name = :name, city = :city, description = :description, category_id = :category_id, main_image = :main_image
-             WHERE id = :id AND id_restaurateur = :id_restaurateur"
+                name = :name, city = :city, description = :description, main_image = :main_image
+             WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur"
         );
 
         if ($upd->execute([
             'name'            => $name,
             'city'            => $city,
             'description'     => $description,
-            'category_id'     => $category_id,
             'main_image'      => $image_name,
             'id'              => $id_restaurant,
             'id_restaurateur' => $id_restaurateur,
         ])) {
+            // Mise à jour de la catégorie via la table intermédiaire
+            $pdo->prepare("DELETE FROM restaurant_categories WHERE id_restaurant = :id")->execute(['id' => $id_restaurant]);
+            if ($category_id > 0) {
+                $pdo->prepare("INSERT INTO restaurant_categories (id_restaurant, id_categorie) VALUES (:id_restaurant, :id_categorie)")
+                    ->execute(['id_restaurant' => $id_restaurant, 'id_categorie' => $category_id]);
+            }
+            $current_category_id = $category_id;
             $message_success = "Restaurant modifié avec succès !";
             // Recharger les données
-            $stmt2 = $pdo->prepare("SELECT * FROM restaurants WHERE id = :id");
+            $stmt2 = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id");
             $stmt2->execute(['id' => $id_restaurant]);
             $resto = $stmt2->fetch();
         } else {
@@ -134,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
                                         <select name="category_id" class="form-control">
                                             <option value="0">-- Sélectionner --</option>
                                             <?php foreach ($categories as $cat): ?>
-                                                <option value="<?= $cat['id'] ?>" <?= ($resto['category_id'] == $cat['id']) ? 'selected' : '' ?>>
+                                                <option value="<?= $cat['id_categorie'] ?>" <?= ($current_category_id == $cat['id_categorie']) ? 'selected' : '' ?>>
                                                     <?= htmlspecialchars($cat['name']) ?>
                                                 </option>
                                             <?php endforeach; ?>

@@ -154,6 +154,5 @@ try {
                 <?php endif; ?>
             </div>
         </div>
-
     </div>
 </section>

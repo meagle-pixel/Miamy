@@ -22,7 +22,7 @@ if (!$id_plat) {
 $pdo  = Database::getInstance()->getConnection();
 $stmt = $pdo->prepare(
     "SELECT p.id, p.disponible FROM plats p
-     JOIN restaurants r ON r.id = p.id_restaurant
+     JOIN restaurants r ON r.id_restaurant = p.id_restaurant
      WHERE p.id = ? AND r.id_restaurateur = ?"
 );
 $stmt->execute([$id_plat, $id_restaurateur]);

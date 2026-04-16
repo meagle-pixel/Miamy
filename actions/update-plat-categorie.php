@@ -27,7 +27,7 @@ if (!$id_plat || !in_array($nouvelle_cat, $categories_valides, true)) {
 $pdo  = Database::getInstance()->getConnection();
 $stmt = $pdo->prepare(
     "SELECT p.id FROM plats p
-     JOIN restaurants r ON r.id = p.id_restaurant
+     JOIN restaurants r ON r.id_restaurant = p.id_restaurant
      WHERE p.id = :id_plat AND r.id_restaurateur = :id_restaurateur"
 );
 $stmt->execute([

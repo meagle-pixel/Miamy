@@ -113,19 +113,19 @@ if (isset($_GET['success']) && $_GET['success'] === 'deleted') {
                                             <?php endif; ?>
 
                                             <div class="resto_actions">
-                                                <a href="gestion-carte?id=<?= $resto['id'] ?>" class="btn btn_theme btn_sm me-2">
+                                                <a href="gestion-carte?id=<?= $resto['id_restaurant'] ?>" class="btn btn_theme btn_sm me-2">
                                                     <i class="fas fa-book-open me-1"></i> Gérer la carte
                                                 </a>
-                                                <a href="configurer-qr-codes/<?= $resto['id'] ?>" class="btn btn_navber btn_sm me-2">
+                                                <a href="configurer-qr-codes/<?= $resto['id_restaurant'] ?>" class="btn btn_navber btn_sm me-2">
                                                     <i class="fas fa-qrcode me-1"></i> QR Codes
                                                 </a>
-                                                <a href="details?id=<?= $resto['id'] ?>" class="btn btn-info btn_sm me-2">
+                                                <a href="details?id=<?= $resto['id_restaurant'] ?>" class="btn btn-info btn_sm me-2">
                                                     <i class="fas fa-info-circle me-1"></i> Détails
                                                 </a>
-                                                <a href="modifier-restaurant?id=<?= $resto['id'] ?>" class="btn btn-warning btn_sm me-2">
+                                                <a href="modifier-restaurant?id=<?= $resto['id_restaurant'] ?>" class="btn btn-warning btn_sm me-2">
                                                     <i class="fas fa-edit me-1"></i> Modifier
                                                 </a>
-                                                <a href="supprimer-restaurant?id=<?= $resto['id'] ?>" class="btn btn-danger btn_sm me-2">
+                                                <a href="supprimer-restaurant?id=<?= $resto['id_restaurant'] ?>" class="btn btn-danger btn_sm me-2">
                                                     <i class="fas fa-trash me-1"></i> Supprimer
                                                 </a>
                                             </div>

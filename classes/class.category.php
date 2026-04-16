@@ -11,7 +11,7 @@ class Category {
     }
 
     public function getById($id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM `categories` WHERE `id` = :id");
+        $stmt = $this->pdo->prepare("SELECT * FROM `categories` WHERE `id_categorie` = :id");
         $stmt->execute(['id' => (int)$id]);
         return $stmt->fetch();
     }
@@ -23,7 +23,7 @@ class Category {
     }
 
     public function delete($id) {
-        $stmt = $this->pdo->prepare("DELETE FROM `categories` WHERE `id` = :id");
+        $stmt = $this->pdo->prepare("DELETE FROM `categories` WHERE `id_categorie` = :id");
         return $stmt->execute(['id' => (int)$id]);
     }
 }

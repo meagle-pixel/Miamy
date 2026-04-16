@@ -9,7 +9,7 @@ $pdo = Database::getInstance()->getConnection();
 
 $horairesAujourdhui = [];
 if (!empty($restaurants)) {
-    $ids  = implode(',', array_map(fn($r) => (int)$r['id'], $restaurants));
+    $ids  = implode(',', array_map(fn($r) => (int)$r['id_restaurant'], $restaurants));
     $stmt = $pdo->query(
         "SELECT * FROM horaires WHERE id_restaurant IN ($ids) AND jour = $jourAujourdhui"
     );
@@ -58,7 +58,7 @@ if (!empty($restaurants)) {
             <div class="row">
                 <?php foreach ($restaurants as $resto):
                     $image   = !empty($resto['main_image']) ? $resto['main_image'] : 'default-resto.jpg';
-                    $horaire = $horairesAujourdhui[$resto['id']] ?? null;
+                    $horaire = $horairesAujourdhui[$resto['id_restaurant']] ?? null;
 
                     // Calcul statut ouverture
                     if ($horaire === null) {
@@ -76,7 +76,7 @@ if (!empty($restaurants)) {
                     <div class="col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
                         <div class="theme_common_box_two img_hover">
                             <div class="theme_two_box_img">
-                                <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id'] ?>">
+                                <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>">
                                     <img src="<?= $GLOBALS['url'] ?>/assets/img/restaurants/<?= htmlspecialchars($image) ?>"
                                          alt="<?= htmlspecialchars($resto['name']) ?>">
                                 </a>
@@ -88,7 +88,7 @@ if (!empty($restaurants)) {
                             </div>
                             <div class="theme_two_box_content">
                                 <h4>
-                                    <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id'] ?>">
+                                    <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>">
                                         <?= htmlspecialchars($resto['name']) ?>
                                     </a>
                                 </h4>
@@ -99,7 +99,7 @@ if (!empty($restaurants)) {
                                     <i class="fas fa-map-marker-alt me-1 text-muted" style="font-size:.85rem;"></i>
                                     <?= htmlspecialchars($resto['city'] ?? '') ?>
                                     <span>
-                                        <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id'] ?>"
+                                        <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>"
                                            class="btn btn_theme btn_sm cart_btn">Voir</a>
                                     </span>
                                 </h3>

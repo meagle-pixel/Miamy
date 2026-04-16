@@ -18,7 +18,7 @@ if (!$id_restaurant) {
 
 // Vérifier que le restaurant appartient bien à ce restaurateur
 $pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT id FROM restaurants WHERE id = ? AND id_restaurateur = ?");
+$stmt = $pdo->prepare("SELECT id_restaurant FROM restaurants WHERE id_restaurant = ? AND id_restaurateur = ?");
 $stmt->execute([$id_restaurant, $id_restaurateur]);
 
 if (!$stmt->fetch()) {

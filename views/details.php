@@ -16,7 +16,7 @@ if (!$id_restaurant) {
 // 3. Je vérifie que le restaurant appartient bien au restaurateur connecté
 $id_restaurateur = $_SESSION['user']['profil_id'];
 $pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id = :id AND id_restaurateur = :id_proprio");
+$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_proprio");
 $stmt->execute(['id' => $id_restaurant, 'id_proprio' => $id_restaurateur]);
 $resto = $stmt->fetch();
 

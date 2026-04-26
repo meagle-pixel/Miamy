@@ -1,4 +1,3 @@
-CREATE DATABASE Miamy;
 USE Miamy;
 
 -- ============================================================
@@ -355,3 +354,5 @@ COMMIT;
 
 INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
 ('Admin Panel', 'admin-panel', 'views/admin-panel.php');
+
+INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES ('Dashboard', 'dashboard', 'views/dashboard.php');

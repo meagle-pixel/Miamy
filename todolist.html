@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todolist — Miamy Admin & Restaurateur</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f5f4f0; color: #1a1a18; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 500; margin-bottom: 0.25rem; }
+    .subtitle { font-size: 13px; color: #888780; margin-bottom: 1.5rem; }
+
+    .global-progress { background: #fff; border-radius: 12px; border: 0.5px solid #d3d1c7; padding: 14px 16px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 14px; }
+    .prog-count { font-size: 18px; font-weight: 500; white-space: nowrap; }
+    .prog-bar-wrap { flex: 1; height: 6px; background: #e8e6e0; border-radius: 3px; overflow: hidden; }
+    .prog-bar-fill { height: 100%; background: #1D9E75; border-radius: 3px; transition: width 0.3s; }
+    .prog-label { font-size: 13px; color: #888780; white-space: nowrap; }
+
+    .legend { display: flex; gap: 14px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #888780; }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .p-high { background: #E24B4A; }
+    .p-med  { background: #EF9F27; }
+    .p-low  { background: #639922; }
+
+    .section-header { display: flex; align-items: center; gap: 10px; margin: 1.5rem 0 0.75rem; }
+    .section-badge { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 8px; }
+    .badge-admin { background: #EEEDFE; color: #3C3489; }
+    .badge-resto { background: #E1F5EE; color: #085041; }
+    .section-title { font-size: 16px; font-weight: 500; }
+    .progress-line { font-size: 12px; color: #888780; margin-left: auto; }
+
+    .todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 0.5px solid #d3d1c7; background: #fff; margin-bottom: 7px; cursor: pointer; transition: background 0.15s; user-select: none; }
+    .todo-item:hover { background: #f5f4f0; }
+    .todo-item.done { opacity: 0.5; }
+    .todo-item.done .todo-label { text-decoration: line-through; color: #888780; }
+
+    .todo-checkbox { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid #b4b2a9; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border 0.15s; }
+    .todo-checkbox.checked { background: #1D9E75; border-color: #1D9E75; }
+    .todo-checkbox.checked::after { content: ''; display: block; width: 5px; height: 9px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); }
+
+    .todo-label { font-size: 14px; line-height: 1.5; flex: 1; }
+    .todo-sub { font-size: 12px; color: #888780; margin-top: 2px; }
+    .priority-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+
+    .save-note { font-size: 12px; color: #888780; text-align: center; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Todolist — Miamy</h1>
+    <p class="subtitle">Fonctionnalités manquantes · Admin &amp; Restaurateur</p>
+
+    <div class="global-progress">
+      <span class="prog-count" id="global-count">0 / 13</span>
+      <div class="prog-bar-wrap"><div class="prog-bar-fill" id="global-bar" style="width:0%"></div></div>
+      <span class="prog-label" id="global-pct">0% terminé</span>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot p-high"></div> Priorité haute</div>
+      <div class="legend-item"><div class="legend-dot p-med"></div> Priorité moyenne</div>
+      <div class="legend-item"><div class="legend-dot p-low"></div> Priorité basse</div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="section-header">
+      <span class="section-badge badge-admin">Admin</span>
+      <p class="section-title">Panel administrateur</p>
+      <span class="progress-line" id="prog-admin">0 / 7</span>
+    </div>
+
+    <div id="list-admin">
+      <div class="todo-item" data-section="admin" data-id="1" onclick="toggle(this)">
+        <div class="priority-dot p-high"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Tableau de bord avec statistiques globales</div>
+          <div class="todo-sub">Nb restaurants actifs, commandes du jour, CA total, utilisateurs inscrits</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="admin" data-id="2" onclick="toggle(this)">
+        <div class="priority-dot p-high"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Gestion des restaurants (vue admin)</div>
+          <div class="todo-sub">Voir, modifier, activer/désactiver tous les restaurants sans passer par le restaurateur</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="admin" data-id="3" onclick="toggle(this)">
+        <div class="priority-dot p-high"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Validation des nouveaux restaurants</div>
+          <div class="todo-sub">Workflow en attente / approuvé / rejeté avant publication</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="admin" data-id="4" onclick="toggle(this)">
+        <div class="priority-dot p-med"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Gestion des abonnements</div>
+          <div class="todo-sub">Interface pour activer/désactiver subscription_active par restaurant</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="admin" data-id="5" onclick="toggle(this)">
+        <div class="priority-dot p-med"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Visualisation des logs</div>
+          <div class="todo-sub">Page pour lire la table user_logs (actions, dates, IPs)</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="admin" data-id="6" onclick="toggle(this)">
+        <div class="priority-dot p-low"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Gestion des catégories</div>
+          <div class="todo-sub">Créer/modifier/supprimer les catégories de plats depuis l'interface</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="admin" data-id="7" onclick="toggle(this)">
+        <div class="priority-dot p-low"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Gestion des codes promo</div>
+          <div class="todo-sub">Créer/modifier/supprimer des codes promo (getPromoById est déjà utilisé)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESTAURATEUR -->
+    <div class="section-header">
+      <span class="section-badge badge-resto">Restaurateur</span>
+      <p class="section-title">Espace gérant</p>
+      <span class="progress-line" id="prog-resto">0 / 6</span>
+    </div>
+
+    <div id="list-resto">
+      <div class="todo-item" data-section="resto" data-id="8" onclick="toggle(this)">
+        <div class="priority-dot p-high"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Gestion des commandes</div>
+          <div class="todo-sub">Voir les commandes liées à ses restaurants, changer le statut</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="resto" data-id="9" onclick="toggle(this)">
+        <div class="priority-dot p-high"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Gestion des horaires</div>
+          <div class="todo-sub">Vue dédiée pour afficher et modifier les horaires (save-horaires.php existe mais pas de vue)</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="resto" data-id="10" onclick="toggle(this)">
+        <div class="priority-dot p-high"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Configuration des QR codes</div>
+          <div class="todo-sub">Créer la vue configurer-qr-codes (lien déjà présent dans le dashboard)</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="resto" data-id="11" onclick="toggle(this)">
+        <div class="priority-dot p-med"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Statistiques de vente</div>
+          <div class="todo-sub">Plats les plus commandés, CA par période, évolution des ventes</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="resto" data-id="12" onclick="toggle(this)">
+        <div class="priority-dot p-low"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Upload photo de restaurant</div>
+          <div class="todo-sub">Interface d'upload pour main_image (actuellement placeholder fixe)</div>
+        </div>
+      </div>
+      <div class="todo-item" data-section="resto" data-id="13" onclick="toggle(this)">
+        <div class="priority-dot p-low"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Photo de profil restaurateur</div>
+          <div class="todo-sub">Remplacer le user-placeholder.png par un vrai upload de photo</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="save-note">Les cases cochées sont sauvegardées automatiquement dans le navigateur.</p>
+  </div>
+
+  <script>
+    const TOTAL = 13;
+    const STORAGE_KEY = 'miamy-todolist';
+
+    function save() {
+      const done = [...document.querySelectorAll('.todo-item.done')].map(el => el.dataset.id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(done));
+    }
+
+    function counts() {
+      const adminDone  = document.querySelectorAll('#list-admin .todo-item.done').length;
+      const adminTotal = document.querySelectorAll('#list-admin .todo-item').length;
+      const restoDone  = document.querySelectorAll('#list-resto .todo-item.done').length;
+      const restoTotal = document.querySelectorAll('#list-resto .todo-item').length;
+      const done = adminDone + restoDone;
+      document.getElementById('prog-admin').textContent = adminDone + ' / ' + adminTotal;
+      document.getElementById('prog-resto').textContent = restoDone + ' / ' + restoTotal;
+      document.getElementById('global-count').textContent = done + ' / ' + TOTAL;
+      const pct = Math.round(done / TOTAL * 100);
+      document.getElementById('global-bar').style.width = pct + '%';
+      document.getElementById('global-pct').textContent = pct + '% terminé';
+    }
+
+    function toggle(el) {
+      el.classList.toggle('done');
+      el.querySelector('.todo-checkbox').classList.toggle('checked');
+      counts();
+      save();
+    }
+
+    // Restaurer l'état depuis localStorage
+    (function restore() {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      saved.forEach(id => {
+        const el = document.querySelector('[data-id="' + id + '"]');
+        if (el) {
+          el.classList.add('done');
+          el.querySelector('.todo-checkbox').classList.add('checked');
+        }
+      });
+      counts();
+    })();
+  </script>
+</body>
+</html>

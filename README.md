@@ -553,3 +553,304 @@ En appelant checkEmpty sur evt.to après chaque drop, le placeholder de la
 catégorie de destination est masqué dès que le plat y arrive.
 
 
+---
+
+# INTÉGRATION DU TEMPLATE SB ADMIN (PARTIE ADMINISTRATEUR)
+
+## OBJECTIF
+
+Utiliser le template SB Admin (Bootstrap 5, sidebar + topbar) uniquement
+pour les pages d'administration, tout en gardant le template public pour
+le reste du site (vitrine, espace client, espace restaurateur).
+
+## PRINCIPE GÉNÉRAL
+
+Le routeur `index.php` utilise deux squelettes HTML différents :
+
+- Layout PUBLIC : head.php → header.php → page → footer.php → foot.php
+- Layout ADMIN  : admin_head.php → page → admin_foot.php
+
+Selon la page demandée, le routeur choisit lequel des deux charger.
+
+---
+
+## ÉTAPE 1 — COPIER LE TEMPLATE DANS LE PROJET
+
+Le template SB Admin téléchargé contient des fichiers HTML d'exemple
+(index.html, tables.html, charts.html, etc.). Ces fichiers ne sont PAS
+copiés dans Miamy : ils servent uniquement de référence visuelle quand
+on crée une nouvelle page admin (on y pioche des blocs HTML).
+
+Seuls les fichiers CSS / JS sont copiés, dans `assets/admins/` :
+
+```
+Miamy/
+└── assets/
+    └── admins/
+        ├── css/
+        │   └── styles.css        (Bootstrap 5.2.3 + tous les styles SB Admin)
+        ├── js/
+        │   ├── scripts.js
+        │   └── datatables-simple-demo.js
+        └── assets/
+            ├── demo/             (chart-area-demo.js, etc.)
+            └── img/
+```
+
+Important : le dossier doit s'appeler `admins` (avec un s), parce que les
+chemins dans les partials PHP référencent ce nom. Sinon le CSS ne charge
+pas et la sidebar n'a aucun style.
+
+---
+
+## ÉTAPE 2 — CRÉER LE PARTIAL admin_head.php
+
+Fichier : `views/partials/admin_head.php`
+
+Ce partial ouvre le HTML, charge le CSS de SB Admin, dessine la topbar et
+la sidebar, puis ouvre une balise `<main>` qui accueillera le contenu de
+chaque page admin. Il NE FERME PAS `</main>`, `</body>` ni `</html>`
+volontairement — c'est `admin_foot.php` qui s'en charge.
+
+```php
+<?php $current_mod = $_GET['mod'] ?? ''; ?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <base href="<?= $GLOBALS['url'] ?>/">
+    <meta charset="utf-8" />
+    <title><?= htmlspecialchars($page_title ?? 'Admin') ?> - Miamy</title>
+    <link href="<?= $GLOBALS['url'] ?>/assets/admins/css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js"></script>
+</head>
+<body class="sb-nav-fixed">
+
+    <!-- Topbar (logo + recherche + menu utilisateur) -->
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        ...
+    </nav>
+
+    <div id="layoutSidenav">
+        <!-- Sidebar (menu de navigation admin) -->
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark">
+                <a class="nav-link <?= $current_mod === 'dashboard' ? 'active' : '' ?>"
+                   href="dashboard">
+                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    Tableau de bord
+                </a>
+                <a class="nav-link <?= $current_mod === 'admin-panel' ? 'active' : '' ?>"
+                   href="admin-panel">
+                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                    Utilisateurs
+                </a>
+            </nav>
+        </div>
+
+        <!-- Contenu (la page admin sera incluse ici) -->
+        <div id="layoutSidenav_content">
+            <main>
+```
+
+L'astuce `$current_mod === 'xxx' ? 'active' : ''` permet de surligner
+automatiquement le lien de la page courante dans la sidebar.
+
+---
+
+## ÉTAPE 3 — CRÉER LE PARTIAL admin_foot.php
+
+Fichier : `views/partials/admin_foot.php`
+
+C'est le miroir de admin_head.php : il ferme tout ce que l'autre a ouvert
+(`</main>`, `</body>`, `</html>`), affiche le footer, et charge les
+scripts JavaScript.
+
+```php
+            </main>
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid px-4">
+                    <div class="text-muted">Copyright &copy; Miamy <?= date('Y') ?></div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= $GLOBALS['url'] ?>/assets/admins/js/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"></script>
+    <script src="<?= $GLOBALS['url'] ?>/assets/admins/js/datatables-simple-demo.js"></script>
+</body>
+</html>
+```
+
+---
+
+## ÉTAPE 4 — MODIFIER LE ROUTEUR index.php
+
+Le routeur d'origine inclut systématiquement les partials publics. On
+ajoute une détection pour basculer sur les partials admin quand la page
+demandée est une page admin.
+
+```php
+// Liste blanche des slugs (mod) qui doivent utiliser le layout admin.
+// Ajouter ici tout nouveau mod admin.
+$admin_mods = ['dashboard', 'admin-panel'];
+
+// Une page est admin si :
+//   - son fichier est dans views/admin/, OU
+//   - son slug est dans la liste blanche ci-dessus
+$is_admin_page = (strpos($page_url, 'views/admin/') === 0)
+              || in_array($page, $admin_mods, true);
+
+if ($is_admin_page) {
+    include('views/partials/admin_head.php');
+    include($page_url);
+    include('views/partials/admin_foot.php');
+} else {
+    include('views/partials/head.php');
+    include('views/partials/header.php');
+    include($page_url);
+    include('views/partials/footer.php');
+    include('views/partials/foot.php');
+}
+```
+
+La double détection (chemin + liste blanche) est une sécurité : si l'url
+en BDD ne contient pas exactement `views/admin/`, la liste blanche prend
+le relais. Tu peux n'en garder qu'une si tu préfères.
+
+---
+
+## ÉTAPE 5 — CRÉER UNE PAGE ADMIN
+
+Les pages admin vivent dans `views/admin/`. Elles ne contiennent PAS de
+balises `<html>`, `<head>` ou `<body>` — elles s'insèrent au milieu du
+squelette préparé par les partials.
+
+Une page admin doit donc :
+
+1. Faire son traitement PHP (sécurité, requêtes BDD)
+2. Encapsuler son HTML dans `<div class="container-fluid px-4">...</div>`
+   (le conteneur standard SB Admin)
+
+Squelette type :
+
+```php
+<?php
+// Vérification d'accès admin (profil = 1)
+if (!isset($_SESSION['connected']) || $_SESSION['user']['profil'] > 1) {
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
+    exit();
+}
+
+$pdo = Database::getInstance()->getConnection();
+// ... requêtes ...
+?>
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Mon titre</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="accueil">Accueil</a></li>
+        <li class="breadcrumb-item active">Ma page</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Mon tableau
+        </div>
+        <div class="card-body">
+            <table id="datatablesSimple">
+                <thead><tr><th>...</th></tr></thead>
+                <tbody>...</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+```
+
+C'est là que les fichiers HTML du template original deviennent utiles :
+ouvrir `tables.html` pour un tableau, `charts.html` pour un graphique,
+etc., et copier le bloc qui se trouve à l'intérieur de `<main>...</main>`.
+
+---
+
+## ÉTAPE 6 — ENREGISTRER LA PAGE ET L'AJOUTER AU MENU
+
+Trois actions à faire pour qu'une nouvelle page admin soit accessible :
+
+### (a) Insérer la page dans la table `pages`
+
+Via phpMyAdmin par exemple :
+
+```sql
+INSERT INTO pages (nom, `mod`, url)
+VALUES ('Gestion des plats', 'gestion-plats', 'views/admin/gestion-plats.php');
+```
+
+### (b) Ajouter le slug à la liste blanche dans index.php
+
+```php
+$admin_mods = ['dashboard', 'admin-panel', 'gestion-plats'];
+```
+
+### (c) Ajouter un lien dans la sidebar de admin_head.php
+
+```php
+<a class="nav-link <?= $current_mod === 'gestion-plats' ? 'active' : '' ?>"
+   href="gestion-plats">
+    <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
+    Gestion des plats
+</a>
+```
+
+La page est alors accessible à `/gestion-plats`, surlignée dans le menu,
+encadrée par la sidebar et la topbar SB Admin.
+
+---
+
+## RÉCAP MÉMO — AJOUTER UNE PAGE ADMIN EN 4 ÉTAPES
+
+1. Créer le fichier `views/admin/ma-page.php`
+   → commence par `<div class="container-fluid px-4">`
+2. Insérer la ligne dans la table `pages` (mod = slug, url = chemin)
+3. Ajouter le slug à `$admin_mods` dans `index.php`
+4. Ajouter le `<a class="nav-link">` correspondant dans `admin_head.php`
+
+---
+
+## PIÈGES À ÉVITER
+
+- Le dossier dans assets/ doit s'appeler `admins` (pluriel), pas `admin`.
+  Sinon le CSS retourne une 404 et la sidebar n'a aucun style.
+
+- Une page admin ne doit JAMAIS contenir `<html>`, `<head>` ou `<body>` :
+  ces balises sont déjà dans `admin_head.php` / `admin_foot.php`.
+
+- Pas de `<section id="common_banner">` ni `<section class="section_padding">`
+  sur les pages admin : ces éléments appartiennent au template public et
+  cassent la mise en page SB Admin.
+
+- Après chaque modif des partials, faire `Ctrl+F5` dans le navigateur
+  pour casser le cache du CSS, sinon on continue à voir l'ancienne version.
+
+---
+
+## COULEURS DES BADGES DE LOG (dashboard.php)
+
+La fonction `getActionBadgeStyle()` (en haut de `views/admin/dashboard.php`)
+mappe chaque type d'action à une couleur de badge :
+
+- login          → jaune
+- logout         → rouge
+- login_fail     → orange
+- connect_as     → violet
+- create_*       → vert
+- update_*       → bleu
+- reset_password → orange
+- delete_*       → rouge foncé
+- défaut         → gris
+
+Pour ajouter un nouveau type d'action coloré, ajouter un `case` dans
+le `switch` de la fonction. Sinon le badge sera gris par défaut.
+

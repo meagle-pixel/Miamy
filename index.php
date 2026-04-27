@@ -23,16 +23,33 @@ if(isset($_GET['mod']))
 }
 else
 {
+	$page = '';
 	$page_title = 'Accueil';
 	$page_url = 'views/home.php';
 }
 
-include('views/partials/head.php'); 
-include('views/partials/header.php');
+// Liste blanche des slugs (mod) qui doivent utiliser le layout admin.
+// Ajouter ici tout nouveau mod admin.
+$admin_mods = ['dashboard', 'admin-panel'];
 
-include($page_url); 
+// Une page est admin si :
+//   - son fichier est dans views/admin/, OU
+//   - son slug est dans la liste blanche ci-dessus
+$is_admin_page = (strpos($page_url, 'views/admin/') === 0)
+              || in_array($page, $admin_mods, true);
 
-include('views/partials/footer.php');
-include('views/partials/foot.php'); 
+if ($is_admin_page) {
+	// Layout administrateur (template SB Admin)
+	include('views/partials/admin_head.php');
+	include($page_url);
+	include('views/partials/admin_foot.php');
+} else {
+	// Layout public classique
+	include('views/partials/head.php');
+	include('views/partials/header.php');
+	include($page_url);
+	include('views/partials/footer.php');
+	include('views/partials/foot.php');
+}
 
 ?>

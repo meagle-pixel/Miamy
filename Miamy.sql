@@ -356,3 +356,10 @@ INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
 ('Admin Panel', 'admin-panel', 'views/admin-panel.php');
 
 INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES ('Dashboard', 'dashboard', 'views/dashboard.php');
+UPDATE pages 
+SET url = 'views/admin/admin-panel.php' 
+WHERE url = 'views/admin-panel.php';
+
+UPDATE pages 
+SET url = 'views/admin/dashboard.php' 
+WHERE url = 'views/dashboard.php';

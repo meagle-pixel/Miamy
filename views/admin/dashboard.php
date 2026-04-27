@@ -100,37 +100,62 @@ try {
 } catch (Exception $e) {
 }
 
+/**
+ * Retourne le style CSS d'un badge selon le type d'action de log.
+ * Renvoie un tableau ['bg' => couleur fond, 'text' => couleur texte].
+ */
+function getActionBadgeStyle($action_type) {
+    switch ($action_type) {
+        // Connexions
+        case 'login':         return ['bg' => '#FFF8E1', 'text' => '#FF8F00']; // jaune
+        case 'logout':        return ['bg' => '#FEEBEB', 'text' => '#B71C1C']; // rouge
+        case 'login_fail':    return ['bg' => '#FFE0B2', 'text' => '#E65100']; // orange
+        case 'connect_as':    return ['bg' => '#EDE7F6', 'text' => '#311B92']; // violet
+
+        // Créations (en vert)
+        case 'create_user':
+        case 'create_page':   return ['bg' => '#E1F5EE', 'text' => '#085041']; // vert
+
+        // Modifications (en bleu)
+        case 'update_role':
+        case 'update_page':
+        case 'update_permission':
+        case 'update_profile':
+        case 'update_password': return ['bg' => '#E3F2FD', 'text' => '#0D47A1']; // bleu
+
+        // Réinitialisation mot de passe
+        case 'reset_password': return ['bg' => '#FFE0B2', 'text' => '#E65100']; // orange
+
+        // Suppression (rouge foncé)
+        case 'delete_user':   return ['bg' => '#FFCDD2', 'text' => '#7F0000']; // rouge foncé
+
+        // Par défaut : gris neutre
+        default:              return ['bg' => '#f0f0f0', 'text' => '#555'];
+    }
+}
+
 ?>
-<section id="common_banner">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="common_bannner_text">
-                    <h2>Tableau de bord</h2>
-                    <ul>
-                        <li><a href="accueil">Accueil</a></li>
-                        <li><span><i class="fas fa-circle"></i></span>Admin</li>
-                    </ul>
-                </div>
-            </div>
+<div class="container-fluid px-4">
+
+    <!-- Titre + breadcrumb (style SB Admin) -->
+    <h1 class="mt-4">Tableau de bord</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="<?= $GLOBALS['url'] ?>/accueil">Accueil</a></li>
+        <li class="breadcrumb-item active">Admin</li>
+    </ol>
+
+    <!-- Titre de section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-1">
+                <i class="fas fa-chart-line me-2"></i>
+                Statistiques globales
+            </h3>
+            <p class="text-muted">
+                Données en temps réel — <?= date('d/m/Y à H:i') ?>
+            </p>
         </div>
     </div>
-</section>
-<section class="section_padding">
-    <div class="container">
-
-        <!-- Titre de la page -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h3 class="dashboard_common_title">
-                    <i class="fas fa-chart-line me-2"></i>
-                    Statistiques globales
-                </h3>
-                <p class="text-muted">
-                    Données en temps réel — <?= date('d/m/Y à H:i') ?>
-                </p>
-            </div>
-        </div>
 
 
         <div class="row g-4 mb-4">
@@ -250,8 +275,8 @@ try {
                                                     <!-- Badge vert = actif -->
                                                     <span class="badge" style="background:#E1F5EE; color:#085041; font-size:11px;">Actif</span>
                                                 <?php else: ?>
-                                                    <!-- Badge gris = inactif -->
-                                                    <span class="badge" style="background:#f0f0f0; color:#888; font-size:11px;">Inactif</span>
+                                                    <!-- Badge rouge = inactif -->
+                                                    <span class="badge" style="background:#FEEBEB; color:#B71C1C; font-size:11px;">Inactif</span>
                                                 <?php endif; ?>
                                             </td>
                                         </tr>
@@ -345,10 +370,11 @@ try {
                                 </thead>
                                 <tbody>
                                     <?php foreach ($derniers_logs as $log): ?>
+                                        <?php $badge = getActionBadgeStyle($log['action_type']); ?>
                                         <tr>
-                                            <!-- Badge de type d'action -->
+                                            <!-- Badge de type d'action (couleur selon action) -->
                                             <td>
-                                                <span class="badge" style="background:#f0f0f0; color:#555; font-size:11px;">
+                                                <span class="badge" style="background:<?= $badge['bg'] ?>; color:<?= $badge['text'] ?>; font-size:11px;">
                                                     <?= htmlspecialchars($log['action_type']) ?>
                                                 </span>
                                             </td>
@@ -367,5 +393,4 @@ try {
             </div>
         <?php endif; ?>
 
-    </div>
-</section>
+</div>

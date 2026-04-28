@@ -35,16 +35,13 @@
 		$pdo  = Database::getInstance()->getConnection();
 		$stmt = $pdo->prepare(
 			"INSERT INTO `clients`
-			(`id`, `email`, `motdepasse`, `civilite`, `nom`, `prenom`, `telephone`,
-			 `adresse`, `adresse_comp`, `codepostal`, `ville`,
-			 `dateinscription`, `dateconnect`, `dateaction`)
+			(`id`, `civilite`, `nom`, `prenom`, `telephone`,
+			 `adresse`, `adresse_comp`, `codepostal`, `ville`)
 			VALUES
-			(NULL, :email, :motdepasse, :civilite, :nom, :prenom, :telephone,
-			 :adresse, :adresse_comp, :codepostal, :ville, NOW(), NOW(), NOW())"
+			(NULL, :civilite, :nom, :prenom, :telephone,
+			 :adresse, :adresse_comp, :codepostal, :ville)"
 		);
 		$stmt->execute([
-			'email'        => $client['email'],
-			'motdepasse'   => password_hash($client['motdepasse'], PASSWORD_DEFAULT),
 			'civilite'     => $client['civilite'],
 			'nom'          => $client['nom'],
 			'prenom'       => $client['prenom'],

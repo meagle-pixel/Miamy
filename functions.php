@@ -16,7 +16,7 @@
 	}*/
 
 	//require_once('classes/class.adresses.php');
-	//require_once('classes/class.clients.php');
+	require_once('classes/class.clients.php');
 	//require_once('classes/class.commandes.php');
 	//require_once('classes/class.configuration.php');
 	require_once('classes/class.database.php');

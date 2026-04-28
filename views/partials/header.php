@@ -49,7 +49,7 @@
 								<li><a href="deconnexion">Déconnexion</a></li>
 							<?php else: ?>
 								<li><a href="connexion">Connexion</a></li>
-								<li><a href="inscription">Inscription</a></li>
+								<li><a href="inscription-client">Inscription</a></li>
 							<?php endif; ?>
 						</ul>
 					</div>

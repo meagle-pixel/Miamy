@@ -30,7 +30,7 @@ else
 
 // Liste blanche des slugs (mod) qui doivent utiliser le layout admin.
 // Ajouter ici tout nouveau mod admin.
-$admin_mods = ['dashboard', 'admin-panel'];
+$admin_mods = ['dashboard', 'admin-panel', 'admin-restaurants'];
 
 // Une page est admin si :
 //   - son fichier est dans views/admin/, OU

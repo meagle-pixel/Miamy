@@ -69,6 +69,10 @@ $current_mod = $_GET['mod'] ?? '';
                         </a>
 
                         <div class="sb-sidenav-menu-heading">Gestion</div>
+                        <a class="nav-link <?= $current_mod === 'admin-restaurants' ? 'active' : '' ?>" href="<?= $GLOBALS['url'] ?>/admin-restaurants">
+                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                            Restaurants
+                        </a>
                         <a class="nav-link <?= $current_mod === 'admin-panel' ? 'active' : '' ?>" href="<?= $GLOBALS['url'] ?>/admin-panel">
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Utilisateurs

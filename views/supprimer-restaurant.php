@@ -28,13 +28,19 @@ if (!$resto) {
 }
 
 // 3. Traitement de la confirmation de suppression
+$message_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
-    $restaurant = new Restaurant();
-    if ($restaurant->delete($id_restaurant)) {
-        header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur?success=deleted');
-        exit();
-    } else {
-        $message_error = "Une erreur est survenue lors de la suppression.";
+    try {
+        $restaurant = new Restaurant();
+        if ($restaurant->delete($id_restaurant)) {
+            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur?success=deleted');
+            exit();
+        } else {
+            $message_error = "Une erreur est survenue lors de la suppression.";
+        }
+    } catch (PDOException $e) {
+        error_log('[supprimer-restaurant] ' . $e->getMessage());
+        $message_error = "Erreur lors de la suppression. Détail technique : " . $e->getMessage();
     }
 }
 ?>

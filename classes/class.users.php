@@ -507,4 +507,122 @@
 		return $result;
 	}
 
+
+	/**
+	 * Migre un utilisateur d'un profil à un autre en garantissant la cohérence
+	 * entre `utilisateurs` et les tables métier (`administrateurs`,
+	 * `restaurateurs`, `clients`).
+	 *
+	 * Tout est encapsulé dans une transaction SQL :
+	 *   1. Lit la ligne actuelle dans la table métier d'origine
+	 *   2. Insère dans la table métier de destination en reprenant les champs
+	 *      compatibles (nom, prenom, telephone…) + $extraData pour les NOT NULL
+	 *      spécifiques (ex. civilite, codepostal, ville pour `clients`)
+	 *   3. Met à jour `utilisateurs` (profil ET profil_id)
+	 *   4. Supprime l'ancienne ligne métier
+	 *
+	 * @param int   $userId    ID dans utilisateurs
+	 * @param int   $newProfil 1 = admin, 2 = restaurateur, 3 = client
+	 * @param array $extraData Champs supplémentaires (ex. civilite, codepostal, ville)
+	 * @return bool            true si succès, false si échec (détail dans error_log)
+	 */
+	function changeUserProfile($userId, $newProfil, $extraData = []) {
+		$pdo = Database::getInstance()->getConnection();
+
+		$tables = [
+			1 => 'administrateurs',
+			2 => 'restaurateurs',
+			3 => 'clients',
+		];
+
+		if (!isset($tables[$newProfil])) {
+			error_log("[changeUserProfile] Profil cible inconnu : $newProfil");
+			return false;
+		}
+
+		$newTable = $tables[$newProfil];
+
+		try {
+			$pdo->beginTransaction();
+
+			// 1. Récupère l'utilisateur courant
+			$stmt = $pdo->prepare("SELECT profil, profil_id FROM utilisateurs WHERE id = :id");
+			$stmt->execute(['id' => (int)$userId]);
+			$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			if (!$user) {
+				throw new Exception("Utilisateur ID $userId introuvable");
+			}
+
+			$oldProfil   = (int) $user['profil'];
+			$oldProfilId = (int) $user['profil_id'];
+
+			// Aucun changement réel : on sort proprement
+			if ($oldProfil === (int)$newProfil) {
+				$pdo->commit();
+				return true;
+			}
+
+			// 2. Lit l'ancienne ligne métier (s'il y en a une)
+			$oldTable = $tables[$oldProfil] ?? null;
+			$oldData  = [];
+			if ($oldTable && $oldProfilId) {
+				$stmt = $pdo->prepare("SELECT * FROM `$oldTable` WHERE id = :id");
+				$stmt->execute(['id' => $oldProfilId]);
+				$oldData = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+			}
+
+			// 3. Fusionne ancien + extra (extra prioritaire)
+			$merged = array_merge($oldData, $extraData);
+
+			// 4. Filtre selon les colonnes réelles de la table cible
+			$cols = $pdo->query("DESCRIBE `$newTable`")->fetchAll(PDO::FETCH_COLUMN);
+			$insertData = [];
+			foreach ($cols as $col) {
+				if ($col === 'id') continue;
+				if (array_key_exists($col, $merged)) {
+					$insertData[$col] = $merged[$col];
+				}
+			}
+
+			// 5. INSERT dans la nouvelle table métier
+			$colNames     = array_keys($insertData);
+			$colsSql      = implode(',', array_map(function($c) { return "`$c`"; }, $colNames));
+			$placeholders = implode(',', array_map(function($c) { return ":$c"; }, $colNames));
+			$stmt = $pdo->prepare("INSERT INTO `$newTable` ($colsSql) VALUES ($placeholders)");
+			$stmt->execute($insertData);
+			$newProfilId = (int) $pdo->lastInsertId();
+
+			// 6. UPDATE utilisateurs (profil + profil_id)
+			$stmt = $pdo->prepare("UPDATE utilisateurs SET profil = :profil, profil_id = :profil_id WHERE id = :id");
+			$stmt->execute([
+				'profil'    => (int)$newProfil,
+				'profil_id' => $newProfilId,
+				'id'        => (int)$userId,
+			]);
+
+			// 7. DELETE de l'ancienne ligne métier
+			if ($oldTable && $oldProfilId) {
+				$stmt = $pdo->prepare("DELETE FROM `$oldTable` WHERE id = :id");
+				$stmt->execute(['id' => $oldProfilId]);
+			}
+
+			$pdo->commit();
+
+			if (function_exists('logUserAction')) {
+				$actorId = $_SESSION['user']['id'] ?? $userId;
+				logUserAction($actorId, 'update_role', "Migration de profil : utilisateur $userId, $oldProfil -> $newProfil");
+			}
+
+			return true;
+
+		} catch (Exception $e) {
+			if ($pdo->inTransaction()) {
+				$pdo->rollBack();
+			}
+			error_log('[changeUserProfile] ' . $e->getMessage());
+			return false;
+		}
+	}
+
 ?>

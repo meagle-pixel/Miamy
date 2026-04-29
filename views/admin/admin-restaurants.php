@@ -1,5 +1,4 @@
 <?php
-
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
     header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
@@ -7,14 +6,12 @@ if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSI
 
 // $pdo = Database::getInstance()->getConnection(); ---> Plus besoin car la fonction listRestaurants le fait déjà.
 
-
 try {
     $resto = new Restaurant();
     $restaurants = $resto->listRestaurants(false);
 } catch (PDOException $e) {
     $error = "Erreur lors de la récupération des restaurants.";
 }
-
 
 ?>
 
@@ -43,6 +40,7 @@ try {
                         <tr>
                             <th>ID</th>
                             <th>Nom</th>
+                            <th>Appartient à</th>
                             <th>Ville</th>
                             <th>Catégories</th>
                             <th>Statut</th>
@@ -53,6 +51,7 @@ try {
                             <tr>
                                 <td><?= (int) $r['id_restaurant'] ?></td>
                                 <td><?= htmlspecialchars($r['name'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($r['id_restaurateur'] ?? '') ?></td>
                                 <td><?= htmlspecialchars($r['city'] ?? '') ?? '-' ?></td>
                                 <td><?= htmlspecialchars($r['category_name']) ?? '-' ?></td>
                                 <td>

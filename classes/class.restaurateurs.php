@@ -20,8 +20,8 @@ function getRestaurantsByOwner($id_restaurateur) {
 function insertRestaurateur($data) {
     $pdo  = Database::getInstance()->getConnection();
     $stmt = $pdo->prepare(
-        "INSERT INTO restaurateurs (nom, prenom, email, telephone, dateinscription)
-         VALUES (:nom, :prenom, :email, :telephone, NOW())"
+        "INSERT INTO restaurateurs (nom, prenom, email, telephone)
+         VALUES (:nom, :prenom, :email, :telephone)"
     );
     $stmt->execute([
         'nom'       => $data['nom'],

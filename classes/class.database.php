@@ -1,17 +1,15 @@
 <?php
-/*
-* Database class (PDO) - only one connection allowed (Singleton)
-*/
+
 class Database
 {
-    private $_connection;
-    private static $_instance;
-    private $_host;
-    private $_username;
-    private $_password;
-    private $_database;
+    private ?PDO $_connection = null;
+    private static ?Database $_instance = null;
+    private string $_host;
+    private string $_username;
+    private string $_password;
+    private string $_database;
 
-    public static function getInstance()
+    public static function getInstance(): Database
     {
         if (!self::$_instance) {
             self::$_instance = new self();
@@ -37,6 +35,13 @@ class Database
                     PDO::ATTR_EMULATE_PREPARES   => false,
                 ]
             );
+
+            // Aligne la timezone MySQL sur Europe/Paris pour que current_timestamp(),
+            // NOW(), CURDATE() etc. produisent l'heure locale française.
+            // On utilise l'offset (+02:00 / +01:00) plutôt que 'Europe/Paris'
+            // car les tables de fuseaux MySQL ne sont pas toujours installées.
+            $offset = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('P');
+            $this->_connection->exec("SET time_zone = '{$offset}'");
         } catch (PDOException $e) {
             trigger_error("Failed to connect to MySQL: " . $e->getMessage(), E_USER_ERROR);
         }
@@ -45,7 +50,7 @@ class Database
     private function __clone() {}
 
     // Get PDO connection
-    public function getConnection()
+    public function getConnection(): ?PDO
     {
         return $this->_connection;
     }

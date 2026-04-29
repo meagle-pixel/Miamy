@@ -2,6 +2,9 @@
 
 	session_start();
 
+	// Fuseau horaire global PHP : tout date()/strtotime() raisonne en heure de Paris.
+	date_default_timezone_set('Europe/Paris');
+
 	require_once('config.php');
 
 	/*if($GLOBALS['dev'] == true)

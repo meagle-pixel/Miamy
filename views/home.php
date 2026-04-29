@@ -1,5 +1,4 @@
 <?php 
-
 // Initialisation par défaut pour éviter les erreurs dans la vue si la DB est HS
 $allCategories = [];
 $featuredRestos = [];
@@ -74,3 +73,11 @@ try {
         </div>
     </div>
 </section>
+<?php 
+
+echo '<pre>'; // La balise <pre> permet de garder le formatage (retours à la ligne)
+var_dump($_SESSION);
+echo '</pre>';
+
+
+?>

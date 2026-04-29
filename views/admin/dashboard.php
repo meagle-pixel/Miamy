@@ -1,7 +1,5 @@
 <?php
-
 // TABLEAU DE BORD ADMIN
-
 if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
     header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
@@ -16,20 +14,25 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM restaurants");
     $nb_restaurants_total = (int) $stmt->fetchColumn();
 } catch (Exception $e) {
+    error_log('[dashboard] nb_restaurants_total : ' . $e->getMessage());
 }
 
-// Nombre de restaurants actifs (abonnement actif)$nb_restaurants_actifs = 0;
+// Nombre de restaurants actifs (abonnement actif)
+$nb_restaurants_actifs = 0;
 try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM restaurants WHERE subscription_active = 1");
     $nb_restaurants_actifs = (int) $stmt->fetchColumn();
 } catch (Exception $e) {
+    error_log('[dashboard] nb_restaurants_actifs : ' . $e->getMessage());
 }
 
-//  Nombre d'utilisateurs inscrits (clients + restaurateurs) $nb_utilisateurs = 0;
+//  Nombre d'utilisateurs inscrits (clients + restaurateurs) 
+$nb_utilisateurs = 0;
 try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM utilisateurs WHERE profil IN (2, 3)");
     $nb_utilisateurs = (int) $stmt->fetchColumn();
 } catch (Exception $e) {
+    error_log('[dashboard] nb_utilisateurs : ' . $e->getMessage());
 }
 //  Nombre de plats disponibles 
 $nb_plats = 0;
@@ -37,6 +40,7 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM plats WHERE disponible = 1");
     $nb_plats = (int) $stmt->fetchColumn();
 } catch (Exception $e) {
+    error_log('[dashboard] nb_plats : ' . $e->getMessage());
 }
 
 //  Commandes du jour 
@@ -48,6 +52,7 @@ try {
     $nb_commandes_jour = (int) $row[0];
     $ca_jour = (float) $row[1];
 } catch (Exception $e) {
+    error_log('[dashboard] commandes_jour : ' . $e->getMessage());
 }
 
 //  Dernières inscriptions (5 derniers utilisateurs) 
@@ -63,6 +68,7 @@ try {
     ");
     $derniers_utilisateurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
+    error_log('[dashboard] derniers_utilisateurs : ' . $e->getMessage());
 }
 
 // Derniers restaurants ajoutés
@@ -76,6 +82,7 @@ try {
     ");
     $derniers_restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
+    error_log('[dashboard] derniers_restaurants : ' . $e->getMessage());
 }
 
 // Dernières actions dans les log
@@ -90,6 +97,7 @@ try {
     ");
     $derniers_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
+    error_log('[dashboard] derniers_logs : ' . $e->getMessage());
 }
 
 // Codes promo actif
@@ -98,6 +106,7 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM promos WHERE actif = 1");
     $nb_promos_actives = (int) $stmt->fetchColumn();
 } catch (Exception $e) {
+    error_log('[dashboard] nb_promos_actives : ' . $e->getMessage());
 }
 
 /**
@@ -251,7 +260,7 @@ function getActionBadgeStyle($action_type) {
                             <i class="fas fa-store me-2" style="color:#1D9E75;"></i>
                             Derniers restaurants ajoutés
                         </h5>
-                        <a href="<?= $GLOBALS['url'] ?>/liste-restaurants" class="btn btn-sm btn_theme" style="font-size:12px;">
+                        <a href="<?= $GLOBALS['url'] ?>/admin-restaurants" class="btn btn-sm btn_theme" style="font-size:12px;">
                             Voir tout
                         </a>
                     </div>

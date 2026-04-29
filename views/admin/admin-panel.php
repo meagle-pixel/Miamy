@@ -13,17 +13,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $user_id    = (int) $_POST['user_id'];
         $new_profil = (int) $_POST['profil'];
 
-        if (in_array($new_profil, [2, 3])) {
-            try {
-                $stmt = $pdo->prepare("UPDATE utilisateurs SET profil = :profil WHERE id = :id AND profil != 1");
-                $stmt->execute([':profil' => $new_profil, ':id' => $user_id]);
+        // 2 = restaurateur, 3 = client (la promotion en admin se fait via un autre flux)
+        if (in_array($new_profil, [2, 3], true)) {
 
-                logUserAction($_SESSION['user']['id'], 'update_role', "Changement de rôle de l'utilisateur ID $user_id vers profil $new_profil");
+            // Si on bascule vers `clients`, les colonnes NOT NULL (civilite, adresse_comp, codepostal, ville)
+            // doivent être fournies. On met des valeurs par défaut neutres, à compléter ensuite par l'utilisateur.
+            $extraData = [];
+            if ($new_profil === 3) {
+                $extraData = [
+                    'civilite'     => 1,
+                    'adresse_comp' => '',
+                    'codepostal'   => '',
+                    'ville'        => '',
+                ];
+            }
 
+            if (changeUserProfile($user_id, $new_profil, $extraData)) {
                 header('Location: ' . $GLOBALS['url'] . '/admin-panel');
                 exit();
-            } catch (PDOException $e) {
-                $error = "Erreur lors de la modification du rôle.";
+            } else {
+                $error = "Erreur lors de la modification du rôle (voir error_log).";
             }
         }
     }

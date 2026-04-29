@@ -43,20 +43,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_restaurant']))
             }
         }
 
-        // Insertion en BDD avec requête préparée
-        $stmt = $pdo->prepare(
-            "INSERT INTO restaurants (name, slug, description, city, main_image, id_restaurateur, created_at)
-             VALUES (:name, :slug, :description, :city, :main_image, :id_restaurateur, NOW())"
-        );
+        // Insertion en BDD avec requête préparée (sous transaction + try/catch
+        // pour qu'une exception SQL n'aille jamais casser la sortie HTML).
+        try {
+            $stmt = $pdo->prepare(
+                "INSERT INTO restaurants (name, slug, description, city, main_image, id_restaurateur, created_at)
+                 VALUES (:name, :slug, :description, :city, :main_image, :id_restaurateur, NOW())"
+            );
 
-        if ($stmt->execute([
-            'name'            => $name,
-            'slug'            => $slug,
-            'description'     => $description,
-            'city'            => $city,
-            'main_image'      => $image_name,
-            'id_restaurateur' => $id_restaurateur,
-        ])) {
+            $stmt->execute([
+                'name'            => $name,
+                'slug'            => $slug,
+                'description'     => $description,
+                'city'            => $city,
+                'main_image'      => $image_name,
+                'id_restaurateur' => $id_restaurateur,
+            ]);
+
             $new_id = $pdo->lastInsertId();
 
             // Liaison avec la catégorie via la table intermédiaire
@@ -71,8 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_restaurant']))
             }
 
             $message_success = "Restaurant ajouté avec succès !";
-        } else {
-            $message_error = "Erreur lors de l'ajout du restaurant.";
+
+        } catch (PDOException $e) {
+            error_log('[ajouter-restaurant] ' . $e->getMessage());
+            $message_error = "Erreur lors de l'ajout du restaurant. Détail technique : " . $e->getMessage();
         }
     }
 }

@@ -4,39 +4,26 @@ ob_start();
 include('functions.php');
 
 
-if(isset($_GET['mod']))
-{
+if (isset($_GET['mod'])) {
 	$page = $_GET['mod'];
 
 	$page_content = getPage($page);
 
-	if(!empty($page_content['nom']) && !empty($page_content['url']))
-	{
+	if (!empty($page_content['nom']) && !empty($page_content['url'])) {
 		$page_title = $page_content['nom'];
 		$page_url = $page_content['url'];
-	}
-	else
-	{
+	} else {
 		$page_title = 'Page introuvable';
 		$page_url = 'views/404.php';
 	}
-}
-else
-{
+} else {
 	$page = '';
 	$page_title = 'Accueil';
 	$page_url = 'views/home.php';
 }
 
-// Liste blanche des slugs (mod) qui doivent utiliser le layout admin.
-// Ajouter ici tout nouveau mod admin.
-$admin_mods = ['dashboard', 'admin-panel', 'admin-restaurants'];
-
-// Une page est admin si :
-//   - son fichier est dans views/admin/, OU
-//   - son slug est dans la liste blanche ci-dessus
-$is_admin_page = (strpos($page_url, 'views/admin/') === 0)
-              || in_array($page, $admin_mods, true);
+// Une page est admin si son fichier est dans views/admin/
+$is_admin_page = strpos($page_url, 'views/admin/') === 0;
 
 if ($is_admin_page) {
 	// Layout administrateur (template SB Admin)
@@ -51,5 +38,3 @@ if ($is_admin_page) {
 	include('views/partials/footer.php');
 	include('views/partials/foot.php');
 }
-
-?>

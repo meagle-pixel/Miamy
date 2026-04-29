@@ -67,6 +67,21 @@
 	// --- FIN FONCTIONS LOGS ---
 
 
+	function insertAdministrateur($data)
+	{
+		$pdo  = Database::getInstance()->getConnection();
+		$stmt = $pdo->prepare(
+			"INSERT INTO `administrateurs` (`nom`, `prenom`, `telephone`)
+			 VALUES (:nom, :prenom, :telephone)"
+		);
+		$stmt->execute([
+			'nom'       => $data['nom'],
+			'prenom'    => $data['prenom'],
+			'telephone' => $data['telephone'] ?? '',
+		]);
+		return $pdo->lastInsertId();
+	}
+
 	function insertUtilisateur($utilisateur)
 	{
 		$pdo       = Database::getInstance()->getConnection();
@@ -386,20 +401,46 @@
 	{
 		$pdo = Database::getInstance()->getConnection();
 
-		$s = $pdo->prepare("SELECT id FROM utilisateurs WHERE profil_id = :profil_id AND profil = :profil");
-		$s->execute(['profil_id' => (int)$id, 'profil' => (int)$profil]);
-		$row            = $s->fetch();
-		$userIdToDelete = $row['id'] ?? 0;
+		try {
+			$pdo->beginTransaction();
 
-		$stmt = $pdo->prepare("DELETE FROM `utilisateurs` WHERE `profil_id` = :profil_id AND `profil` = :profil");
-		$ok   = $stmt->execute(['profil_id' => (int)$id, 'profil' => (int)$profil]);
+			// Récupère l'id dans utilisateurs pour le log
+			$s = $pdo->prepare("SELECT id FROM utilisateurs WHERE profil_id = :profil_id AND profil = :profil");
+			$s->execute(['profil_id' => (int)$id, 'profil' => (int)$profil]);
+			$row            = $s->fetch();
+			$userIdToDelete = $row['id'] ?? 0;
 
-		if ($ok) {
+			// Récupère dynamiquement le nom de la table métier depuis profils.type
+			// → fonctionne pour tous les rôles actuels et futurs sans rien coder en dur
+			$sp = $pdo->prepare("SELECT type FROM `profils` WHERE id = :id");
+			$sp->execute(['id' => (int)$profil]);
+			$profilRow = $sp->fetch();
+			$table     = $profilRow['type'] ?? null;
+
+			if ($table) {
+				// Supprime la ligne dans la table métier du profil.
+				// Les suppressions en cascade (restaurants → plats, horaires, etc.)
+				// sont gérées par les FK ON DELETE CASCADE côté MySQL.
+				$pdo->prepare("DELETE FROM `$table` WHERE `id` = :id")
+				    ->execute(['id' => (int)$id]);
+			}
+
+			// Supprime le compte utilisateur
+			$pdo->prepare("DELETE FROM `utilisateurs` WHERE `profil_id` = :profil_id AND `profil` = :profil")
+			    ->execute(['profil_id' => (int)$id, 'profil' => (int)$profil]);
+
+			$pdo->commit();
+
 			$actorId = $_SESSION['user']['id'] ?? 1;
-			logUserAction($actorId, 'delete_user', "Suppression de l'utilisateur ID $userIdToDelete (Profil $profil / $id)");
+			logUserAction($actorId, 'delete_user', "Suppression complète de l'utilisateur ID $userIdToDelete (Profil $profil / profil_id $id)");
+
 			return true;
+
+		} catch (Exception $e) {
+			if ($pdo->inTransaction()) $pdo->rollBack();
+			error_log('[deleteUser] ' . $e->getMessage());
+			return false;
 		}
-		return false;
 	}
 
 	function deleteAdmin($id)

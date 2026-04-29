@@ -169,7 +169,7 @@ CREATE TABLE `restaurants` (
     `id_restaurateur` int(11) NOT NULL,
     PRIMARY KEY (`id_restaurant`),
     UNIQUE KEY `slug` (`slug`),
-    CONSTRAINT `fk_resto_patron` FOREIGN KEY (`id_restaurateur`) REFERENCES `restaurateurs` (`id`)
+    CONSTRAINT `fk_resto_patron` FOREIGN KEY (`id_restaurateur`) REFERENCES `restaurateurs` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `restaurant_categories` (
@@ -278,10 +278,28 @@ INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
     ('Mes commandes',            'commandes',               'views/commandes.php'),
     ('Détails restaurant',       'details',                 'views/details.php'),
     ('Admin Panel',              'admin-panel',             'views/admin/admin-panel.php'),
-    ('Dashboard',                'dashboard',               'views/admin/dashboard.php');
+    ('Dashboard',                'dashboard',               'views/admin/dashboard.php'),
+    ('Ajouter un administrateur','ajouter-admin',           'views/admin/ajouter-admin.php');
 
 -- Donne tous les droits à l'admin (profil 1) sur toutes les pages
 INSERT INTO `autorisations` (`page`, `profil`, `etat`)
 SELECT `id`, 1, 1 FROM `pages`;
 
 COMMIT;
+
+ALTER TABLE `restaurants` DROP FOREIGN KEY `fk_resto_patron`;
+
+ALTER TABLE `restaurants` ADD CONSTRAINT `fk_resto_patron` FOREIGN KEY (`id_restaurateur`) REFERENCES `restaurateurs` (`id`) ON DELETE CASCADE;
+
+INSERT INTO `administrateurs` (`nom`, `prenom`, `telephone`)
+VALUES ('Paulin', 'Maxime', '0658263580');
+
+UPDATE `utilisateurs`
+SET `profil_id` = LAST_INSERT_ID()
+WHERE `email` = 'ton@email.com' AND `profil` = 1;
+
+INSERT INTO `pages` (`nom`, `mod`, `url`)
+VALUES ('Ajouter un administrateur', 'ajouter-admin', 'views/admin/ajouter-admin.php');
+
+INSERT INTO `autorisations` (`page`, `profil`, `etat`)
+VALUES (LAST_INSERT_ID(), 1, 1);

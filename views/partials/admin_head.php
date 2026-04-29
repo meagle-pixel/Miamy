@@ -77,6 +77,10 @@ $current_mod = $_GET['mod'] ?? '';
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Utilisateurs
                         </a>
+                        <a class="nav-link <?= $current_mod === 'ajouter-admin' ? 'active' : '' ?>" href="<?= $GLOBALS['url'] ?>/ajouter-admin">
+                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                            Ajouter un administrateur
+                        </a>
 
                     </div>
                 </div>

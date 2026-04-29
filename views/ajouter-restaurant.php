@@ -1,6 +1,8 @@
 <?php
-// 1. Sécurité : vérifier si connecté et restaurateur
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
+// 1. Sécurité : vérifier si connecté ET restaurateur (profil 2 uniquement)
+// Les admins (profil 1) ont leur profil_id pointant vers `administrateurs`,
+// pas vers `restaurateurs` → la FK échouerait. Cette page est réservée au profil 2.
+if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || (int)$_SESSION['user']['profil'] !== 2) {
     header('Location: ' . $GLOBALS['url'] . '/connexion');
     exit();
 }
@@ -19,9 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_restaurant']))
     $city            = trim($_POST['city'] ?? '');
     $description     = trim($_POST['description'] ?? '');
     $category_id     = (int)($_POST['category_id'] ?? 0);
-    $id_restaurateur = $_SESSION['user']['profil_id'];
+    $id_restaurateur = (int)($_SESSION['user']['profil_id'] ?? 0);
 
-    if (empty($name) || empty($city)) {
+    if ($id_restaurateur <= 0) {
+        $message_error = "Compte restaurateur introuvable. Veuillez contacter l'administrateur.";
+    } elseif (empty($name) || empty($city)) {
         $message_error = "Le nom et la ville sont obligatoires.";
     } else {
         $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name)));

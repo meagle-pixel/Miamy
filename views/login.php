@@ -13,7 +13,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Redirection selon le profil
             $profil = $_SESSION['user']['profil'];
 
-            $redirect_url = ($profil == 1 || $profil == 2) ? 'mon-compte-restaurateur' : 'mon-compte';
+            if ($profil == 1) {
+                $redirect_url = 'dashboard';
+            } elseif ($profil == 2) {
+                $redirect_url = 'mon-compte-restaurateur';
+            } else {
+                $redirect_url = 'mon-compte';
+            }
 
             header('Location: ' . $GLOBALS['url'] . '/' . $redirect_url);
             exit();

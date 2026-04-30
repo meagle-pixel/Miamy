@@ -28,11 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 ];
             }
 
-            if (changeUserProfile($user_id, $new_profil, $extraData)) {
+            try {
+                changeUserProfile($user_id, $new_profil, $extraData);
                 header('Location: ' . $GLOBALS['url'] . '/admin-panel');
                 exit();
-            } else {
-                $error = "Erreur lors de la modification du rôle (voir error_log).";
+            } catch (Exception $e) {
+                $error = $e->getMessage();
             }
         }
     }

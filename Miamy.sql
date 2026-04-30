@@ -285,4 +285,7 @@ INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
 INSERT INTO `autorisations` (`page`, `profil`, `etat`)
 SELECT `id`, 1, 1 FROM `pages`;
 
+INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
+('Vue admin restaurants', 'admin-restaurants', 'views/admin/admin-restaurants.php');
+
 COMMIT;

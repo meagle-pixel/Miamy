@@ -1,59 +1,7 @@
 <?php
-// 1. Sécurité
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
-
-$id_restaurateur = $_SESSION['user']['profil_id'];
-$pdo             = Database::getInstance()->getConnection();
-
-$message_success = '';
-$message_error   = '';
-
-// 2. Traitement du formulaire
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_profil'])) {
-
-    $nom       = trim($_POST['nom'] ?? '');
-    $prenom    = trim($_POST['prenom'] ?? '');
-    $email     = trim($_POST['email'] ?? '');
-    $telephone = trim($_POST['telephone'] ?? '');
-
-    if (empty($nom) || empty($prenom) || empty($email)) {
-        $message_error = "Le nom, prénom et email sont obligatoires.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message_error = "L'adresse email n'est pas valide.";
-    } else {
-        $ok = updateRestaurateur([
-            'id'        => $id_restaurateur,
-            'nom'       => $nom,
-            'prenom'    => $prenom,
-            'email'     => $email,
-            'telephone' => $telephone,
-        ]);
-
-        if ($ok) {
-            // Mise à jour de l'email dans la table utilisateurs
-            $stmt = $pdo->prepare(
-                "UPDATE utilisateurs SET email = ? WHERE profil_id = ? AND profil = 2"
-            );
-            $stmt->execute([$email, $id_restaurateur]);
-
-            $_SESSION['user-info']['nom']       = $nom;
-            $_SESSION['user-info']['prenom']    = $prenom;
-            $_SESSION['user-info']['email']     = $email;
-            $_SESSION['user-info']['telephone'] = $telephone;
-            $_SESSION['user']['email']          = $email;
-
-            $message_success = "Votre profil a été mis à jour avec succès.";
-        } else {
-            $message_error = "Une erreur est survenue lors de la mise à jour.";
-        }
-    }
-}
-
-// 3. Récupération des données actuelles
-$restaurateur = $_SESSION['user-info'];
+/** @var array  $restaurateur    */
+/** @var string $message_success */
+/** @var string $message_error   */
 ?>
 
 <section id="common_banner">

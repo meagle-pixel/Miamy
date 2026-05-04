@@ -1,57 +1,10 @@
 <?php
-// 1. Sécurité
-// 1. Vérification de la session (Vigile 1)
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
-
-// On récupère les IDs
-$id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-$id_restaurateur = $_SESSION['user']['profil_id'];
-
-// 2. Vérification de l'ID restaurant (Vigile 2)
-if (!$id_restaurant) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-// 2. Vérifier que le restaurant appartient bien à ce restaurateur
-$pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_proprio");
-$stmt->execute([
-    'id'         => $id_restaurant,
-    'id_proprio' => $id_restaurateur
-]);
-$resto = $stmt->fetch();
-
-
-if (!$resto) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-// 3. Récupérer les plats
-$platClass = new Plat();
-$plats     = $platClass->getByRestaurant($id_restaurant);
-
-// Regrouper les plats par catégorie
-$platsParCategorie = [];
-foreach ($plats as $plat) {
-    $platsParCategorie[$plat['categorie']][] = $plat;
-}
-
-// 4. Messages
-$message_success = '';
-$message_error   = '';
-if (isset($_GET['success'])) {
-    $msgs = [
-        'added'   => 'Plat ajouté avec succès !',
-        'updated' => 'Plat modifié avec succès !',
-        'deleted' => 'Plat supprimé avec succès.',
-    ];
-    $message_success = $msgs[$_GET['success']] ?? '';
-}
+/** @var array  $resto             */
+/** @var array  $plats             */
+/** @var array  $platsParCategorie */
+/** @var int    $id_restaurant     */
+/** @var string $message_success   */
+/** @var string $message_error     */
 ?>
 
 <section id="common_banner">

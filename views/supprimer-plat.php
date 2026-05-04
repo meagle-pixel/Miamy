@@ -1,53 +1,9 @@
 <?php
-// 1. Sécurité
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
-
-$id_plat         = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-$id_restaurant   = isset($_GET['id_restaurant']) ? (int)$_GET['id_restaurant'] : 0;
-$id_restaurateur = $_SESSION['user']['profil_id'];
-
-if (!$id_plat || !$id_restaurant) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-// 2. Récupérer le plat
-$platClass = new Plat();
-$plat      = $platClass->getById($id_plat);
-
-if (!$plat || $plat['id_restaurant'] !== $id_restaurant) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-// 3. Vérifier que le restaurant appartient bien à ce restaurateur
-$pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT name FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
-$stmt->execute([
-    'id'              => $id_restaurant,
-    'id_restaurateur' => $id_restaurateur,
-]);
-$resto = $stmt->fetch();
-
-if (!$resto) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-$message_error = '';
-
-// 4. Traitement de la confirmation
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
-    if ($platClass->delete($id_plat)) {
-        header('Location: ' . $GLOBALS['url'] . '/gestion-carte?id=' . $id_restaurant . '&success=deleted');
-        exit();
-    } else {
-        $message_error = "Une erreur est survenue lors de la suppression.";
-    }
-}
+/** @var array  $resto         */
+/** @var array  $plat          */
+/** @var int    $id_plat       */
+/** @var int    $id_restaurant */
+/** @var string $message_error */
 ?>
 
 <section id="common_banner">

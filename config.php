@@ -32,4 +32,4 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['HTTP_HOST'] == 'localhos
 }
 
 $GLOBALS["base_salt"] = $_ENV['BASE_SALT'] ?? '';
-// ... reste de tes clés Stripe etc.
+

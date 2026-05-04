@@ -3,9 +3,39 @@
 ob_start();
 include('functions.php');
 
+// Chargement des controllers
+require_once('controllers/PlatController.php');
+require_once('controllers/RestaurantController.php');
+require_once('controllers/UserController.php');
+
+// Table de routage : page → [controller, méthode]
+$dispatchMap = [
+    'liste-plats'             => [new PlatController(),        'liste'],
+    'gestion-carte'           => [new PlatController(),        'gestionCarte'],
+    'ajouter-plat'            => [new PlatController(),        'ajouter'],
+    'modifier-plat'           => [new PlatController(),        'modifier'],
+    'supprimer-plat'          => [new PlatController(),        'supprimer'],
+    'liste-restaurants'       => [new RestaurantController(),  'liste'],
+    'ajouter-restaurant'      => [new RestaurantController(),  'ajouter'],
+    'modifier-restaurant'     => [new RestaurantController(),  'modifier'],
+    'supprimer-restaurant'    => [new RestaurantController(),  'supprimer'],
+    'mon-compte'              => [new UserController(),        'monCompte'],
+    'mon-compte-restaurateur' => [new UserController(),        'monCompteRestaurateur'],
+    'profil-editer'           => [new UserController(),        'profilEditer'],
+    'profile'                 => [new UserController(),        'profile'],
+];
 
 if (isset($_GET['mod'])) {
 	$page = $_GET['mod'];
+
+	// Si la page a un controller, on le dispatch et on extrait ses données
+	if (isset($dispatchMap[$page])) {
+		[$controller, $method] = $dispatchMap[$page];
+		$viewData = $controller->$method(); // peut faire header()+exit() ou retourner un tableau
+		if (is_array($viewData)) {
+			extract($viewData); // rend les variables disponibles pour la vue
+		}
+	}
 
 	$page_content = getPage($page);
 

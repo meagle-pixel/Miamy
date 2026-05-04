@@ -1,22 +1,7 @@
 <?php
-// 1. Sécurité : On vérifie si l'utilisateur est connecté et est un restaurateur
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
-
-// 2. Récupération des données du restaurateur (Profil ID 2)
-$restaurateur = $_SESSION['user-info'] ?? [];
-$id_restaurateur = $_SESSION['user']['profil_id'] ?? null;
-
-// 3. Récupération des restaurants possédés
-$mesRestos = getRestaurantsByOwner($id_restaurateur);
-
-// 4. Message de succès après suppression
-$message_success = '';
-if (isset($_GET['success']) && $_GET['success'] === 'deleted') {
-    $message_success = "Le restaurant a été supprimé avec succès.";
-}
+/** @var array  $restaurateur    */
+/** @var array  $mesRestos       */
+/** @var string $message_success */
 ?>
 
 <section id="common_banner">

@@ -1,48 +1,7 @@
 <?php
-// 1. Sécurité
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
-
-$id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-$id_restaurateur = $_SESSION['user']['profil_id'];
-
-if (!$id_restaurant) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-// 2. Récupérer le restaurant et vérifier qu'il appartient au restaurateur connecté
-$pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
-$stmt->execute([
-    'id'              => $id_restaurant,
-    'id_restaurateur' => $id_restaurateur,
-]);
-$resto = $stmt->fetch();
-
-if (!$resto) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-// 3. Traitement de la confirmation de suppression
-$message_error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
-    try {
-        $restaurant = new Restaurant();
-        if ($restaurant->delete($id_restaurant)) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur?success=deleted');
-            exit();
-        } else {
-            $message_error = "Une erreur est survenue lors de la suppression.";
-        }
-    } catch (PDOException $e) {
-        error_log('[supprimer-restaurant] ' . $e->getMessage());
-        $message_error = "Erreur lors de la suppression. Détail technique : " . $e->getMessage();
-    }
-}
+/** @var array  $resto         */
+/** @var int    $id_restaurant */
+/** @var string $message_error */
 ?>
 
 <section id="common_banner">

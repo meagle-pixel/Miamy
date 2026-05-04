@@ -1,97 +1,10 @@
 <?php
-// 1. Sécurité
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
-
-$id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-$id_restaurateur = $_SESSION['user']['profil_id'];
-$pdo             = Database::getInstance()->getConnection();
-
-// 2. Récupérer le restaurant et vérifier qu'il appartient au restaurateur connecté
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
-$stmt->execute([
-    'id'              => $id_restaurant,
-    'id_restaurateur' => $id_restaurateur,
-]);
-$resto = $stmt->fetch();
-
-if (!$resto) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-// Charger la catégorie actuelle via la table intermédiaire
-$stmt_cur_cat = $pdo->prepare("SELECT id_categorie FROM restaurant_categories WHERE id_restaurant = :id LIMIT 1");
-$stmt_cur_cat->execute(['id' => $id_restaurant]);
-$current_category_id = (int)($stmt_cur_cat->fetchColumn() ?: 0);
-
-// 3. Récupérer les catégories
-$categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
-
-$message_success = '';
-$message_error   = '';
-
-// 4. Traitement du formulaire
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_update'])) {
-
-    $name        = trim($_POST['name'] ?? '');
-    $city        = trim($_POST['city'] ?? '');
-    $description = trim($_POST['description'] ?? '');
-    $category_id = (int)($_POST['category_id'] ?? 0);
-
-    if (empty($name) || empty($city)) {
-        $message_error = "Le nom et la ville sont obligatoires.";
-    } else {
-
-        $image_name = $resto['main_image'];
-
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-            $ext     = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-
-            if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
-                $image_name  = $resto['slug'] . '-' . time() . '.' . $ext;
-                $upload_path = $GLOBALS['dev']
-                    ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/restaurants/' . $image_name
-                    : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/restaurants/' . $image_name;
-
-                move_uploaded_file($_FILES['image']['tmp_name'], $upload_path);
-            }
-        }
-
-        $upd = $pdo->prepare(
-            "UPDATE restaurants SET
-                name = :name, city = :city, description = :description, main_image = :main_image
-             WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur"
-        );
-
-        if ($upd->execute([
-            'name'            => $name,
-            'city'            => $city,
-            'description'     => $description,
-            'main_image'      => $image_name,
-            'id'              => $id_restaurant,
-            'id_restaurateur' => $id_restaurateur,
-        ])) {
-            // Mise à jour de la catégorie via la table intermédiaire
-            $pdo->prepare("DELETE FROM restaurant_categories WHERE id_restaurant = :id")->execute(['id' => $id_restaurant]);
-            if ($category_id > 0) {
-                $pdo->prepare("INSERT INTO restaurant_categories (id_restaurant, id_categorie) VALUES (:id_restaurant, :id_categorie)")
-                    ->execute(['id_restaurant' => $id_restaurant, 'id_categorie' => $category_id]);
-            }
-            $current_category_id = $category_id;
-            $message_success = "Restaurant modifié avec succès !";
-            // Recharger les données
-            $stmt2 = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id");
-            $stmt2->execute(['id' => $id_restaurant]);
-            $resto = $stmt2->fetch();
-        } else {
-            $message_error = "Erreur lors de la modification.";
-        }
-    }
-}
+/** @var array  $resto               */
+/** @var int    $id_restaurant       */
+/** @var array  $categories          */
+/** @var int    $current_category_id */
+/** @var string $message_success     */
+/** @var string $message_error       */
 ?>
 
 <section id="common_banner">

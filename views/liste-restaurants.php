@@ -1,22 +1,6 @@
 <?php
-// Récupération des restaurants actifs
-$restoClass  = new Restaurant();
-$restaurants = $restoClass->listRestaurants(activeOnly: false);
-
-// Récupération des horaires du jour (0=Lundi … 6=Dimanche)
-$jourAujourdhui = (int)date('N') - 1; // date('N') → 1=Lundi, 7=Dimanche
-$pdo = Database::getInstance()->getConnection();
-
-$horairesAujourdhui = [];
-if (!empty($restaurants)) {
-    $ids  = implode(',', array_map(fn($r) => (int)$r['id_restaurant'], $restaurants));
-    $stmt = $pdo->query(
-        "SELECT * FROM horaires WHERE id_restaurant IN ($ids) AND jour = $jourAujourdhui"
-    );
-    foreach ($stmt->fetchAll() as $h) {
-        $horairesAujourdhui[(int)$h['id_restaurant']] = $h;
-    }
-}
+/** @var array $restaurants        */
+/** @var array $horairesAujourdhui */
 ?>
 
 <!-- Common Banner Area -->

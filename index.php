@@ -10,19 +10,19 @@ require_once('controllers/UserController.php');
 
 // Table de routage : page → [controller, méthode]
 $dispatchMap = [
-    'liste-plats'             => [new PlatController(),        'liste'],
-    'gestion-carte'           => [new PlatController(),        'gestionCarte'],
-    'ajouter-plat'            => [new PlatController(),        'ajouter'],
-    'modifier-plat'           => [new PlatController(),        'modifier'],
-    'supprimer-plat'          => [new PlatController(),        'supprimer'],
-    'liste-restaurants'       => [new RestaurantController(),  'liste'],
-    'ajouter-restaurant'      => [new RestaurantController(),  'ajouter'],
-    'modifier-restaurant'     => [new RestaurantController(),  'modifier'],
-    'supprimer-restaurant'    => [new RestaurantController(),  'supprimer'],
-    'mon-compte'              => [new UserController(),        'monCompte'],
-    'mon-compte-restaurateur' => [new UserController(),        'monCompteRestaurateur'],
-    'profil-editer'           => [new UserController(),        'profilEditer'],
-    'profile'                 => [new UserController(),        'profile'],
+	'liste-plats'             => [new PlatController(),        'liste'],
+	'gestion-carte'           => [new PlatController(),        'gestionCarte'],
+	'ajouter-plat'            => [new PlatController(),        'ajouter'],
+	'modifier-plat'           => [new PlatController(),        'modifier'],
+	'supprimer-plat'          => [new PlatController(),        'supprimer'],
+	'liste-restaurants'       => [new RestaurantController(),  'liste'],
+	'ajouter-restaurant'      => [new RestaurantController(),  'ajouter'],
+	'modifier-restaurant'     => [new RestaurantController(),  'modifier'],
+	'supprimer-restaurant'    => [new RestaurantController(),  'supprimer'],
+	'mon-compte'              => [new UserController(),        'monCompte'],
+	'mon-compte-restaurateur' => [new UserController(),        'monCompteRestaurateur'],
+	'profil-editer'           => [new UserController(),        'profilEditer'],
+	'profile'                 => [new UserController(),        'profile'],
 ];
 
 if (isset($_GET['mod'])) {

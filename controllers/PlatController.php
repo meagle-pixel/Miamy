@@ -7,7 +7,25 @@ class PlatController
     // ---------------------------------------------------------------
     public function liste()
     {
-        return [];
+        $id_restaurant = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+        if ($id_restaurant === 0) {
+            header('Location: ' . $GLOBALS['url'] . '/liste-restaurants');
+            exit();
+        }
+
+        $restoClass = new Restaurant();
+        $resto = $restoClass->getById($id_restaurant);
+
+        if (!$resto) {
+            header('Location: ' . $GLOBALS['url'] . '/liste-restaurants');
+            exit();
+        }
+
+        $platClass = new Plat();
+        $plats     = $platClass->getByRestaurant($id_restaurant);
+
+        return compact('resto', 'plats', 'id_restaurant');
     }
 
     // ---------------------------------------------------------------

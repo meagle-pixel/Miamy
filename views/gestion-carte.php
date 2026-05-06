@@ -268,16 +268,23 @@ $custom_js = <<<HTML
                 checkEmpty(evt.from); // cache le placeholder si la source se vide
                 checkEmpty(evt.to);   // cache le placeholder si la destination reçoit un plat
 
-                // --- Appel AJAX pour persister en base ---
-                $.post(BASE_URL + '/actions/update-plat-categorie.php', {
-                    id_plat:   platId,
-                    categorie: newCateg
-                }, function (resp) {
+                // --- Appel AJAX vanilla (fetch) pour persister en base ---
+                const fd = new FormData();
+                fd.append('id_plat', platId);
+                fd.append('categorie', newCateg);
+
+                fetch(BASE_URL + '/actions/update-plat-categorie.php', {
+                    method: 'POST',
+                    body: fd
+                })
+                .then(function (response) { return response.json(); })
+                .then(function (resp) {
                     if (!resp.success) {
                         revert(evt, oldCateg, newCateg);
                         alert('Erreur lors du changement de catégorie. Le plat a été replacé.');
                     }
-                }, 'json').fail(function () {
+                })
+                .catch(function () {
                     revert(evt, oldCateg, newCateg);
                     alert('Erreur réseau. Veuillez réessayer.');
                 });
@@ -294,43 +301,58 @@ $custom_js = <<<HTML
         checkEmpty(evt.to);
     }
 
-    // --- Toggle disponible / indisponible ---
-    $(document).on('click', '.btn-toggle-dispo', function () {
-        const btn        = $(this);
-        const platId     = btn.data('plat-id');
-        const disponible = parseInt(btn.data('disponible'), 10);
-        const card       = btn.closest('div[data-plat-id]');
-        const badge      = card.find('[data-badge-disponible]');
+    // --- Toggle disponible / indisponible (délégation d'événement vanilla) ---
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-toggle-dispo');
+        if (!btn) return;
+
+        const platId = btn.dataset.platId;
+        const card   = btn.closest('div[data-plat-id]');
+        const badge  = card.querySelector('[data-badge-disponible]');
 
         // Désactive le bouton le temps de la requête
-        btn.prop('disabled', true);
+        btn.disabled = true;
 
-        $.post(BASE_URL + '/actions/toggle-disponible-plat.php', { id_plat: platId },
-        function (resp) {
+        const fd = new FormData();
+        fd.append('id_plat', platId);
+
+        fetch(BASE_URL + '/actions/toggle-disponible-plat.php', {
+            method: 'POST',
+            body: fd
+        })
+        .then(function (response) { return response.json(); })
+        .then(function (resp) {
             if (resp.success) {
                 const dispo = resp.disponible; // 1 = disponible, 0 = indisponible
-                btn.data('disponible', dispo);
+                btn.dataset.disponible = dispo;
 
                 // Mettre à jour le badge
                 if (dispo) {
-                    badge.removeClass('bg-danger').addClass('bg-success').text('Disponible');
+                    badge.classList.remove('bg-danger');
+                    badge.classList.add('bg-success');
+                    badge.textContent = 'Disponible';
                 } else {
-                    badge.removeClass('bg-success').addClass('bg-danger').text('Indisponible');
+                    badge.classList.remove('bg-success');
+                    badge.classList.add('bg-danger');
+                    badge.textContent = 'Indisponible';
                 }
 
                 // Mettre à jour le bouton
                 if (dispo) {
-                    btn.removeClass('btn-outline-success').addClass('btn-outline-warning')
-                       .attr('title', 'Marquer comme indisponible')
-                       .html('<i class="fas fa-eye-slash me-1"></i>Indispo');
+                    btn.classList.remove('btn-outline-success');
+                    btn.classList.add('btn-outline-warning');
+                    btn.title = 'Marquer comme indisponible';
+                    btn.innerHTML = '<i class="fas fa-eye-slash me-1"></i>Indispo';
                 } else {
-                    btn.removeClass('btn-outline-warning').addClass('btn-outline-success')
-                       .attr('title', 'Marquer comme disponible')
-                       .html('<i class="fas fa-eye me-1"></i>Dispo');
+                    btn.classList.remove('btn-outline-warning');
+                    btn.classList.add('btn-outline-success');
+                    btn.title = 'Marquer comme disponible';
+                    btn.innerHTML = '<i class="fas fa-eye me-1"></i>Dispo';
                 }
 
                 // Griser légèrement la carte si indisponible
-                card.find('.d-md-flex').toggleClass('opacity-50', !dispo);
+                const inner = card.querySelector('.d-md-flex');
+                if (inner) inner.classList.toggle('opacity-50', !dispo);
 
                 // Mettre à jour le compteur global "Disponibles" en haut de page
                 const totalDispoEl = document.getElementById('total-dispo');
@@ -343,12 +365,12 @@ $custom_js = <<<HTML
             } else {
                 alert('Erreur lors de la mise à jour. Veuillez réessayer.');
             }
-        }, 'json')
-        .fail(function () {
+        })
+        .catch(function () {
             alert('Erreur réseau. Veuillez réessayer.');
         })
-        .always(function () {
-            btn.prop('disabled', false);
+        .finally(function () {
+            btn.disabled = false;
         });
     });
 })();

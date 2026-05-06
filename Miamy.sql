@@ -288,4 +288,7 @@ SELECT `id`, 1, 1 FROM `pages`;
 INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
 ('Vue admin restaurants', 'admin-restaurants', 'views/admin/admin-restaurants.php');
 
+INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
+('Liste des plats', 'liste-plats', 'views/liste-plats.php');
+
 COMMIT;

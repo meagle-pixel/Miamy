@@ -28,6 +28,7 @@
     .section-badge { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 8px; }
     .badge-admin { background: #EEEDFE; color: #3C3489; }
     .badge-resto { background: #E1F5EE; color: #085041; }
+    .badge-tech  { background: #FDE8D9; color: #8A3A0E; }
     .section-title { font-size: 16px; font-weight: 500; }
     .progress-line { font-size: 12px; color: #888780; margin-left: auto; }
 
@@ -53,7 +54,7 @@
     <p class="subtitle">Fonctionnalités manquantes · Admin &amp; Restaurateur</p>
 
     <div class="global-progress">
-      <span class="prog-count" id="global-count">0 / 13</span>
+      <span class="prog-count" id="global-count">0 / 14</span>
       <div class="prog-bar-wrap"><div class="prog-bar-fill" id="global-bar" style="width:0%"></div></div>
       <span class="prog-label" id="global-pct">0% terminé</span>
     </div>
@@ -188,11 +189,29 @@
       </div>
     </div>
 
+    <!-- TECHNIQUE -->
+    <div class="section-header">
+      <span class="section-badge badge-tech">Technique</span>
+      <p class="section-title">Architecture &amp; refactor</p>
+      <span class="progress-line" id="prog-tech">0 / 1</span>
+    </div>
+
+    <div id="list-tech">
+      <div class="todo-item" data-section="tech" data-id="14" onclick="toggle(this)">
+        <div class="priority-dot p-med"></div>
+        <div class="todo-checkbox"></div>
+        <div>
+          <div class="todo-label">Refactoriser le code en PSR-4 (autoloader Composer)</div>
+          <div class="todo-sub">Namespaces Miamy\, dossiers src/Models, src/Controllers, src/Services. Déplacer la logique d'auth des vues login/register vers un AuthController. Sortir les requêtes SQL des controllers.</div>
+        </div>
+      </div>
+    </div>
+
     <p class="save-note">Les cases cochées sont sauvegardées automatiquement dans le navigateur.</p>
   </div>
 
   <script>
-    const TOTAL = 13;
+    const TOTAL = 14;
     const STORAGE_KEY = 'miamy-todolist';
 
     function save() {
@@ -205,9 +224,12 @@
       const adminTotal = document.querySelectorAll('#list-admin .todo-item').length;
       const restoDone  = document.querySelectorAll('#list-resto .todo-item.done').length;
       const restoTotal = document.querySelectorAll('#list-resto .todo-item').length;
-      const done = adminDone + restoDone;
+      const techDone   = document.querySelectorAll('#list-tech .todo-item.done').length;
+      const techTotal  = document.querySelectorAll('#list-tech .todo-item').length;
+      const done = adminDone + restoDone + techDone;
       document.getElementById('prog-admin').textContent = adminDone + ' / ' + adminTotal;
       document.getElementById('prog-resto').textContent = restoDone + ' / ' + restoTotal;
+      document.getElementById('prog-tech').textContent  = techDone  + ' / ' + techTotal;
       document.getElementById('global-count').textContent = done + ' / ' + TOTAL;
       const pct = Math.round(done / TOTAL * 100);
       document.getElementById('global-bar').style.width = pct + '%';

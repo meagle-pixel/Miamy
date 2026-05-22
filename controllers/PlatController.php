@@ -95,10 +95,7 @@ class PlatController
     // ---------------------------------------------------------------
     public function ajouter()
     {
-        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-            header('Location: ' . APP_URL . '/connexion');
-            exit();
-        }
+        Auth::requireRestaurateur();
 
         $id_restaurant   = isset($_GET['id_restaurant']) ? (int)$_GET['id_restaurant'] : 0;
         $id_restaurateur = $_SESSION['user']['profil_id'];
@@ -108,13 +105,8 @@ class PlatController
             exit();
         }
 
-        $pdo  = Database::getInstance()->getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
-        $stmt->execute([
-            'id'              => $id_restaurant,
-            'id_restaurateur' => $id_restaurateur,
-        ]);
-        $resto = $stmt->fetch();
+        $restoClass = new Restaurant();
+        $resto      = $restoClass->getOwnedBy($id_restaurant, (int)$id_restaurateur);
 
         if (!$resto) {
             header('Location: ' . APP_URL . '/mon-compte-restaurateur');
@@ -139,29 +131,14 @@ class PlatController
             } elseif (!is_numeric($prix) || $prix < 0) {
                 $message_error = "Le prix doit être un nombre valide.";
             } else {
+                // Upload image via le helper centralisé
                 $image_name = null;
                 if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-                    $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-                    $ext     = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-
-                    if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
-                        $slug_plat   = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
-                        $image_name  = $slug_plat . '-' . time() . '.' . $ext;
-                        $upload_dir  = APP_DEV
-                            ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/plats/'
-                            : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/plats/';
-                        $upload_path = $upload_dir . $image_name;
-
-                        if (!is_dir($upload_dir)) {
-                            mkdir($upload_dir, 0755, true);
-                        }
-
-                        if (!move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
-                            $image_name    = null;
-                            $message_error = "Erreur lors de l'upload de l'image.";
-                        }
-                    } else {
-                        $message_error = "Image invalide (formats acceptés : JPG, PNG, WebP — max 5 Mo).";
+                    $uploader   = new ImageUploader('plats');
+                    $slug_plat  = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
+                    $image_name = $uploader->upload($_FILES['image'], $slug_plat . '-' . time());
+                    if ($uploader->error) {
+                        $message_error = $uploader->error;
                     }
                 }
 
@@ -201,10 +178,7 @@ class PlatController
     // ---------------------------------------------------------------
     public function modifier()
     {
-        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-            header('Location: ' . APP_URL . '/connexion');
-            exit();
-        }
+        Auth::requireRestaurateur();
 
         $id_plat         = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $id_restaurateur = $_SESSION['user']['profil_id'];
@@ -224,13 +198,8 @@ class PlatController
 
         $id_restaurant = $plat['id_restaurant'];
 
-        $pdo  = Database::getInstance()->getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
-        $stmt->execute([
-            'id'              => $id_restaurant,
-            'id_restaurateur' => $id_restaurateur,
-        ]);
-        $resto = $stmt->fetch();
+        $restoClass = new Restaurant();
+        $resto      = $restoClass->getOwnedBy((int)$id_restaurant, (int)$id_restaurateur);
 
         if (!$resto) {
             header('Location: ' . APP_URL . '/mon-compte-restaurateur');
@@ -257,27 +226,16 @@ class PlatController
             if (empty($nom))                         $errors[] = "Le nom du plat est obligatoire.";
             if (!is_numeric($prix) || $prix < 0)     $errors[] = "Le prix doit être un nombre valide et positif.";
 
+            // Upload image via le helper centralisé (on garde l'image existante si pas d'upload)
             $image_name = $plat['image'];
-
             if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-                $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-                $ext     = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-
-                if (!in_array($ext, $allowed)) {
-                    $errors[] = "Format d'image non supporté (JPG, PNG, WebP uniquement).";
-                } elseif ($_FILES['image']['size'] > 5000000) {
-                    $errors[] = "L'image est trop volumineuse (maximum 5 Mo).";
-                } else {
-                    $slug_plat   = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
-                    $new_image   = $slug_plat . '-' . time() . '.' . $ext;
-                    $upload_dir  = APP_DEV ? '/Miamy/assets/img/plats/' : '/assets/img/plats/';
-                    $upload_path = $_SERVER['DOCUMENT_ROOT'] . $upload_dir . $new_image;
-
-                    if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
-                        $image_name = $new_image;
-                    } else {
-                        $errors[] = "Erreur technique lors du téléchargement de l'image.";
-                    }
+                $uploader  = new ImageUploader('plats');
+                $slug_plat = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
+                $new_image = $uploader->upload($_FILES['image'], $slug_plat . '-' . time());
+                if ($new_image) {
+                    $image_name = $new_image;
+                } elseif ($uploader->error) {
+                    $errors[] = $uploader->error;
                 }
             }
 
@@ -302,10 +260,6 @@ class PlatController
 
         return compact('resto', 'plat', 'id_plat', 'id_restaurant', 'categoriesSuggestions', 'errors');
     }
-
-    // ---------------------------------------------------------------
-    // Supprimer un plat
-    // ---------------------------------------------------------------
     public function supprimer()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
@@ -355,5 +309,75 @@ class PlatController
         }
 
         return compact('resto', 'plat', 'id_plat', 'id_restaurant', 'message_error');
+    }
+
+    // ---------------------------------------------------------------
+    // AJAX : bascule la disponibilite d'un plat (returns JSON)
+    // ---------------------------------------------------------------
+    public function toggleDisponible()
+    {
+        header('Content-Type: application/json');
+
+        if (!Auth::isRestaurateur()) {
+            echo json_encode(['success' => false, 'message' => 'Non autorise']);
+            exit();
+        }
+
+        $id_plat         = isset($_POST['id_plat']) ? (int)$_POST['id_plat'] : 0;
+        $id_restaurateur = (int)$_SESSION['user']['profil_id'];
+
+        if (!$id_plat) {
+            echo json_encode(['success' => false, 'message' => 'ID invalide']);
+            exit();
+        }
+
+        $platClass = new Plat();
+        $plat      = $platClass->getOwnedBy($id_plat, $id_restaurateur);
+
+        if (!$plat) {
+            echo json_encode(['success' => false, 'message' => 'Plat introuvable ou acces refuse']);
+            exit();
+        }
+
+        $ok         = $platClass->toggleDisponible($id_plat);
+        $nouvelEtat = $plat['disponible'] ? 0 : 1;
+
+        echo json_encode(['success' => (bool)$ok, 'disponible' => $nouvelEtat]);
+        exit();
+    }
+
+    // ---------------------------------------------------------------
+    // AJAX : changer la categorie d'un plat (returns JSON)
+    // ---------------------------------------------------------------
+    public function updateCategorie()
+    {
+        header('Content-Type: application/json');
+
+        if (!Auth::isRestaurateur()) {
+            echo json_encode(['success' => false, 'message' => 'Non autorise']);
+            exit();
+        }
+
+        $id_plat         = isset($_POST['id_plat'])   ? (int)trim($_POST['id_plat'])   : 0;
+        $nouvelle_cat    = isset($_POST['categorie']) ? trim($_POST['categorie'])       : '';
+        $id_restaurateur = (int)$_SESSION['user']['profil_id'];
+
+        $categories_valides = ['Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'];
+
+        if (!$id_plat || !in_array($nouvelle_cat, $categories_valides, true)) {
+            echo json_encode(['success' => false, 'message' => 'Donnees invalides']);
+            exit();
+        }
+
+        $platClass = new Plat();
+
+        if (!$platClass->isOwnedBy($id_plat, $id_restaurateur)) {
+            echo json_encode(['success' => false, 'message' => 'Plat introuvable ou acces refuse']);
+            exit();
+        }
+
+        $ok = $platClass->updateCategorie($id_plat, $nouvelle_cat);
+        echo json_encode(['success' => (bool)$ok]);
+        exit();
     }
 }

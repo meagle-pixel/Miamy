@@ -1,4 +1,5 @@
 <?php
+
 /** @var array  $resto             */
 /** @var array  $plats             */
 /** @var array  $platsParCategorie */
@@ -93,7 +94,9 @@
             $toutesCategories = ['Entrées', 'Plats', 'Desserts', 'Boissons', 'Snacks'];
             // On ajoute les éventuelles catégories personnalisées non standards
             foreach ($platsParCategorie as $cat => $_) {
-                if (!in_array($cat, $toutesCategories)) $toutesCategories[] = $cat;
+                if (!in_array($cat, $toutesCategories, true)) {
+                    $toutesCategories[] = $cat;
+                }
             }
             foreach ($toutesCategories as $categorie):
                 $platsCateg = $platsParCategorie[$categorie] ?? [];

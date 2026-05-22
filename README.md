@@ -387,6 +387,34 @@ Si succès → rien à faire (interface déjà à jour)
 Si erreur → JS annule le déplacement visuel (revert)
 ```
 
+## POURQUOI C'EST INTÉRESSANT TECHNIQUEMENT
+
+- **Pas de rechargement de page** : l'utilisateur a l'impression que
+  la modif est instantanée.
+- **Mise à jour optimiste** : l'UI bouge AVANT la réponse serveur, ce
+  qui donne une sensation de fluidité.
+- **Mécanisme de rollback** : si le serveur dit non, on annule
+  visuellement le déplacement, donc l'utilisateur n'est jamais en
+  désynchro avec la base.
+- **Sécurité respectée** : 3 vérifications côté serveur (connecté,
+  catégorie whitelisted, ownership du plat). Même si quelqu'un trichait
+  avec son JS, le serveur refuserait.
+- **Format JSON propre** : standard universel pour les API web.
+
+## POUR LA PRÉSENTATION ORALE
+
+Cette feature illustre 4 concepts importants à mentionner devant un jury :
+
+- **L'AJAX** : appel HTTP asynchrone (fetch) qui modifie la base sans
+  rechargement.
+- **L'utilisation d'une librairie JS externe** : SortableJS via CDN, sans
+  installation ni dépendance npm.
+- **Le découplage frontend / backend** : le JS ne fait que parler à un
+  endpoint HTTP qui renvoie du JSON — c'est exactement le même principe
+  qu'une API REST moderne (React/Vue/Angular ↔ API PHP).
+- **L'expérience utilisateur** : mise à jour optimiste + rollback en cas
+  d'erreur = perception d'une interface instantanée et fiable.
+
 
 ---
 

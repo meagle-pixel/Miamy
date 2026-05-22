@@ -10,18 +10,11 @@ class RestaurantController
         $restoClass  = new Restaurant();
         $restaurants = $restoClass->listRestaurants(activeOnly: false);
 
-        $jourAujourdhui     = (int)date('N') - 1;
-        $pdo                = Database::getInstance()->getConnection();
         $horairesAujourdhui = [];
-
         if (!empty($restaurants)) {
-            $ids  = implode(',', array_map(fn($r) => (int)$r['id_restaurant'], $restaurants));
-            $stmt = $pdo->query(
-                "SELECT * FROM horaires WHERE id_restaurant IN ($ids) AND jour = $jourAujourdhui"
-            );
-            foreach ($stmt->fetchAll() as $h) {
-                $horairesAujourdhui[(int)$h['id_restaurant']] = $h;
-            }
+            $ids                = array_map(fn($r) => (int)$r['id_restaurant'], $restaurants);
+            $horairesClass      = new Horaires();
+            $horairesAujourdhui = $horairesClass->getTodayForRestaurants($ids);
         }
 
         return compact('restaurants', 'horairesAujourdhui');
@@ -32,16 +25,13 @@ class RestaurantController
     // ---------------------------------------------------------------
     public function ajouter()
     {
-        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || (int)$_SESSION['user']['profil'] !== 2) {
-            header('Location: ' . $GLOBALS['url'] . '/connexion');
-            exit();
-        }
+        Auth::requireExactProfile(2);
 
         $message_success = '';
         $message_error   = '';
 
-        $pdo        = Database::getInstance()->getConnection();
-        $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
+        $categoryClass = new Category();
+        $categories    = $categoryClass->listAll();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_restaurant'])) {
 
@@ -59,27 +49,19 @@ class RestaurantController
                 $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name)));
                 $slug = $slug . '-' . uniqid();
 
+                // Upload image via le helper centralisé (silencieux en cas d'echec : on garde l'image par defaut)
                 $image_name = 'default-resto.jpg';
                 if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-                    $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-                    $ext     = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-
-                    if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
-                        $image_name  = $slug . '.' . $ext;
-                        $upload_path = $GLOBALS['dev']
-                            ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/restaurants/' . $image_name
-                            : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/restaurants/' . $image_name;
-
-                        move_uploaded_file($_FILES['image']['tmp_name'], $upload_path);
+                    $uploader = new ImageUploader('restaurants');
+                    $new      = $uploader->upload($_FILES['image'], $slug);
+                    if ($new) {
+                        $image_name = $new;
                     }
                 }
 
                 try {
-                    $stmt = $pdo->prepare(
-                        "INSERT INTO restaurants (name, slug, description, city, main_image, id_restaurateur, created_at)
-                         VALUES (:name, :slug, :description, :city, :main_image, :id_restaurateur, NOW())"
-                    );
-                    $stmt->execute([
+                    $restoClass = new Restaurant();
+                    $new_id     = $restoClass->insert([
                         'name'            => $name,
                         'slug'            => $slug,
                         'description'     => $description,
@@ -88,16 +70,8 @@ class RestaurantController
                         'id_restaurateur' => $id_restaurateur,
                     ]);
 
-                    $new_id = $pdo->lastInsertId();
-
-                    if ($category_id > 0) {
-                        $stmt_cat = $pdo->prepare(
-                            "INSERT INTO restaurant_categories (id_restaurant, id_categorie) VALUES (:id_restaurant, :id_categorie)"
-                        );
-                        $stmt_cat->execute([
-                            'id_restaurant' => $new_id,
-                            'id_categorie'  => $category_id,
-                        ]);
+                    if ($new_id && $category_id > 0) {
+                        $restoClass->addCategory($new_id, $category_id);
                     }
 
                     $message_success = "Restaurant ajouté avec succès !";
@@ -117,32 +91,23 @@ class RestaurantController
     // ---------------------------------------------------------------
     public function modifier()
     {
-        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-            header('Location: ' . $GLOBALS['url'] . '/connexion');
-            exit();
-        }
+        Auth::requireRestaurateur();
 
         $id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-        $id_restaurateur = $_SESSION['user']['profil_id'];
-        $pdo             = Database::getInstance()->getConnection();
+        $id_restaurateur = (int)$_SESSION['user']['profil_id'];
 
-        $stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
-        $stmt->execute([
-            'id'              => $id_restaurant,
-            'id_restaurateur' => $id_restaurateur,
-        ]);
-        $resto = $stmt->fetch();
+        $restoClass = new Restaurant();
+        $resto      = $restoClass->getOwnedBy($id_restaurant, $id_restaurateur);
 
         if (!$resto) {
             header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
             exit();
         }
 
-        $stmt_cur_cat = $pdo->prepare("SELECT id_categorie FROM restaurant_categories WHERE id_restaurant = :id LIMIT 1");
-        $stmt_cur_cat->execute(['id' => $id_restaurant]);
-        $current_category_id = (int)($stmt_cur_cat->fetchColumn() ?: 0);
+        $current_category_id = $restoClass->getCurrentCategoryId($id_restaurant);
 
-        $categories      = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
+        $categoryClass   = new Category();
+        $categories      = $categoryClass->listAll();
         $message_success = '';
         $message_error   = '';
 
@@ -156,46 +121,33 @@ class RestaurantController
             if (empty($name) || empty($city)) {
                 $message_error = "Le nom et la ville sont obligatoires.";
             } else {
+                // Upload image via le helper centralisé (on garde l'image existante si pas d'upload ou echec)
                 $image_name = $resto['main_image'];
-
                 if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-                    $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-                    $ext     = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-
-                    if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
-                        $image_name  = $resto['slug'] . '-' . time() . '.' . $ext;
-                        $upload_path = $GLOBALS['dev']
-                            ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/restaurants/' . $image_name
-                            : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/restaurants/' . $image_name;
-
-                        move_uploaded_file($_FILES['image']['tmp_name'], $upload_path);
+                    $uploader = new ImageUploader('restaurants');
+                    $new      = $uploader->upload($_FILES['image'], $resto['slug'] . '-' . time());
+                    if ($new) {
+                        $image_name = $new;
                     }
                 }
 
-                $upd = $pdo->prepare(
-                    "UPDATE restaurants SET
-                        name = :name, city = :city, description = :description, main_image = :main_image
-                     WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur"
-                );
+                $ok = $restoClass->updateInfoOwned($id_restaurant, $id_restaurateur, [
+                    'name'        => $name,
+                    'city'        => $city,
+                    'description' => $description,
+                    'main_image'  => $image_name,
+                ]);
 
-                if ($upd->execute([
-                    'name'            => $name,
-                    'city'            => $city,
-                    'description'     => $description,
-                    'main_image'      => $image_name,
-                    'id'              => $id_restaurant,
-                    'id_restaurateur' => $id_restaurateur,
-                ])) {
-                    $pdo->prepare("DELETE FROM restaurant_categories WHERE id_restaurant = :id")->execute(['id' => $id_restaurant]);
+                if ($ok) {
+                    // Mise a jour de la categorie via la table de liaison
+                    $restoClass->removeCategories($id_restaurant);
                     if ($category_id > 0) {
-                        $pdo->prepare("INSERT INTO restaurant_categories (id_restaurant, id_categorie) VALUES (:id_restaurant, :id_categorie)")
-                            ->execute(['id_restaurant' => $id_restaurant, 'id_categorie' => $category_id]);
+                        $restoClass->addCategory($id_restaurant, $category_id);
                     }
                     $current_category_id = $category_id;
                     $message_success     = "Restaurant modifié avec succès !";
-                    $stmt2               = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id");
-                    $stmt2->execute(['id' => $id_restaurant]);
-                    $resto = $stmt2->fetch();
+                    // Re-fetch pour la vue
+                    $resto = $restoClass->getById($id_restaurant);
                 } else {
                     $message_error = "Erreur lors de la modification.";
                 }
@@ -210,26 +162,18 @@ class RestaurantController
     // ---------------------------------------------------------------
     public function supprimer()
     {
-        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-            header('Location: ' . $GLOBALS['url'] . '/connexion');
-            exit();
-        }
+        Auth::requireRestaurateur();
 
         $id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-        $id_restaurateur = $_SESSION['user']['profil_id'];
+        $id_restaurateur = (int)$_SESSION['user']['profil_id'];
 
         if (!$id_restaurant) {
             header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
             exit();
         }
 
-        $pdo  = Database::getInstance()->getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_restaurateur");
-        $stmt->execute([
-            'id'              => $id_restaurant,
-            'id_restaurateur' => $id_restaurateur,
-        ]);
-        $resto = $stmt->fetch();
+        $restoClass = new Restaurant();
+        $resto      = $restoClass->getOwnedBy($id_restaurant, $id_restaurateur);
 
         if (!$resto) {
             header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
@@ -240,8 +184,7 @@ class RestaurantController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
             try {
-                $restaurant = new Restaurant();
-                if ($restaurant->delete($id_restaurant)) {
+                if ($restoClass->delete($id_restaurant)) {
                     header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur?success=deleted');
                     exit();
                 } else {
@@ -254,5 +197,89 @@ class RestaurantController
         }
 
         return compact('resto', 'id_restaurant', 'message_error');
+    }
+
+    // ---------------------------------------------------------------
+    // Sauvegarde des horaires d'un restaurant (POST depuis details.php)
+    // ---------------------------------------------------------------
+    public function saveHoraires()
+    {
+        Auth::requireRestaurateur();
+
+        $id_restaurant   = isset($_POST['id_restaurant']) ? (int)$_POST['id_restaurant'] : 0;
+        $id_restaurateur = (int)$_SESSION['user']['profil_id'];
+
+        if (!$id_restaurant) {
+            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            exit();
+        }
+
+        $restoClass = new Restaurant();
+        if (!$restoClass->isOwnedBy($id_restaurant, $id_restaurateur)) {
+            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            exit();
+        }
+
+        $data          = $_POST['horaires'] ?? [];
+        $horairesClass = new Horaires();
+        $ok            = $horairesClass->save($id_restaurant, $data);
+
+        $status = $ok ? 'ok' : 'error';
+        header('Location: ' . $GLOBALS['url'] . '/details?id=' . $id_restaurant . '&horaires=' . $status);
+        exit();
+    }
+
+    // ---------------------------------------------------------------
+    // Page details (restaurateur) : stats de la carte + horaires
+    // ---------------------------------------------------------------
+    public function details()
+    {
+        Auth::requireRestaurateur();
+
+        $id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $id_restaurateur = (int)$_SESSION['user']['profil_id'];
+
+        if (!$id_restaurant) {
+            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            exit();
+        }
+
+        // Verification de propriete
+        $restoClass = new Restaurant();
+        $resto      = $restoClass->getOwnedBy($id_restaurant, $id_restaurateur);
+
+        if (!$resto) {
+            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            exit();
+        }
+
+        // Recuperation des plats + stats
+        $platClass = new Plat();
+        $plats     = $platClass->getByRestaurant($id_restaurant);
+
+        $totalPlats         = count($plats);
+        $platsDisponibles   = count(array_filter($plats, fn($p) => $p['disponible']));
+        $platsIndisponibles = $totalPlats - $platsDisponibles;
+        $prixMoyen          = $totalPlats > 0
+            ? array_sum(array_column($plats, 'prix')) / $totalPlats
+            : 0;
+
+        // 3 derniers plats ajoutes
+        $dernierPlats = $platClass->getDerniersPlats($id_restaurant);
+
+        // Horaires
+        $horairesClass = new Horaires();
+        $horaires      = $horairesClass->getByRestaurant($id_restaurant);
+
+        // Messages apres redirection depuis save-horaires
+        $horaires_success = isset($_GET['horaires']) && $_GET['horaires'] === 'ok';
+        $horaires_error   = isset($_GET['horaires']) && $_GET['horaires'] === 'error';
+
+        return compact(
+            'resto', 'id_restaurant',
+            'plats', 'totalPlats', 'platsDisponibles', 'platsIndisponibles', 'prixMoyen',
+            'dernierPlats',
+            'horaires', 'horaires_success', 'horaires_error'
+        );
     }
 }

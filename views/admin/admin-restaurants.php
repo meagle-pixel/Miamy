@@ -1,75 +1,14 @@
 <?php
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
+/** @var string $error                 */
+/** @var string $success               */
+/** @var array  $restaurants           */
+/** @var array  $categories_restaurant */
 
-$error   = '';
-$success = '';
-
-// Traitement de la suppression d'un restaurant (action admin)
-if (
-    $_SERVER['REQUEST_METHOD'] === 'POST'
-    && isset($_POST['action'], $_POST['id_restaurant'])
-    && $_POST['action'] === 'delete'
-) {
-
-    $idToDelete = (int) $_POST['id_restaurant'];
-
-    try {
-        $resto = new Restaurant();
-        if ($resto->delete($idToDelete)) {
-            header('Location: ' . $GLOBALS['url'] . '/admin-restaurants?success=deleted');
-            exit();
-        } else {
-            $error = "La suppression du restaurant a échoué.";
-        }
-    } catch (PDOException $e) {
-        error_log('[admin-restaurants] delete : ' . $e->getMessage());
-        $error = "Erreur lors de la suppression. Détail technique : " . $e->getMessage();
-    }
-}
-
-// Traitement de la modification de catégorie d'un restaurant
-if (
-    $_SERVER['REQUEST_METHOD'] === 'POST'
-    && isset($_POST['action'], $_POST['id_restaurant'], $_POST['category_id'])
-    && $_POST['action'] === 'update_category'
-) {
-    $idRestaurant = (int) $_POST['id_restaurant'];
-    $idCategorie  = (int) $_POST['category_id'];
-
-    try {
-        $resto = new Restaurant();
-        if ($resto->updateCategory($idRestaurant, $idCategorie)) {
-            header('Location: ' . $GLOBALS['url'] . '/admin-restaurants?success=updated');
-            exit();
-        } else {
-            $error = "La mise à jour de la catégorie a échoué.";
-        }
-    } catch (PDOException $e) {
-        error_log('[admin-restaurants] update_category : ' . $e->getMessage());
-        $error = "Erreur lors de la modification de la catégorie. Détail technique : " . $e->getMessage();
-    }
-}
-
-if (isset($_GET['success'])) {
-    if ($_GET['success'] === 'deleted') {
-        $success = "Restaurant supprimé avec succès.";
-    } elseif ($_GET['success'] === 'updated') {
-        $success = "Catégorie mise à jour avec succès.";
-    }
-}
-
-try {
-    $resto = new Restaurant();
-    $restaurants = $resto->listRestaurants(false);
-    $categories_restaurant = (new Category())->listAll();
-} catch (PDOException $e) {
-    $error = "Erreur lors du chargement des données.";
-    error_log('[admin-restaurants] load : ' . $e->getMessage());
-}
-
+// Valeurs par defaut au cas ou la vue serait appelee sans controller
+$error                 = $error                 ?? '';
+$success               = $success               ?? '';
+$restaurants           = $restaurants           ?? [];
+$categories_restaurant = $categories_restaurant ?? [];
 ?>
 
 <div class="container-fluid px-4">

@@ -1,146 +1,175 @@
 <?php
+/**
+ * Client : gestion des comptes clients (table `clients`).
+ * Le compte de connexion associe vit dans `utilisateurs` (profil = 3).
+ *
+ * NOTE : seule la methode insert() a un caller actuellement (AuthController::registerClient).
+ * Les autres methodes sont conservees pour les fonctionnalites futures (panier, commandes,
+ * espace client) mais ne sont actuellement appelees nulle part.
+ */
+class Client
+{
+    private $pdo;
 
-	function getAllClients($onlynb = false)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$data = $pdo->query("SELECT * FROM `clients`")->fetchAll();
-		return $onlynb ? count($data) : $data;
-	}
+    public function __construct()
+    {
+        $this->pdo = Database::getInstance()->getConnection();
+    }
 
-	function deleteClient($id)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("DELETE FROM `clients` WHERE `id` = :id");
-		return $stmt->execute(['id' => (int)$id]);
-	}
+    public function listAll(bool $onlyCount = false)
+    {
+        $data = $this->pdo->query("SELECT * FROM `clients`")->fetchAll();
+        return $onlyCount ? count($data) : $data;
+    }
 
-	function getClient($id)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = :id");
-		$stmt->execute(['id' => (int)$id]);
-		return $stmt->fetch() ?: [];
-	}
+    public function delete(int $id): bool
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM `clients` WHERE `id` = :id");
+        return $stmt->execute(['id' => $id]);
+    }
 
-	function getClientByEmail($email)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `email` = :email");
-		$stmt->execute(['email' => $email]);
-		return $stmt->fetch() ?: [];
-	}
+    public function getById(int $id): array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM `clients` WHERE `id` = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch() ?: [];
+    }
 
-	function insertClient($client)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare(
-			"INSERT INTO `clients`
-			(`id`, `civilite`, `nom`, `prenom`, `telephone`,
-			 `adresse`, `adresse_comp`, `codepostal`, `ville`)
-			VALUES
-			(NULL, :civilite, :nom, :prenom, :telephone,
-			 :adresse, :adresse_comp, :codepostal, :ville)"
-		);
-		$stmt->execute([
-			'civilite'     => $client['civilite'],
-			'nom'          => $client['nom'],
-			'prenom'       => $client['prenom'],
-			'telephone'    => $client['telephone'],
-			'adresse'      => $client['adresse'],
-			'adresse_comp' => $client['adresse_comp'],
-			'codepostal'   => $client['codepostal'],
-			'ville'        => $client['ville'],
-		]);
-		return $pdo->lastInsertId();
-	}
+    public function getByEmail(string $email): array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM `clients` WHERE `email` = :email");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch() ?: [];
+    }
 
-	function updateClientDataLite($id)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `id` = :id");
-		$stmt->execute(['id' => (int)$id]);
-		$result = $stmt->fetch();
+    /**
+     * Cree un nouveau client. Retourne l'ID insere.
+     */
+    public function insert(array $client)
+    {
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO `clients`
+            (`id`, `civilite`, `nom`, `prenom`, `telephone`,
+             `adresse`, `adresse_comp`, `codepostal`, `ville`)
+            VALUES
+            (NULL, :civilite, :nom, :prenom, :telephone,
+             :adresse, :adresse_comp, :codepostal, :ville)"
+        );
+        $stmt->execute([
+            'civilite'     => $client['civilite'],
+            'nom'          => $client['nom'],
+            'prenom'       => $client['prenom'],
+            'telephone'    => $client['telephone'],
+            'adresse'      => $client['adresse'],
+            'adresse_comp' => $client['adresse_comp'],
+            'codepostal'   => $client['codepostal'],
+            'ville'        => $client['ville'],
+        ]);
+        return $this->pdo->lastInsertId();
+    }
 
-		if ($result) {
-			$_SESSION['connected'] = true;
-			$_SESSION['user']      = $result;
-		} else {
-			$_SESSION['connected'] = false;
-			$_SESSION['user']      = false;
-		}
+    /**
+     * Charge un client dans la session et met a jour sa date d'action.
+     * Utilise par le flux de connexion client (pas encore branche).
+     */
+    public function refreshSession(int $id): void
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM `clients` WHERE `id` = :id");
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch();
 
-		$upd = $pdo->prepare("UPDATE `clients` SET `dateaction` = NOW() WHERE `id` = :id");
-		$upd->execute(['id' => (int)$id]);
+        if ($result) {
+            $_SESSION['connected'] = true;
+            $_SESSION['user']      = $result;
+        } else {
+            $_SESSION['connected'] = false;
+            $_SESSION['user']      = false;
+        }
 
-		insertIP($id, 2);
-	}
+        $upd = $this->pdo->prepare("UPDATE `clients` SET `dateaction` = NOW() WHERE `id` = :id");
+        $upd->execute(['id' => $id]);
 
-	function trytoconnectClient($email, $pass)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT * FROM `clients` WHERE `email` = :email");
-		$stmt->execute(['email' => $email]);
-		$user = $stmt->fetch();
+        // insertIP est encore une fonction globale (class.users.php pas encore converti).
+        insertIP($id, 2);
+    }
 
-		if ($user && password_verify($pass, $user['motdepasse'])) {
-			$_SESSION['connected'] = true;
-			$_SESSION['user']      = $user;
-			return true;
-		}
+    /**
+     * Tentative de connexion directe client (table `clients`).
+     * Non utilise actuellement : le projet passe par trytoconnect() de class.users.php.
+     */
+    public function tryToConnect(string $email, string $pass): bool
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM `clients` WHERE `email` = :email");
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch();
 
-		$_SESSION['connected'] = false;
-		$_SESSION['user']      = false;
-		return false;
-	}
+        if ($user && password_verify($pass, $user['motdepasse'])) {
+            $_SESSION['connected'] = true;
+            $_SESSION['user']      = $user;
+            return true;
+        }
 
-	function updateClient($client)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare(
-			"UPDATE `clients` SET
-			`email` = :email, `civilite` = :civilite, `nom` = :nom, `prenom` = :prenom,
-			`telephone` = :telephone, `adresse` = :adresse, `adresse_comp` = :adresse_comp,
-			`codepostal` = :codepostal, `ville` = :ville
-			WHERE `id` = :id"
-		);
-		$stmt->execute([
-			'email'        => $client['email'],
-			'civilite'     => $client['civilite'],
-			'nom'          => $client['nom'],
-			'prenom'       => $client['prenom'],
-			'telephone'    => $client['telephone'],
-			'adresse'      => $client['adresse'],
-			'adresse_comp' => $client['adresse_comp'],
-			'codepostal'   => $client['codepostal'],
-			'ville'        => $client['ville'],
-			'id'           => (int)$client['id'],
-		]);
+        $_SESSION['connected'] = false;
+        $_SESSION['user']      = false;
+        return false;
+    }
 
-		if (isset($client['motdepasse'])) {
-			$upd = $pdo->prepare("UPDATE `clients` SET `motdepasse` = :motdepasse WHERE `id` = :id");
-			$upd->execute([
-				'motdepasse' => password_hash($client['motdepasse'], PASSWORD_DEFAULT),
-				'id'         => (int)$client['id'],
-			]);
-		}
-	}
+    /**
+     * Met a jour les donnees d'un client. Si $client['motdepasse'] est present,
+     * le mot de passe est aussi mis a jour (hashe).
+     */
+    public function update(array $client): void
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE `clients` SET
+                `email`        = :email,
+                `civilite`     = :civilite,
+                `nom`          = :nom,
+                `prenom`       = :prenom,
+                `telephone`    = :telephone,
+                `adresse`      = :adresse,
+                `adresse_comp` = :adresse_comp,
+                `codepostal`   = :codepostal,
+                `ville`        = :ville
+             WHERE `id` = :id"
+        );
+        $stmt->execute([
+            'email'        => $client['email'],
+            'civilite'     => $client['civilite'],
+            'nom'          => $client['nom'],
+            'prenom'       => $client['prenom'],
+            'telephone'    => $client['telephone'],
+            'adresse'      => $client['adresse'],
+            'adresse_comp' => $client['adresse_comp'],
+            'codepostal'   => $client['codepostal'],
+            'ville'        => $client['ville'],
+            'id'           => (int)$client['id'],
+        ]);
 
-	function changePassword($id, $pass)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("UPDATE `clients` SET `motdepasse` = :motdepasse WHERE `id` = :id");
-		$stmt->execute([
-			'motdepasse' => password_hash($pass, PASSWORD_DEFAULT),
-			'id'         => (int)$id,
-		]);
-	}
+        if (isset($client['motdepasse'])) {
+            $this->changePassword((int)$client['id'], $client['motdepasse']);
+        }
+    }
 
-	function existEmailClient($email)
-	{
-		$pdo  = Database::getInstance()->getConnection();
-		$stmt = $pdo->prepare("SELECT id FROM `clients` WHERE `email` = :email");
-		$stmt->execute(['email' => $email]);
-		return $stmt->fetch() !== false;
-	}
+    /**
+     * Change le mot de passe d'un client (hash bcrypt).
+     */
+    public function changePassword(int $id, string $pass): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE `clients` SET `motdepasse` = :motdepasse WHERE `id` = :id");
+        $stmt->execute([
+            'motdepasse' => password_hash($pass, PASSWORD_DEFAULT),
+            'id'         => $id,
+        ]);
+    }
 
-?>
+    /**
+     * Verifie si un email est deja utilise par un client.
+     */
+    public function emailExists(string $email): bool
+    {
+        $stmt = $this->pdo->prepare("SELECT id FROM `clients` WHERE `email` = :email");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch() !== false;
+    }
+}

@@ -128,40 +128,59 @@ PHP reçoit : $\_GET['mod'] = 'connexion'
 
 FONCTIONNALITÉS DÉVELOPPÉES
 -----------------------------
-1. INSCRIPTION (views/register.php)
-   → Crée un restaurateur + utilisateur
- 
-2. CONNEXION (views/login.php)
-   → Authentification + sessions
- 
-3. DÉCONNEXION (views/deconnexion.php)
-   → Destruction session + redirection
- 
-4. HEADER DYNAMIQUE (views/partials/header.php)
-   → Affiche "Bonjour [Prénom]" si connecté
-   → Affiche "Connexion | Inscription" sinon
- 
-5. DASHBOARD RESTAURATEUR (views/mon-compte-restaurateur.php)
-   → Liste des restaurants du gérant
-   → Boutons : Gérer carte, QR Codes, Modifier
- 
-6. AJOUTER RESTAURANT (views/ajouter-restaurant.php)
-   → Formulaire : nom, ville, catégorie, description, image
-   → Upload image vers assets/img/restaurants/
- 
-7. MODIFIER RESTAURANT (views/modifier-restaurant.php)
-   → Pré-remplissage du formulaire
-   → Vérification propriétaire
-   → Update en BDD
- 
- 
+Architecture MVC : chaque page passe par le routeur (index.php) qui
+appelle une méthode de contrôleur, qui prépare les données puis inclut
+la vue correspondante. Voir les sections "REFACTOR MVC" en bas du fichier
+pour le détail de la mise en place.
+
+PAGES PUBLIQUES
+- Accueil               -> HomeController::index   (views/home.php)
+- Connexion             -> AuthController::login   (views/login.php)
+- Inscription resto     -> AuthController::register        (views/register.php)
+- Inscription client    -> AuthController::registerClient  (views/register-client.php)
+- Déconnexion           -> AuthController::logout  (header+exit, pas de vue)
+- Liste des restaurants -> RestaurantController::liste     (views/liste-restaurants.php)
+
+ESPACE RESTAURATEUR (profil = 2)
+- Mon compte            -> UserController::monCompteRestaurateur
+- Éditer profil         -> UserController::profilEditer
+- Ajouter restaurant    -> RestaurantController::ajouter
+- Modifier restaurant   -> RestaurantController::modifier
+- Supprimer restaurant  -> RestaurantController::supprimer
+- Gestion de la carte   -> PlatController::gestionCarte
+- CRUD plats            -> PlatController::ajouter / modifier / supprimer
+- Toggle dispo plat     -> PlatController::toggleDisponible   (AJAX, JSON)
+- Changer catégorie     -> PlatController::updateCategorie    (AJAX, JSON)
+- Sauver horaires       -> RestaurantController::saveHoraires
+
+ESPACE ADMIN (profil = 1)
+- Tableau de bord       -> AdminController::dashboard
+- Gestion utilisateurs  -> AdminController::panel
+- Gestion restaurants   -> AdminController::restaurants
+- Ajouter un admin      -> AdminController::ajouterAdmin
+
+CLASSES DE SERVICE (classes/)
+- Database, User, UserLog, Auth, Restaurant, Restaurateur, Plat, Client,
+  Category, Horaires, Page, ImageUploader, plus class.functions.php
+  (utilitaires : get_ip, sanitizeString, array_sort).
+
+
 TABLES BDD UTILISÉES
 -----------------------------
-- utilisateurs : comptes de connexion
-- restaurateurs : infos profil gérant
-- restaurants : établissements
-- categories : types de cuisine (Français, Italien, etc.)
-- pages : routage URL → fichier PHP
+- utilisateurs   : comptes de connexion (email, motdepasse, profil, profil_id)
+- administrateurs: fiches admin (profil = 1)
+- restaurateurs  : fiches gérant   (profil = 2)
+- clients        : fiches client   (profil = 3)
+- restaurants    : établissements
+- plats          : carte d'un restau
+- horaires       : 7 jours par restau
+- categories     : types de cuisine (Français, Italien...)
+- restaurant_categories : liaison restau ↔ catégorie
+- pages          : routage URL → fichier PHP (utilisé par Page::getByMod)
+- profils, autorisations : ACL en base (table support, peu utilisée)
+- user_logs      : journal des actions utilisateur (UserLog::log)
+- ips            : tracking IP (table support, code mort actuel)
+- password_resets: tokens de réinit mot de passe
 
 
 ---
@@ -189,7 +208,7 @@ uniquement pour l'appel AJAX.
 ## FICHIERS MODIFIÉS / CRÉÉS
 
 1. views/gestion-carte.php  → modifié (HTML + JS)
-2. actions/update-plat-categorie.php  → créé (endpoint AJAX)
+2. PlatController::updateCategorie  → méthode AJAX (route /update-plat-categorie)
 
 ---
 
@@ -292,7 +311,7 @@ et remet le plat à sa place d'origine.
 
 ---
 
-## 3. FICHIER AJAX : actions/update-plat-categorie.php
+## 3. ENDPOINT AJAX : PlatController::updateCategorie (route /update-plat-categorie)
 
 Reçoit la requête JavaScript (méthode POST) et met à jour la base de données.
 
@@ -358,7 +377,7 @@ SortableJS détecte le drop (onEnd)
         ↓
 JS met à jour l'interface immédiatement (optimiste)
         ↓
-JS envoie $.post() → actions/update-plat-categorie.php
+JS envoie fetch() → /update-plat-categorie → PlatController::updateCategorie
         ↓
 PHP vérifie session + propriété + valide catégorie
         ↓
@@ -382,7 +401,7 @@ sans passer par le formulaire de modification.
 ## FICHIERS MODIFIÉS / CRÉÉS
 
 1. views/gestion-carte.php  → modifié (HTML + JS)
-2. actions/toggle-disponible-plat.php  → créé (endpoint AJAX)
+2. PlatController::toggleDisponible  → méthode AJAX (route /toggle-disponible-plat)
 
 ---
 
@@ -436,7 +455,7 @@ $(document).on('click', '.btn-toggle-dispo', function () {
 
     btn.prop('disabled', true); // désactive pendant la requête
 
-    $.post(BASE_URL + '/actions/toggle-disponible-plat.php', { id_plat: platId },
+    fetch(BASE_URL + '/toggle-disponible-plat', { id_plat: platId },
     function (resp) {
         if (resp.success) {
             // resp.disponible = nouvel état retourné par le serveur (0 ou 1)
@@ -461,7 +480,7 @@ $(document).on('click', '.btn-toggle-dispo', function () {
 
 ---
 
-## 3. FICHIER AJAX : actions/toggle-disponible-plat.php
+## 3. ENDPOINT AJAX : PlatController::toggleDisponible (route /toggle-disponible-plat)
 
 Reçoit id_plat en POST et inverse la valeur de disponible en base.
 
@@ -508,7 +527,7 @@ Utilisateur clique sur "Indispo" / "Dispo"
         ↓
 JS désactive le bouton (anti double-clic)
         ↓
-JS envoie $.post() → actions/toggle-disponible-plat.php
+JS envoie fetch() → /toggle-disponible-plat → PlatController::toggleDisponible
         ↓
 PHP vérifie session + propriété du plat
         ↓
@@ -685,22 +704,31 @@ scripts JavaScript.
 
 ---
 
-## ÉTAPE 4 — MODIFIER LE ROUTEUR index.php
+## ÉTAPE 4 — ROUTEUR : DISPATCHMAP + DÉTECTION LAYOUT ADMIN
 
-Le routeur d'origine inclut systématiquement les partials publics. On
-ajoute une détection pour basculer sur les partials admin quand la page
-demandée est une page admin.
+Le routeur d'origine incluait systématiquement les partials publics. Deux
+choses ont été ajoutées :
+
+(1) Une `$dispatchMap` qui mappe chaque slug d'URL vers la méthode du
+contrôleur correspondante. C'est la table de routage centrale du projet.
+
+(2) Une détection de layout admin basée sur le chemin de la vue : si le
+fichier de vue est dans `views/admin/`, on inclut les partials admin
+(template SB Admin) au lieu des partials publics.
 
 ```php
-// Liste blanche des slugs (mod) qui doivent utiliser le layout admin.
-// Ajouter ici tout nouveau mod admin.
-$admin_mods = ['dashboard', 'admin-panel'];
+$dispatchMap = [
+    'accueil'           => [new HomeController(),       'index'],
+    'connexion'         => [new AuthController(),       'login'],
+    // ... (toutes les routes du projet)
+    'dashboard'         => [new AdminController(),      'dashboard'],
+    'admin-panel'       => [new AdminController(),      'panel'],
+    'admin-restaurants' => [new AdminController(),      'restaurants'],
+    'ajouter-admin'     => [new AdminController(),      'ajouterAdmin'],
+];
 
-// Une page est admin si :
-//   - son fichier est dans views/admin/, OU
-//   - son slug est dans la liste blanche ci-dessus
-$is_admin_page = (strpos($page_url, 'views/admin/') === 0)
-              || in_array($page, $admin_mods, true);
+// Une page est admin si son fichier est dans views/admin/
+$is_admin_page = strpos($page_url, 'views/admin/') === 0;
 
 if ($is_admin_page) {
     include('views/partials/admin_head.php');
@@ -715,11 +743,10 @@ if ($is_admin_page) {
 }
 ```
 
-La double détection (chemin + liste blanche) est une sécurité : si l'url
-en BDD ne contient pas exactement `views/admin/`, la liste blanche prend
-le relais. Tu peux n'en garder qu'une si tu préfères.
-
----
+Note : il n'y a plus de "liste blanche" séparée pour détecter le layout
+admin (contrairement à une ancienne version). Le critère unique est le
+chemin de la vue dans `views/admin/`. Tant qu'une nouvelle page admin
+est créée dans ce dossier, elle bascule automatiquement sur le layout admin.
 
 ## ÉTAPE 5 — CRÉER UNE PAGE ADMIN
 
@@ -788,11 +815,18 @@ INSERT INTO pages (nom, `mod`, url)
 VALUES ('Gestion des plats', 'gestion-plats', 'views/admin/gestion-plats.php');
 ```
 
-### (b) Ajouter le slug à la liste blanche dans index.php
+### (b) Ajouter le slug et la méthode du contrôleur à `$dispatchMap` dans index.php
 
 ```php
-$admin_mods = ['dashboard', 'admin-panel', 'gestion-plats'];
+$dispatchMap = [
+    // ... routes existantes
+    'gestion-plats' => [new AdminController(), 'gestionPlats'],
+];
 ```
+
+Et créer la méthode correspondante dans le contrôleur. Pour une page admin,
+ajouter `AdminController::gestionPlats()` qui appelle `Auth::requireAdmin()`
+en tête et retourne les données via `compact(...)`.
 
 ### (c) Ajouter un lien dans la sidebar de admin_head.php
 
@@ -814,7 +848,7 @@ encadrée par la sidebar et la topbar SB Admin.
 1. Créer le fichier `views/admin/ma-page.php`
    → commence par `<div class="container-fluid px-4">`
 2. Insérer la ligne dans la table `pages` (mod = slug, url = chemin)
-3. Ajouter le slug à `$admin_mods` dans `index.php`
+3. Ajouter le slug + la méthode du contrôleur à `$dispatchMap` dans `index.php`
 4. Ajouter le `<a class="nav-link">` correspondant dans `admin_head.php`
 
 ---
@@ -854,3 +888,277 @@ mappe chaque type d'action à une couleur de badge :
 Pour ajouter un nouveau type d'action coloré, ajouter un `case` dans
 le `switch` de la fonction. Sinon le badge sera gris par défaut.
 
+
+# REFACTOR MVC — ÉTAPE 1 : ACCUEIL, CONNEXION, DÉCONNEXION
+
+## CONTEXTE
+
+Certaines vues contenaient encore de la logique métier (SQL, POST,
+redirections) avant le HTML. Cette première passe nettoie 3 pages :
+
+- `views/home.php`        → logique déplacée dans `HomeController::index()`
+- `views/login.php`       → logique déplacée dans `AuthController::login()`
+- `views/deconnexion.php` → déplacée dans `AuthController::logout()`,
+  fichier SUPPRIMÉ.
+
+`views/details.php` est volontairement exclu.
+
+## FICHIERS CRÉÉS
+
+- `controllers/HomeController.php` — `index()` : charge catégories et
+  restaurants featured, retourne `compact('allCategories', 'featuredRestos', 'error_message')`.
+- `controllers/AuthController.php` — `login()` (traite POST + redirige
+  selon profil) et `logout()` (log + session_destroy + header).
+
+## FICHIERS MODIFIÉS
+
+- `index.php` : 3 nouvelles entrées dans `$dispatchMap` (`accueil`, `connexion`,
+  `deconnexion`) ; le cas "pas de mod" devient `'accueil'` au lieu de bypasser
+  le système.
+- `views/home.php` : plus aucune logique en tête, juste un `?? []` de
+  défense pour les variables attendues.
+- `views/login.php` : le bloc PHP de traitement POST a disparu.
+
+## FICHIER SUPPRIMÉ
+
+`views/deconnexion.php` — La logique est dans `AuthController::logout()`
+qui fait `header()+exit()` avant que `index.php` n'inclue la vue. Pour la
+cohérence DB, on peut aussi exécuter :
+
+```sql
+UPDATE pages SET url = '' WHERE `mod` = 'deconnexion';
+```
+
+
+# REFACTOR MVC — ÉTAPE 2 : INSCRIPTIONS + ADMIN
+
+## INSCRIPTIONS
+
+Deux méthodes ajoutées à `AuthController` :
+
+- `register()` — inscription restaurateur (profil 2). Valide les 6 champs,
+  appelle `insertRestaurateur` puis `insertUtilisateur`. Renvoie 7 variables.
+- `registerClient()` — inscription client (profil 3). 11 champs, appelle
+  `insertClient` puis `insertUtilisateur`.
+
+Vues `register.php` et `register-client.php` réduites au HTML pur. Routes
+`inscription` et `inscription-client` ajoutées au `dispatchMap`.
+
+## ADMIN
+
+Nouveau `controllers/AdminController.php` avec :
+
+- `requireAdmin()` (privée à l'époque, supprimée à l'étape 5 au profit de
+  `Auth::requireAdmin`).
+- `dashboard()` — 10 indicateurs (compteurs + dernières inscriptions /
+  restaurants / logs).
+- `panel()` — gestion utilisateurs (POST update + delete).
+- `restaurants()` — gestion restaurants (POST delete + update_category).
+- `ajouterAdmin()` — création d'un compte admin (profil 1).
+
+La fonction `getActionBadgeStyle()` (mapping action → couleur de badge)
+est restée dans `views/admin/dashboard.php` car purement présentationnelle.
+
+Routes ajoutées : `dashboard`, `admin-panel`, `admin-restaurants`, `ajouter-admin`.
+
+
+# REFACTOR MVC — ÉTAPE 3 : SUPPRESSION DE actions/
+
+Le dossier `actions/` court-circuitait le routeur en exposant des fichiers
+PHP directement par leur chemin (`/actions/save-horaires.php`). Tout passe
+maintenant par `index.php`.
+
+## MIGRÉ
+
+- `actions/save-horaires.php`         → `RestaurantController::saveHoraires()`
+- `actions/toggle-disponible-plat.php` → `PlatController::toggleDisponible()` (AJAX, JSON)
+- `actions/update-plat-categorie.php`  → `PlatController::updateCategorie()`  (AJAX, JSON)
+
+## URL MISES À JOUR DANS LES VUES
+
+- `views/details.php`       : `action="...actions/save-horaires.php"` → `action="save-horaires"`
+- `views/gestion-carte.php` : `fetch(BASE_URL + '/actions/update-plat-categorie.php')` → `'/update-plat-categorie'`
+- `views/gestion-carte.php` : `fetch(BASE_URL + '/actions/toggle-disponible-plat.php')` → `'/toggle-disponible-plat'`
+
+## SUPPRIMÉ
+
+- `actions/changeRegion.php` (référence un `../login.php` qui n'existe plus)
+- `actions/changepermission.php`
+
+Le dossier `actions/` est entièrement supprimé.
+
+## NOUVELLES ROUTES
+
+```php
+'toggle-disponible-plat' => [new PlatController(),       'toggleDisponible'],
+'update-plat-categorie'  => [new PlatController(),       'updateCategorie'],
+'save-horaires'          => [new RestaurantController(), 'saveHoraires'],
+```
+
+
+# REFACTOR MVC — ÉTAPE 4 : MODÈLES OO ET SQL HORS CONTRÔLEURS
+
+## 4a — Sortir le SQL de PlatController et RestaurantController
+
+Les deux contrôleurs faisaient encore du `$pdo->prepare(...)` directement,
+la requête de vérification de propriété d'un restaurant était dupliquée 5 fois.
+
+**Nouvelles méthodes de modèle** :
+- `Restaurant` : `getOwnedBy`, `isOwnedBy`, `insert`, `addCategory`,
+  `removeCategories`, `getCurrentCategoryId`, `updateInfoOwned`, `listByOwner`
+- `Plat` : `getOwnedBy`, `isOwnedBy`, `updateCategorie`
+- `Horaires` : `getTodayForRestaurants`
+
+`PlatController` 449 → 400 lignes, `RestaurantController` 296 → 254 lignes.
+Plus aucun SQL brut dans ces deux contrôleurs.
+
+## 4b — Homogénéiser classes/ (procédural → OO)
+
+Le dossier `classes/` mélangeait de vraies classes et des fichiers
+`class.X.php` qui ne contenaient que des fonctions globales. Tout est
+maintenant OO.
+
+- `class.restaurateurs.php` → classe `Restaurateur` (4 méthodes).
+  `getRestaurantsByOwner` est devenu `Restaurant::listByOwner`.
+- `class.clients.php` → classe `Client` (10 méthodes pour le futur panier).
+  Seul `insert()` est activement utilisé aujourd'hui.
+- `class.pages.php` → classe `Page` (9 méthodes). Seul `getByMod()`
+  (anciennement `getPage`) est active — appelée par le routeur.
+- `class.users.php` (690 lignes, 27 fonctions dont 19 mortes) → classe
+  `User` (6 méthodes actives, 294 lignes) + classe `UserLog` (1 méthode).
+  Les 19 fonctions mortes ont été virées (historique dans git).
+
+Au passage, `isClear($profil, $page)` était la même chose que
+`Page::hasAccess($page, $profil)` (params inversés) : un duplicat de moins.
+
+
+# REFACTOR MVC — ÉTAPE 5 : CENTRALISATION DES PERMISSIONS
+
+Le bloc de check de session était copié-collé 13 fois dans les contrôleurs.
+Tout passe maintenant par une seule classe `Auth`.
+
+## NOUVELLE CLASSE Auth (classes/class.auth.php)
+
+Deux familles de méthodes statiques :
+
+**`require*()`** — `header()+exit()` si refus :
+- `Auth::requireConnected()` — juste connecté
+- `Auth::requireAdmin()` — admin (profil ≤ 1)
+- `Auth::requireRestaurateur()` — admin OU restaurateur (profil ≤ 2)
+- `Auth::requireExactProfile(int)` — profil strictement égal à N
+
+**`is*()`** — version booléenne pour endpoints AJAX qui renvoient du JSON :
+- `Auth::isConnected()`, `Auth::isAdmin()`, `Auth::isRestaurateur()`,
+  `Auth::hasExactProfile(int)`
+
+## AVANT / APRÈS
+
+```php
+// AVANT (4 lignes répétées 13 fois)
+if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true
+    || $_SESSION['user']['profil'] > 2) {
+    header('Location: ' . $GLOBALS['url'] . '/connexion');
+    exit();
+}
+
+// APRÈS
+Auth::requireRestaurateur();
+```
+
+Pour les endpoints AJAX :
+
+```php
+if (!Auth::isRestaurateur()) {
+    echo json_encode(['success' => false, 'message' => 'Non autorise']);
+    exit();
+}
+```
+
+## NETTOYAGE COLLATÉRAL
+
+La méthode privée `AdminController::requireAdmin()` (introduite à l'étape 2)
+est devenue redondante : supprimée + 4 appels `$this->requireAdmin()`
+remplacés par `Auth::requireAdmin()` direct.
+
+
+# REFACTOR MVC — ÉTAPE 6 : HELPER ImageUploader
+
+L'upload d'images était dupliqué dans 4 méthodes (PlatController::ajouter,
+modifier + RestaurantController::ajouter, modifier). Tout passe maintenant
+par une seule classe.
+
+## NOUVELLE CLASSE ImageUploader (classes/class.imageuploader.php)
+
+Centralise la validation (extensions JPG/JPEG/PNG/WebP, taille max 5 Mo),
+la création du dossier cible si nécessaire et l'appel à `move_uploaded_file`.
+
+## USAGE
+
+```php
+$uploader   = new ImageUploader('plats');   // ou 'restaurants'
+$image_name = $uploader->upload($_FILES['image'], $basename);
+
+if ($image_name) {
+    // OK, $image_name = "entrecote-1748000000.jpg" par exemple
+} elseif ($uploader->error) {
+    // Erreur de validation/upload : $uploader->error contient le message
+}
+```
+
+## AVANT / APRÈS
+
+Avant (répété 4 fois, ~20 lignes chaque fois) :
+
+```php
+if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+    $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+    $ext     = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+    if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
+        $slug_plat   = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
+        $image_name  = $slug_plat . '-' . time() . '.' . $ext;
+        $upload_dir  = $GLOBALS['dev']
+            ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/plats/'
+            : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/plats/';
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $image_name)) {
+            $message_error = "Erreur lors de l'upload de l'image.";
+        }
+    } else {
+        $message_error = "Image invalide (formats acceptés : JPG, PNG, WebP — max 5 Mo).";
+    }
+}
+```
+
+Après (5 lignes) :
+
+```php
+$uploader   = new ImageUploader('plats');
+$slug_plat  = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
+$image_name = $uploader->upload($_FILES['image'], $slug_plat . '-' . time());
+if ($uploader->error) {
+    $message_error = $uploader->error;
+}
+```
+
+## POUR ÉTENDRE PLUS TARD
+
+Si tu veux accepter le format GIF, modifier la taille max, ajouter des
+miniatures automatiques, valider le contenu réel du fichier, ou passer
+en CDN (S3, Cloudinary…), tu modifies UN seul fichier
+(`class.imageuploader.php`) et les 4 endroits en profitent automatiquement.
+
+
+# BILAN GLOBAL DU REFACTOR MVC
+
+Les 6 points du rapport initial sont tous traités :
+
+| # | Sujet                                          | Statut |
+|---|------------------------------------------------|--------|
+| 1 | Vues = contrôleurs déguisés                    | Étapes 1 + 2 |
+| 2 | Dossier actions/                               | Étape 3 |
+| 3 | SQL brut dans PlatController/RestaurantController | Étape 4 |
+| 4 | classes/ hétérogène (procédural + OO)          | Étape 4 bis |
+| 5 | Blocs de permission copiés-collés              | Étape 5 |
+| 6 | Upload d'images dupliqué                       | Étape 6 |
+
+`views/details.php` est volontairement resté hors scope (décision initiale).

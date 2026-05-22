@@ -1,82 +1,20 @@
 <?php
+/** @var array  $erreurs         */
+/** @var bool   $succes          */
+/** @var string $message_success */
+/** @var string $prenom          */
+/** @var string $nom             */
+/** @var string $email           */
+/** @var string $tel             */
 
-// Initialisation
-$erreurs        = [];
-$succes         = false;
-$message_success = "Votre compte gérant a été créé avec succès. Bienvenue chez Miamy !";
-
-$prenom = '';
-$nom    = '';
-$email  = '';
-$tel    = '';
-
-// Traitement du formulaire
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
-
-    // 1. Récupération et assainissement des données
-    $prenom   = sanitizeString($_POST['prenom'] ?? '');
-    $nom      = sanitizeString($_POST['nom'] ?? '');
-    $email    = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-    $tel      = sanitizeString($_POST['telephone'] ?? '');
-    $pass     = $_POST['password'] ?? '';
-    $pass2    = $_POST['password2'] ?? '';
-
-    // 2. Vérifications de sécurité
-    if (empty($prenom) || strlen($prenom) < 2 || strlen($prenom) > 50) {
-        $erreurs[] = "Votre prénom doit contenir entre 2 et 50 caractères.";
-    }
-
-    if (empty($nom) || strlen($nom) < 2 || strlen($nom) > 50) {
-        $erreurs[] = "Votre nom doit contenir entre 2 et 50 caractères.";
-    }
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $erreurs[] = "Format d'email invalide.";
-    } elseif (isRegistered($email)) {
-        $erreurs[] = "Cet email est déjà utilisé par un autre compte.";
-    }
-
-    if (empty($pass) || strlen($pass) < 8) {
-        $erreurs[] = "Le mot de passe doit contenir au moins 8 caractères.";
-    } elseif ($pass !== $pass2) {
-        $erreurs[] = "Les mots de passe ne correspondent pas.";
-    }
-
-    // 3. Si aucune erreur, on insère
-    if (empty($erreurs)) {
-
-        $data_resto = [
-            'nom'       => $nom,
-            'prenom'    => $prenom,
-            'email'     => $email,
-            'telephone' => $tel
-        ];
-
-        $id_restaurateur = insertRestaurateur($data_resto);
-
-        if ($id_restaurateur) {
-
-            $user_account = [
-                'email'      => $email,
-                'motdepasse' => $pass,
-                'profil'     => 2,
-                'profil_id'  => $id_restaurateur
-            ];
-
-            $id_user = insertUtilisateur($user_account);
-
-            if ($id_user) {
-                $succes = true;
-                // On vide les champs après succès
-                $prenom = $nom = $email = $tel = '';
-            } else {
-                $erreurs[] = "Erreur lors de la création de vos identifiants de connexion.";
-            }
-        } else {
-            $erreurs[] = "Impossible d'enregistrer vos informations professionnelles.";
-        }
-    }
-}
+// Valeurs par defaut au cas ou la vue serait appelee sans controller
+$erreurs         = $erreurs         ?? [];
+$succes          = $succes          ?? false;
+$message_success = $message_success ?? "Votre compte gérant a été créé avec succès. Bienvenue chez Miamy !";
+$prenom          = $prenom          ?? '';
+$nom             = $nom             ?? '';
+$email           = $email           ?? '';
+$tel             = $tel             ?? '';
 ?>
 
 <section id="common_banner">
@@ -105,17 +43,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
                         <h2>Créer mon accès Miamy</h2>
                     </div>
 
-                    <?php if($succes): ?>
+                    <?php if ($succes): ?>
                         <div class="alert alert-success shadow-sm"><?= $message_success ?></div>
                         <div class="text-center mt-3">
                             <a href="connexion" class="btn btn_theme">Se connecter maintenant</a>
                         </div>
                     <?php else: ?>
 
-                        <?php if(!empty($erreurs)): ?>
+                        <?php if (!empty($erreurs)): ?>
                             <div class="alert alert-danger shadow-sm">
                                 <ul class="mb-0">
-                                    <?php foreach($erreurs as $err): ?>
+                                    <?php foreach ($erreurs as $err): ?>
                                         <li><?= htmlspecialchars($err) ?></li>
                                     <?php endforeach; ?>
                                 </ul>

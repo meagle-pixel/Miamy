@@ -15,14 +15,13 @@ class UserController
     // ---------------------------------------------------------------
     public function monCompteRestaurateur()
     {
-        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-            header('Location: ' . $GLOBALS['url'] . '/connexion');
-            exit();
-        }
+        Auth::requireRestaurateur();
 
         $restaurateur    = $_SESSION['user-info'] ?? [];
         $id_restaurateur = $_SESSION['user']['profil_id'] ?? null;
-        $mesRestos       = getRestaurantsByOwner($id_restaurateur);
+
+        $restoClass = new Restaurant();
+        $mesRestos  = $restoClass->listByOwner((int)$id_restaurateur);
 
         $message_success = '';
         if (isset($_GET['success']) && $_GET['success'] === 'deleted') {
@@ -37,10 +36,7 @@ class UserController
     // ---------------------------------------------------------------
     public function profilEditer()
     {
-        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true) {
-            header('Location: ' . $GLOBALS['url'] . '/connexion');
-            exit();
-        }
+        Auth::requireConnected();
 
         $id_restaurateur = $_SESSION['user']['profil_id'];
         $pdo             = Database::getInstance()->getConnection();
@@ -59,7 +55,8 @@ class UserController
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $message_error = "L'adresse email n'est pas valide.";
             } else {
-                $ok = updateRestaurateur([
+                $restaurateurModel = new Restaurateur();
+                $ok = $restaurateurModel->update([
                     'id'        => $id_restaurateur,
                     'nom'       => $nom,
                     'prenom'    => $prenom,
@@ -68,6 +65,7 @@ class UserController
                 ]);
 
                 if ($ok) {
+                    // Synchroniser l'email cote table utilisateurs
                     $stmt = $pdo->prepare(
                         "UPDATE utilisateurs SET email = ? WHERE profil_id = ? AND profil = 2"
                     );

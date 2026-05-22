@@ -1,57 +1,28 @@
 <?php
-// 1. Sécurité
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
+/** @var array  $resto              */
+/** @var int    $id_restaurant      */
+/** @var array  $plats              */
+/** @var int    $totalPlats         */
+/** @var int    $platsDisponibles   */
+/** @var int    $platsIndisponibles */
+/** @var float  $prixMoyen          */
+/** @var array  $dernierPlats       */
+/** @var array  $horaires           */
+/** @var bool   $horaires_success   */
+/** @var bool   $horaires_error     */
 
-// 2. Récupération et validation de l'ID restaurant
-$id_restaurant = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
-if (!$id_restaurant) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-// 3. Je vérifie que le restaurant appartient bien au restaurateur connecté
-$id_restaurateur = $_SESSION['user']['profil_id'];
-$pdo  = Database::getInstance()->getConnection();
-$stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurant = :id AND id_restaurateur = :id_proprio");
-$stmt->execute(['id' => $id_restaurant, 'id_proprio' => $id_restaurateur]);
-$resto = $stmt->fetch();
-
-if (!$resto) {
-    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
-    exit();
-}
-
-// 4. Récupération des plats
-$platClass = new Plat();
-$plats     = $platClass->getByRestaurant($id_restaurant);
-
-// 5. Calcul des stats
-$totalPlats        = count($plats);
-$platsDisponibles  = count(array_filter($plats, fn($p) => $p['disponible']));
-$platsIndisponibles = $totalPlats - $platsDisponibles;
-
-if ($totalPlats > 0) {
-    $prixMoyen = array_sum(array_column($plats, 'prix')) / $totalPlats;
-} else {
-    $prixMoyen = 0;
-}
-
-// 6. Récupération des 3 derniers plats
-$dernierPlats = $platClass->getDerniersPlats($id_restaurant);
-
-// 7. Récupération des horaires
-$horairesClass = new Horaires();
-$horaires      = $horairesClass->getByRestaurant($id_restaurant);
-
-// 8. Message horaires
-$horaires_success = isset($_GET['horaires']) && $_GET['horaires'] === 'ok';
-$horaires_error   = isset($_GET['horaires']) && $_GET['horaires'] === 'error';
-
-
+// Valeurs par defaut au cas ou la vue serait appelee sans controller
+$resto              = $resto              ?? [];
+$id_restaurant      = $id_restaurant      ?? 0;
+$plats              = $plats              ?? [];
+$totalPlats         = $totalPlats         ?? 0;
+$platsDisponibles   = $platsDisponibles   ?? 0;
+$platsIndisponibles = $platsIndisponibles ?? 0;
+$prixMoyen          = $prixMoyen          ?? 0;
+$dernierPlats       = $dernierPlats       ?? [];
+$horaires           = $horaires           ?? [];
+$horaires_success   = $horaires_success   ?? false;
+$horaires_error     = $horaires_error     ?? false;
 ?>
 
 <section id="common_banner">
@@ -155,7 +126,7 @@ $horaires_error   = isset($_GET['horaires']) && $_GET['horaires'] === 'error';
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="<?= $GLOBALS['url'] ?>/actions/save-horaires.php">
+        <form method="POST" action="save-horaires">
             <input type="hidden" name="id_restaurant" value="<?= $id_restaurant ?>">
 
             <div class="bg-white shadow-sm rounded border p-4">

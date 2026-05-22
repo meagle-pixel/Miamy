@@ -23,9 +23,18 @@ class PlatController
         }
 
         $platClass = new Plat();
-        $plats     = $platClass->getByRestaurant($id_restaurant);
+        $allPlats  = $platClass->getByRestaurant($id_restaurant);
 
-        return compact('resto', 'plats', 'id_restaurant');
+        // Cote client : on ne montre que les plats actuellement disponibles
+        $plats = array_values(array_filter($allPlats, fn($p) => (int)$p['disponible'] === 1));
+
+        // Groupement par categorie pour faciliter l'affichage de sections
+        $platsParCategorie = [];
+        foreach ($plats as $plat) {
+            $platsParCategorie[$plat['categorie']][] = $plat;
+        }
+
+        return compact('resto', 'plats', 'platsParCategorie', 'id_restaurant');
     }
 
     // ---------------------------------------------------------------

@@ -1,118 +1,30 @@
 <?php
+/** @var array  $erreurs         */
+/** @var bool   $succes          */
+/** @var string $message_success */
+/** @var string $civilite        */
+/** @var string $prenom          */
+/** @var string $nom             */
+/** @var string $email           */
+/** @var string $tel             */
+/** @var string $adresse         */
+/** @var string $adresse_comp    */
+/** @var string $codepostal      */
+/** @var string $ville           */
 
-// Initialisation
-$erreurs        = [];
-$succes         = false;
-$message_success = "Votre compte a été créé avec succès. Bienvenue chez Miamy !";
-
-$civilite = '';
-$prenom = '';
-$nom    = '';
-$email  = '';
-$tel    = '';
-$adresse = '';
-$adresse_comp = '';
-$pass = '';
-$pass2 = '';
-$codepostal = '';
-$ville = '';
-
-
-// Traitement du formulaire
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
-
-    // 1. Récupération et assainissement des données
-    $civilite = $_POST['civilite'] ?? '';
-    $prenom   = sanitizeString($_POST['prenom'] ?? '');
-    $nom      = sanitizeString($_POST['nom'] ?? '');
-    $email    = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-    $tel      = sanitizeString($_POST['telephone'] ?? '');
-    $adresse = sanitizeString($_POST['adresse'] ?? '');
-    $adresse_comp = sanitizeString($_POST['adresse_comp'] ?? '');
-    $pass     = $_POST['password'] ?? '';
-    $pass2    = $_POST['password2'] ?? '';
-    $codepostal = $_POST['codepostal'] ?? '';
-    $ville = $_POST['ville'] ?? '';
-
-    // 2. Vérifications de sécurité
-
-    if (!in_array($civilite, ['1', '2', '3'], true)) {
-        $erreurs[] = "Veuillez sélectionner une civilité.";
-    }
-    if (empty($prenom) || strlen($prenom) < 2 || strlen($prenom) > 50) {
-        $erreurs[] = "Votre prénom doit contenir entre 2 et 50 caractères.";
-    }
-
-    if (empty($nom) || strlen($nom) < 2 || strlen($nom) > 50) {
-        $erreurs[] = "Votre nom doit contenir entre 2 et 50 caractères.";
-    }
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $erreurs[] = "Format d'email invalide.";
-    } elseif (isRegistered($email)) {
-        $erreurs[] = "Cet email est déjà utilisé par un autre compte.";
-    }
-
-    if (empty($tel)) {
-        $erreurs[] = "Le numéro de téléphone est obligatoire";
-    }
-
-    if (empty($adresse)) {
-        $erreurs[] = "L'adresse est obligatoire.";
-    }
-
-    if (empty($pass) || strlen($pass) < 8) {
-        $erreurs[] = "Le mot de passe doit contenir au moins 8 caractères.";
-    } elseif ($pass !== $pass2) {
-        $erreurs[] = "Les mots de passe ne correspondent pas.";
-    }
-
-    if (!preg_match('/^\d{5}$/', $codepostal)) {
-        $erreurs[] = "Le code postal doit contenir 5 chiffres.";
-    }
-    if (empty($ville)) {
-        $erreurs[] = "La ville est obligatoire.";
-    }
-
-    // 3. Si aucune erreur, on insère
-    if (empty($erreurs)) {
-
-        $data_client = [
-            'civilite'     => $civilite,
-            'nom'          => $nom,
-            'prenom'       => $prenom,
-            'telephone'    => $tel,
-            'adresse'      => $adresse,
-            'adresse_comp' => $adresse_comp,
-            'codepostal'   => $codepostal,
-            'ville'        => $ville,
-        ];
-
-        $id_client = insertClient($data_client);
-
-        if ($id_client) {
-
-            $user_account = [
-                'email'      => $email,
-                'motdepasse' => $pass,
-                'profil'     => 3,
-                'profil_id'  => $id_client
-            ];
-
-            $id_user = insertUtilisateur($user_account);
-
-            if ($id_user) {
-                $succes = true;
-                // On vide les champs après succès
-                $civilite = $prenom = $nom = $email = $tel = $adresse = $adresse_comp = $codepostal = $ville = '';
-            } else {
-                $erreurs[] = "Erreur lors de la création de vos identifiants de connexion.";
-            }
-        } else {
-            $erreurs[] = "Impossible d'enregistrer vos informations.";
-        }
-    }
-}
+// Valeurs par defaut au cas ou la vue serait appelee sans controller
+$erreurs         = $erreurs         ?? [];
+$succes          = $succes          ?? false;
+$message_success = $message_success ?? "Votre compte a été créé avec succès. Bienvenue chez Miamy !";
+$civilite        = $civilite        ?? '';
+$prenom          = $prenom          ?? '';
+$nom             = $nom             ?? '';
+$email           = $email           ?? '';
+$tel             = $tel             ?? '';
+$adresse         = $adresse         ?? '';
+$adresse_comp    = $adresse_comp    ?? '';
+$codepostal      = $codepostal      ?? '';
+$ville           = $ville           ?? '';
 ?>
 
 <section id="common_banner">

@@ -10,7 +10,8 @@ if(isset($_GET['mod']))
 	else
 		$page = 'home';
 	
-	$page_content = getPage($page);
+	$pageModel = new Page();
+	$page_content = $pageModel->getByMod($page);
 	
 	$page_title = $page_content['nom'];
 	$page_url = $page_content['url'];

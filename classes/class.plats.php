@@ -104,4 +104,51 @@ class Plat
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    /**
+     * Retourne le plat s'il appartient bien a un restaurant du restaurateur donne,
+     * sinon null. Utilise par toggleDisponible (besoin du champ disponible courant).
+     */
+    public function getOwnedBy(int $idPlat, int $idRestaurateur): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT p.id, p.disponible
+             FROM `plats` p
+             JOIN `restaurants` r ON r.id_restaurant = p.id_restaurant
+             WHERE p.id = :id_plat AND r.id_restaurateur = :id_restaurateur"
+        );
+        $stmt->execute([
+            'id_plat'         => $idPlat,
+            'id_restaurateur' => $idRestaurateur,
+        ]);
+        return $stmt->fetch() ?: null;
+    }
+
+    /**
+     * Verifie qu'un plat appartient bien a un restaurant du restaurateur donne.
+     * Version booleenne (plus rapide) quand on n'a pas besoin des donnees du plat.
+     */
+    public function isOwnedBy(int $idPlat, int $idRestaurateur): bool
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT p.id
+             FROM `plats` p
+             JOIN `restaurants` r ON r.id_restaurant = p.id_restaurant
+             WHERE p.id = :id_plat AND r.id_restaurateur = :id_restaurateur"
+        );
+        $stmt->execute([
+            'id_plat'         => $idPlat,
+            'id_restaurateur' => $idRestaurateur,
+        ]);
+        return (bool)$stmt->fetch();
+    }
+
+    /**
+     * Met a jour uniquement la categorie d'un plat (sans toucher au reste).
+     */
+    public function updateCategorie(int $idPlat, string $categorie): bool
+    {
+        $stmt = $this->pdo->prepare("UPDATE `plats` SET `categorie` = :categorie WHERE `id` = :id");
+        return $stmt->execute(['categorie' => $categorie, 'id' => $idPlat]);
+    }
 }

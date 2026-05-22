@@ -273,7 +273,7 @@ $custom_js = <<<HTML
                 fd.append('id_plat', platId);
                 fd.append('categorie', newCateg);
 
-                fetch(BASE_URL + '/actions/update-plat-categorie.php', {
+                fetch(BASE_URL + '/update-plat-categorie', {
                     method: 'POST',
                     body: fd
                 })
@@ -316,7 +316,7 @@ $custom_js = <<<HTML
         const fd = new FormData();
         fd.append('id_plat', platId);
 
-        fetch(BASE_URL + '/actions/toggle-disponible-plat.php', {
+        fetch(BASE_URL + '/toggle-disponible-plat', {
             method: 'POST',
             body: fd
         })

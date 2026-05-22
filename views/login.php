@@ -1,35 +1,6 @@
 <?php
-$message_error = "";
-
-// 2. Traitement de la connexion
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $pass  = $_POST['password'] ?? '';
-
-    if (!empty($email) && !empty($pass)) {
-        
-        if (trytoconnect($email, $pass)) {
-
-            // Redirection selon le profil
-            $profil = $_SESSION['user']['profil'];
-
-            if ($profil == 1) {
-                $redirect_url = 'dashboard';
-            } elseif ($profil == 2) {
-                $redirect_url = 'mon-compte-restaurateur';
-            } else {
-                $redirect_url = 'mon-compte';
-            }
-
-            header('Location: ' . $GLOBALS['url'] . '/' . $redirect_url);
-            exit();
-        } else {
-            $message_error = "Identifiants invalides ou compte non activé.";
-        }
-    } else {
-        $message_error = "Veuillez remplir tous les champs.";
-    }
-}
+/** @var string $message_error */
+$message_error = $message_error ?? '';
 ?>
 
 <section id="common_banner">

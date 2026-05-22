@@ -1,57 +1,10 @@
 <?php
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
+/** @var string $message_success */
+/** @var string $message_error   */
 
-$message_success = '';
-$message_error   = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_admin'])) {
-
-    $prenom = trim($_POST['prenom'] ?? '');
-    $nom    = trim($_POST['nom'] ?? '');
-    $email  = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-    $tel    = trim($_POST['telephone'] ?? '');
-    $pass   = $_POST['password'] ?? '';
-    $pass2  = $_POST['password2'] ?? '';
-
-    if (empty($prenom) || empty($nom)) {
-        $message_error = "Le prénom et le nom sont obligatoires.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message_error = "Format d'email invalide.";
-    } elseif (isRegistered($email)) {
-        $message_error = "Cet email est déjà utilisé par un autre compte.";
-    } elseif (strlen($pass) < 8) {
-        $message_error = "Le mot de passe doit contenir au moins 8 caractères.";
-    } elseif ($pass !== $pass2) {
-        $message_error = "Les mots de passe ne correspondent pas.";
-    } else {
-
-        $id_admin = insertAdministrateur([
-            'nom'       => $nom,
-            'prenom'    => $prenom,
-            'telephone' => $tel,
-        ]);
-
-        if ($id_admin) {
-            $id_user = insertUtilisateur([
-                'email'      => $email,
-                'motdepasse' => $pass,
-                'profil'     => 1,
-                'profil_id'  => $id_admin,
-            ]);
-
-            if ($id_user) {
-                $message_success = "Administrateur <strong>" . htmlspecialchars($prenom . ' ' . $nom) . "</strong> créé avec succès.";
-            } else {
-                $message_error = "Erreur lors de la création du compte utilisateur.";
-            }
-        } else {
-            $message_error = "Erreur lors de la création de l'administrateur.";
-        }
-    }
-}
+// Valeurs par defaut au cas ou la vue serait appelee sans controller
+$message_success = $message_success ?? '';
+$message_error   = $message_error   ?? '';
 ?>
 
 <div class="container-fluid px-4">

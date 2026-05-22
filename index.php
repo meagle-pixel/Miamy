@@ -4,52 +4,64 @@ ob_start();
 include('functions.php');
 
 // Chargement des controllers
+require_once('controllers/AdminController.php');
+require_once('controllers/AuthController.php');
+require_once('controllers/HomeController.php');
 require_once('controllers/PlatController.php');
 require_once('controllers/RestaurantController.php');
 require_once('controllers/UserController.php');
 
-// Table de routage : page → [controller, méthode]
+// Table de routage : page -> [controller, methode]
 $dispatchMap = [
+	'accueil'                 => [new HomeController(),       'index'],
+	'connexion'               => [new AuthController(),       'login'],
+	'deconnexion'             => [new AuthController(),       'logout'],
+	'inscription'             => [new AuthController(),       'register'],
+	'inscription-client'      => [new AuthController(),       'registerClient'],
+	'dashboard'               => [new AdminController(),      'dashboard'],
+	'admin-panel'             => [new AdminController(),      'panel'],
+	'admin-restaurants'       => [new AdminController(),      'restaurants'],
+	'ajouter-admin'           => [new AdminController(),      'ajouterAdmin'],
 	'liste-plats'             => [new PlatController(),        'liste'],
 	'gestion-carte'           => [new PlatController(),        'gestionCarte'],
 	'ajouter-plat'            => [new PlatController(),        'ajouter'],
 	'modifier-plat'           => [new PlatController(),        'modifier'],
 	'supprimer-plat'          => [new PlatController(),        'supprimer'],
+	'toggle-disponible-plat'  => [new PlatController(),        'toggleDisponible'],
+	'update-plat-categorie'   => [new PlatController(),        'updateCategorie'],
 	'liste-restaurants'       => [new RestaurantController(),  'liste'],
 	'ajouter-restaurant'      => [new RestaurantController(),  'ajouter'],
 	'modifier-restaurant'     => [new RestaurantController(),  'modifier'],
 	'supprimer-restaurant'    => [new RestaurantController(),  'supprimer'],
+	'details'                 => [new RestaurantController(),  'details'],
+	'save-horaires'           => [new RestaurantController(),  'saveHoraires'],
 	'mon-compte'              => [new UserController(),        'monCompte'],
 	'mon-compte-restaurateur' => [new UserController(),        'monCompteRestaurateur'],
 	'profil-editer'           => [new UserController(),        'profilEditer'],
 	'profile'                 => [new UserController(),        'profile'],
 ];
 
-if (isset($_GET['mod'])) {
-	$page = $_GET['mod'];
+// On considere "pas de mod" comme la page d'accueil
+$page = isset($_GET['mod']) ? $_GET['mod'] : 'accueil';
 
-	// Si la page a un controller, on le dispatch et on extrait ses données
-	if (isset($dispatchMap[$page])) {
-		[$controller, $method] = $dispatchMap[$page];
-		$viewData = $controller->$method(); // peut faire header()+exit() ou retourner un tableau
-		if (is_array($viewData)) {
-			extract($viewData); // rend les variables disponibles pour la vue
-		}
+// Si la page a un controller, on le dispatch et on extrait ses donnees
+if (isset($dispatchMap[$page])) {
+	[$controller, $method] = $dispatchMap[$page];
+	$viewData = $controller->$method(); // peut faire header()+exit() ou retourner un tableau
+	if (is_array($viewData)) {
+		extract($viewData); // rend les variables disponibles pour la vue
 	}
+}
 
-	$page_content = getPage($page);
+$pageModel = new Page();
+$page_content = $pageModel->getByMod($page);
 
-	if (!empty($page_content['nom']) && !empty($page_content['url'])) {
-		$page_title = $page_content['nom'];
-		$page_url = $page_content['url'];
-	} else {
-		$page_title = 'Page introuvable';
-		$page_url = 'views/404.php';
-	}
+if (!empty($page_content['nom']) && !empty($page_content['url'])) {
+	$page_title = $page_content['nom'];
+	$page_url   = $page_content['url'];
 } else {
-	$page = '';
-	$page_title = 'Accueil';
-	$page_url = 'views/home.php';
+	$page_title = 'Page introuvable';
+	$page_url   = 'views/404.php';
 }
 
 // Une page est admin si son fichier est dans views/admin/

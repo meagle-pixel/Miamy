@@ -1,148 +1,62 @@
 <?php
-// TABLEAU DE BORD ADMIN
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
+/** @var int   $nb_restaurants_total  */
+/** @var int   $nb_restaurants_actifs */
+/** @var int   $nb_utilisateurs       */
+/** @var int   $nb_plats              */
+/** @var int   $nb_commandes_jour     */
+/** @var float $ca_jour               */
+/** @var int   $nb_promos_actives     */
+/** @var array $derniers_utilisateurs */
+/** @var array $derniers_restaurants  */
+/** @var array $derniers_logs         */
 
-$pdo = Database::getInstance()->getConnection();
-
-// Nombre total de restaurants 
-$nb_restaurants_total = 0;
-
-try {
-    $stmt = $pdo->query("SELECT COUNT(*) FROM restaurants");
-    $nb_restaurants_total = (int) $stmt->fetchColumn();
-} catch (Exception $e) {
-    error_log('[dashboard] nb_restaurants_total : ' . $e->getMessage());
-}
-
-// Nombre de restaurants actifs (abonnement actif)
-$nb_restaurants_actifs = 0;
-try {
-    $stmt = $pdo->query("SELECT COUNT(*) FROM restaurants WHERE subscription_active = 1");
-    $nb_restaurants_actifs = (int) $stmt->fetchColumn();
-} catch (Exception $e) {
-    error_log('[dashboard] nb_restaurants_actifs : ' . $e->getMessage());
-}
-
-//  Nombre d'utilisateurs inscrits (clients + restaurateurs) 
-$nb_utilisateurs = 0;
-try {
-    $stmt = $pdo->query("SELECT COUNT(*) FROM utilisateurs WHERE profil IN (2, 3)");
-    $nb_utilisateurs = (int) $stmt->fetchColumn();
-} catch (Exception $e) {
-    error_log('[dashboard] nb_utilisateurs : ' . $e->getMessage());
-}
-//  Nombre de plats disponibles 
-$nb_plats = 0;
-try {
-    $stmt = $pdo->query("SELECT COUNT(*) FROM plats WHERE disponible = 1");
-    $nb_plats = (int) $stmt->fetchColumn();
-} catch (Exception $e) {
-    error_log('[dashboard] nb_plats : ' . $e->getMessage());
-}
-
-//  Commandes du jour 
-$nb_commandes_jour = 0;
-$ca_jour = 0;
-try {
-    $stmt = $pdo->query("SELECT COUNT(*), COALESCE(SUM(totalttc), 0) FROM commandes WHERE DATE(date_commande) = CURDATE()");
-    $row = $stmt->fetch(PDO::FETCH_NUM);
-    $nb_commandes_jour = (int) $row[0];
-    $ca_jour = (float) $row[1];
-} catch (Exception $e) {
-    error_log('[dashboard] commandes_jour : ' . $e->getMessage());
-}
-
-//  Dernières inscriptions (5 derniers utilisateurs) 
-$derniers_utilisateurs = [];
-try {
-    $stmt = $pdo->query("
-        SELECT u.email, u.dateinscription,
-               CASE u.profil WHEN 2 THEN 'Restaurateur' ELSE 'Client' END AS role
-        FROM utilisateurs u
-        WHERE u.profil IN (2, 3)
-        ORDER BY u.dateinscription DESC
-        LIMIT 5
-    ");
-    $derniers_utilisateurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Exception $e) {
-    error_log('[dashboard] derniers_utilisateurs : ' . $e->getMessage());
-}
-
-// Derniers restaurants ajoutés
-$derniers_restaurants = [];
-try {
-    $stmt = $pdo->query("
-        SELECT name, city, subscription_active, created_at
-        FROM restaurants
-        ORDER BY created_at DESC
-        LIMIT 5
-    ");
-    $derniers_restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Exception $e) {
-    error_log('[dashboard] derniers_restaurants : ' . $e->getMessage());
-}
-
-// Dernières actions dans les log
-$derniers_logs = [];
-try {
-    $stmt = $pdo->query("
-        SELECT l.action_type, l.message, l.created_at, u.email
-        FROM user_logs l
-        LEFT JOIN utilisateurs u ON l.user_id = u.id
-        ORDER BY l.created_at DESC
-        LIMIT 5
-    ");
-    $derniers_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Exception $e) {
-    error_log('[dashboard] derniers_logs : ' . $e->getMessage());
-}
-
-// Codes promo actif
-$nb_promos_actives = 0;
-try {
-    $stmt = $pdo->query("SELECT COUNT(*) FROM promos WHERE actif = 1");
-    $nb_promos_actives = (int) $stmt->fetchColumn();
-} catch (Exception $e) {
-    error_log('[dashboard] nb_promos_actives : ' . $e->getMessage());
-}
+// Valeurs par defaut au cas ou la vue serait appelee sans controller
+$nb_restaurants_total  = $nb_restaurants_total  ?? 0;
+$nb_restaurants_actifs = $nb_restaurants_actifs ?? 0;
+$nb_utilisateurs       = $nb_utilisateurs       ?? 0;
+$nb_plats              = $nb_plats              ?? 0;
+$nb_commandes_jour     = $nb_commandes_jour     ?? 0;
+$ca_jour               = $ca_jour               ?? 0;
+$nb_promos_actives     = $nb_promos_actives     ?? 0;
+$derniers_utilisateurs = $derniers_utilisateurs ?? [];
+$derniers_restaurants  = $derniers_restaurants  ?? [];
+$derniers_logs         = $derniers_logs         ?? [];
 
 /**
  * Retourne le style CSS d'un badge selon le type d'action de log.
- * Renvoie un tableau ['bg' => couleur fond, 'text' => couleur texte].
+ * Fonction de presentation uniquement : reste dans la vue.
  */
-function getActionBadgeStyle($action_type) {
-    switch ($action_type) {
-        // Connexions
-        case 'login':         return ['bg' => '#FFF8E1', 'text' => '#FF8F00']; // jaune
-        case 'logout':        return ['bg' => '#FEEBEB', 'text' => '#B71C1C']; // rouge
-        case 'login_fail':    return ['bg' => '#FFE0B2', 'text' => '#E65100']; // orange
-        case 'connect_as':    return ['bg' => '#EDE7F6', 'text' => '#311B92']; // violet
+if (!function_exists('getActionBadgeStyle')) {
+    function getActionBadgeStyle($action_type) {
+        switch ($action_type) {
+            // Connexions
+            case 'login':         return ['bg' => '#FFF8E1', 'text' => '#FF8F00']; // jaune
+            case 'logout':        return ['bg' => '#FEEBEB', 'text' => '#B71C1C']; // rouge
+            case 'login_fail':    return ['bg' => '#FFE0B2', 'text' => '#E65100']; // orange
+            case 'connect_as':    return ['bg' => '#EDE7F6', 'text' => '#311B92']; // violet
 
-        // Créations (en vert)
-        case 'create_user':
-        case 'create_page':   return ['bg' => '#E1F5EE', 'text' => '#085041']; // vert
+            // Créations (en vert)
+            case 'create_user':
+            case 'create_page':   return ['bg' => '#E1F5EE', 'text' => '#085041']; // vert
 
-        // Modifications (en bleu)
-        case 'update_role':
-        case 'update_page':
-        case 'update_permission':
-        case 'update_profile':
-        case 'update_password': return ['bg' => '#E3F2FD', 'text' => '#0D47A1']; // bleu
+            // Modifications (en bleu)
+            case 'update_role':
+            case 'update_page':
+            case 'update_permission':
+            case 'update_profile':
+            case 'update_password': return ['bg' => '#E3F2FD', 'text' => '#0D47A1']; // bleu
 
-        // Réinitialisation mot de passe
-        case 'reset_password': return ['bg' => '#FFE0B2', 'text' => '#E65100']; // orange
+            // Réinitialisation mot de passe
+            case 'reset_password': return ['bg' => '#FFE0B2', 'text' => '#E65100']; // orange
 
-        // Suppression (rouge foncé)
-        case 'delete_user':   return ['bg' => '#FFCDD2', 'text' => '#7F0000']; // rouge foncé
+            // Suppression (rouge foncé)
+            case 'delete_user':   return ['bg' => '#FFCDD2', 'text' => '#7F0000']; // rouge foncé
 
-        // Par défaut : gris neutre
-        default:              return ['bg' => '#f0f0f0', 'text' => '#555'];
+            // Par défaut : gris neutre
+            default:              return ['bg' => '#f0f0f0', 'text' => '#555'];
+        }
     }
 }
-
 ?>
 <div class="container-fluid px-4">
 

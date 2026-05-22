@@ -1,52 +1,64 @@
 <?php
-/* ==========================================================================
-   GESTION DES RESTAURATEURS (MULTI-ÉTABLISSEMENTS)
-   ========================================================================== */
+/**
+ * Restaurateur : gestion des profils de gerants (table `restaurateurs`).
+ * Le compte de connexion associe vit dans `utilisateurs` (profil = 2).
+ */
+class Restaurateur
+{
+    private $pdo;
 
-function getRestaurateur($id) {
-    $pdo  = Database::getInstance()->getConnection();
-    $stmt = $pdo->prepare("SELECT * FROM restaurateurs WHERE id = :id");
-    $stmt->execute(['id' => (int)$id]);
-    return $stmt->fetch() ?: null;
-}
+    public function __construct()
+    {
+        $this->pdo = Database::getInstance()->getConnection();
+    }
 
-function getRestaurantsByOwner($id_restaurateur) {
-    $pdo  = Database::getInstance()->getConnection();
-    $stmt = $pdo->prepare("SELECT * FROM restaurants WHERE id_restaurateur = :id_restaurateur ORDER BY name ASC");
-    $stmt->execute(['id_restaurateur' => (int)$id_restaurateur]);
-    return $stmt->fetchAll();
-}
+    /**
+     * Retourne un restaurateur par son id, ou null s'il n'existe pas.
+     */
+    public function getById(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM `restaurateurs` WHERE `id` = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch() ?: null;
+    }
 
-function insertRestaurateur($data) {
-    $pdo  = Database::getInstance()->getConnection();
-    $stmt = $pdo->prepare(
-        "INSERT INTO restaurateurs (nom, prenom, email, telephone)
-         VALUES (:nom, :prenom, :email, :telephone)"
-    );
-    $stmt->execute([
-        'nom'       => $data['nom'],
-        'prenom'    => $data['prenom'],
-        'email'     => $data['email'],
-        'telephone' => $data['telephone'],
-    ]);
-    return $pdo->lastInsertId();
-}
+    /**
+     * Cree un nouveau restaurateur. Retourne l'ID insere.
+     */
+    public function insert(array $data)
+    {
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO `restaurateurs` (nom, prenom, email, telephone)
+             VALUES (:nom, :prenom, :email, :telephone)"
+        );
+        $stmt->execute([
+            'nom'       => $data['nom'],
+            'prenom'    => $data['prenom'],
+            'email'     => $data['email'],
+            'telephone' => $data['telephone'],
+        ]);
+        return $this->pdo->lastInsertId();
+    }
 
-function updateRestaurateur($data) {
-    $pdo  = Database::getInstance()->getConnection();
-    $stmt = $pdo->prepare(
-        "UPDATE restaurateurs SET
-            nom = :nom,
-            prenom = :prenom,
-            email = :email,
-            telephone = :telephone
-         WHERE id = :id"
-    );
-    return $stmt->execute([
-        'nom'       => $data['nom'],
-        'prenom'    => $data['prenom'],
-        'email'     => $data['email'],
-        'telephone' => $data['telephone'],
-        'id'        => (int)$data['id'],
-    ]);
+    /**
+     * Met a jour les infos d'un restaurateur. $data['id'] doit etre present.
+     */
+    public function update(array $data): bool
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE `restaurateurs` SET
+                nom       = :nom,
+                prenom    = :prenom,
+                email     = :email,
+                telephone = :telephone
+             WHERE id = :id"
+        );
+        return $stmt->execute([
+            'nom'       => $data['nom'],
+            'prenom'    => $data['prenom'],
+            'email'     => $data['email'],
+            'telephone' => $data['telephone'],
+            'id'        => (int)$data['id'],
+        ]);
+    }
 }

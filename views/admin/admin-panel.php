@@ -1,77 +1,10 @@
 <?php
+/** @var string $error */
+/** @var array  $users */
 
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
-
-$pdo = Database::getInstance()->getConnection();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-
-    if ($_POST['action'] === 'update' && isset($_POST['user_id'], $_POST['profil'])) {
-        $user_id    = (int) $_POST['user_id'];
-        $new_profil = (int) $_POST['profil'];
-
-        // 2 = restaurateur, 3 = client (la promotion en admin se fait via un autre flux)
-        if (in_array($new_profil, [2, 3], true)) {
-
-            // Si on bascule vers `clients`, les colonnes NOT NULL (civilite, adresse_comp, codepostal, ville)
-            // doivent être fournies. On met des valeurs par défaut neutres, à compléter ensuite par l'utilisateur.
-            $extraData = [];
-            if ($new_profil === 3) {
-                $extraData = [
-                    'civilite'     => 1,
-                    'adresse_comp' => '',
-                    'codepostal'   => '',
-                    'ville'        => '',
-                ];
-            }
-
-            try {
-                changeUserProfile($user_id, $new_profil, $extraData);
-                header('Location: ' . $GLOBALS['url'] . '/admin-panel');
-                exit();
-            } catch (Exception $e) {
-                $error = $e->getMessage();
-            }
-        }
-    }
-
-    if ($_POST['action'] === 'delete' && isset($_POST['user_id'], $_POST['profil_id'], $_POST['profil'])) {
-        $profil_id = (int) $_POST['profil_id'];
-        $profil    = (int) $_POST['profil'];
-
-        try {
-            deleteUser($profil_id, $profil);
-
-            header('Location: ' . $GLOBALS['url'] . '/admin-panel');
-            exit();
-        } catch (PDOException $e) {
-            $error = "Erreur lors de la suppression.";
-        }
-    }
-}
-
-try {
-    $stmt = $pdo->prepare("
-        SELECT 
-            u.*,
-            COALESCE(r.nom, c.nom) AS nom,
-            COALESCE(r.prenom, c.prenom) AS prenom,
-            COALESCE(r.telephone, c.telephone) AS telephone
-        FROM utilisateurs u
-        LEFT JOIN restaurateurs r ON (u.profil = 2 AND u.profil_id = r.id)
-        LEFT JOIN clients c ON (u.profil = 3 AND u.profil_id = c.id)
-        WHERE u.profil IN (2, 3)
-        ORDER BY u.id ASC
-    ");
-    $stmt->execute();
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $error = "Erreur lors de la récupération des utilisateurs.";
-}
-
+// Valeurs par defaut au cas ou la vue serait appelee sans controller
+$error = $error ?? '';
+$users = $users ?? [];
 ?>
 
 <div class="container-fluid px-4">
@@ -83,7 +16,7 @@ try {
         <li class="breadcrumb-item active">Utilisateurs</li>
     </ol>
 
-    <?php if (isset($error)): ?>
+    <?php if (!empty($error)): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 

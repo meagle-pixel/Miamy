@@ -12,24 +12,26 @@ if (file_exists($envFile)) {
     }
 }
 
-// On détecte si on est sur l'adresse IP locale
-if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['HTTP_HOST'] == 'localhost') {
+// Détection de l'environnement (local Docker vs production o2switch)
+$isLocal = ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['HTTP_HOST'] == 'localhost');
+
+if ($isLocal) {
     // CONFIGURATION LOCALHOST (Docker)
-    $GLOBALS["db_host"]     = $_ENV['DEV_DB_HOST'] ?? 'mysql-server';
-    $GLOBALS["db_username"] = $_ENV['DEV_DB_USER'] ?? 'root';
-    $GLOBALS["db_password"] = $_ENV['DEV_DB_PASS'] ?? 'root';
-    $GLOBALS["db_name"]     = $_ENV['DEV_DB_NAME'] ?? 'Miamy';
-    $GLOBALS["url"]         = $_ENV['DEV_URL']     ?? 'http://localhost/Miamy';
-    $GLOBALS["dev"]         = true;
+    define('DB_HOST',     $_ENV['DEV_DB_HOST'] ?? 'mysql-server');
+    define('DB_USERNAME', $_ENV['DEV_DB_USER'] ?? 'root');
+    define('DB_PASSWORD', $_ENV['DEV_DB_PASS'] ?? 'root');
+    define('DB_NAME',     $_ENV['DEV_DB_NAME'] ?? 'Miamy');
+    define('APP_URL',     $_ENV['DEV_URL']     ?? 'http://localhost/Miamy');
+    define('APP_DEV',     true);
 } else {
     // CONFIGURATION PRODUCTION (o2switch)
-    $GLOBALS["db_host"]     = $_ENV['PROD_DB_HOST'] ?? 'localhost';
-    $GLOBALS["db_username"] = $_ENV['PROD_DB_USER'] ?? '';
-    $GLOBALS["db_password"] = $_ENV['PROD_DB_PASS'] ?? '';
-    $GLOBALS["db_name"]     = $_ENV['PROD_DB_NAME'] ?? '';
-    $GLOBALS["url"]         = $_ENV['PROD_URL']     ?? 'https://miamy.fr';
-    $GLOBALS["dev"]         = false;
+    define('DB_HOST',     $_ENV['PROD_DB_HOST'] ?? 'localhost');
+    define('DB_USERNAME', $_ENV['PROD_DB_USER'] ?? '');
+    define('DB_PASSWORD', $_ENV['PROD_DB_PASS'] ?? '');
+    define('DB_NAME',     $_ENV['PROD_DB_NAME'] ?? '');
+    define('APP_URL',     $_ENV['PROD_URL']     ?? 'https://miamy.fr');
+    define('APP_DEV',     false);
 }
 
-$GLOBALS["base_salt"] = $_ENV['BASE_SALT'] ?? '';
-
+// Sel utilisé pour hasher les mots de passe (UserInsert + tryToConnect)
+define('BASE_SALT', $_ENV['BASE_SALT'] ?? '');

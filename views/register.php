@@ -61,7 +61,7 @@ $tel             = $tel             ?? '';
                         <?php endif; ?>
 
                         <div class="common_author_form">
-                            <form action="<?= $GLOBALS['url'] ?>/inscription" method="POST">
+                            <form action="<?= APP_URL ?>/inscription" method="POST">
                                 <div class="row">
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">

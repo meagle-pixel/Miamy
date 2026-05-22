@@ -18,10 +18,10 @@ ne pointent pas au bon endroit.
    ```php
    if ($_SERVER['HTTP_HOST'] == 'miamy.local' || $_SERVER['HTTP_HOST'] == 'localhost') {
        // LOCAL
-       $GLOBALS["url"] = 'http://localhost/Miamy';
+       define('APP_URL', 'http://localhost/Miamy');
    } else {
        // PRODUCTION
-       $GLOBALS["url"] = 'https://miamy.fr';
+       define('APP_URL', 'https://miamy.fr');
    }
    ```
 
@@ -31,7 +31,7 @@ ne pointent pas au bon endroit.
 
    ```html
    <head>
-     <base href="<?= $GLOBALS['url'] ?>/" />
+     <base href="<?= APP_URL ?>/" />
    </head>
    ```
 
@@ -70,17 +70,17 @@ ne pointent pas au bon endroit.
    APRÈS :
 
    ```php
-   echo "<script>window.location.href='" . $GLOBALS['url'] . "/mon-compte-restaurateur';</script>";
+   echo "<script>window.location.href='" . APP_URL . "/mon-compte-restaurateur';</script>";
    ```
 
-   RÈGLE : Toujours utiliser $GLOBALS['url'] pour les redirections PHP.
+   RÈGLE : Toujours utiliser APP_URL pour les redirections PHP.
 
 ## RÉSUMÉ DES 3 RÈGLES
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ 1. <base href="<?= $GLOBALS['url'] ?>/"> dans head.php │
+│ 1. <base href="<?= APP_URL ?>/"> dans head.php │
 │ 2. Liens HTML : jamais de "/" au début → href="connexion" │
-│ 3. Redirections PHP : toujours $GLOBALS['url'] . "/page" │
+│ 3. Redirections PHP : toujours APP_URL . "/page" │
 └─────────────────────────────────────────────────────────────────────────┘
 
 ## RECHERCHER/REMPLACER DANS VS CODE
@@ -1162,3 +1162,127 @@ Les 6 points du rapport initial sont tous traités :
 | 6 | Upload d'images dupliqué                       | Étape 6 |
 
 `views/details.php` est volontairement resté hors scope (décision initiale).
+
+# LE DOSSIER assets/webfonts/ — POLICES D'ICÔNES
+
+## Pourquoi il existe
+
+Le dossier `assets/webfonts/` (3,2 Mo, 28 fichiers) contient les fichiers
+de polices nécessaires à **Font Awesome** (les `<i class="fas fa-X">`,
+`fas fa-user`, `fas fa-store`, etc. qu'on retrouve partout dans les vues)
+et à **Flaticon** (un autre pack d'icônes du template original).
+
+Il est arrivé dans le projet avec le template HTML initial qu'on a
+téléchargé pour démarrer Miamy — il faisait partie du ZIP de base.
+
+## Comment ça marche techniquement
+
+Chaque icône qu'on utilise dans le HTML, par exemple :
+
+```html
+<i class="fas fa-user"></i>
+```
+
+n'est PAS une image. C'est un caractère spécial dans une police (comme
+la lettre A est un caractère dans Arial). Le CSS de Font Awesome dit
+au navigateur :
+- "ce <i> doit afficher le caractère unicode 0xF007"
+- "avec la police Font Awesome Solid"
+
+Le navigateur va alors chercher la police dans `assets/webfonts/` et
+dessine l'icône correspondante.
+
+Conséquence : on peut utiliser autant d'icônes qu'on veut dans le code,
+le dossier `webfonts/` garde toujours la même taille. Il contient toutes
+les icônes existantes (~2000) en une seule fois.
+
+## Deux mécanismes différents dans le projet
+
+Le site public et la partie admin chargent Font Awesome différemment :
+
+**Site public** (`views/partials/head.php` ligne 15) — chargement LOCAL :
+
+```html
+<link rel="stylesheet" href="<?= $GLOBALS['url'] ?>/assets/css/fontawesome.all.min.css" />
+```
+
+Le CSS local contient des règles `@font-face` qui pointent vers
+`assets/webfonts/fa-solid-900.woff2` (etc.). Le site fonctionne sans
+internet.
+
+**Partie admin** (`views/partials/admin_head.php` ligne 20) — chargement CDN :
+
+```html
+<script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+```
+
+Charge depuis le serveur officiel Font Awesome. Nécessite une connexion
+internet. Hérité du template SB Admin tel quel.
+
+À unifier un jour (tout en local OU tout en CDN) pour la cohérence,
+mais ce n'est pas critique.
+
+## NE PAS SUPPRIMER
+
+Si le dossier `assets/webfonts/` est supprimé, toutes les icônes du
+site public deviennent des rectangles vides. C'est un dossier essentiel.
+
+# MIGRATION $GLOBALS → define() — CONSTANTES DE CONFIGURATION
+
+## POURQUOI
+
+Avant : la configuration (URL de base, mode dev, credentials DB, sel de
+mot de passe) était stockée dans des variables `$GLOBALS['xxx']` —
+**121 occurrences** dans le code. Problèmes : variables mutables (n'importe
+quel bout de code pouvait les réécrire), pas de typage, syntaxe verbeuse.
+
+Après : ces 7 valeurs sont des constantes PHP via `define()`. Immuables,
+plus rapides, plus lisibles, c'est la convention standard PHP (utilisée
+par WordPress, Drupal, etc.).
+
+## LES 7 CONSTANTES
+
+Définies dans `config.php` :
+
+```php
+define('DB_HOST',     $_ENV['DEV_DB_HOST'] ?? 'mysql-server');
+define('DB_USERNAME', $_ENV['DEV_DB_USER'] ?? 'root');
+define('DB_PASSWORD', $_ENV['DEV_DB_PASS'] ?? 'root');
+define('DB_NAME',     $_ENV['DEV_DB_NAME'] ?? 'Miamy');
+define('APP_URL',     $_ENV['DEV_URL']     ?? 'http://localhost/Miamy');
+define('APP_DEV',     true);
+define('BASE_SALT',   $_ENV['BASE_SALT']   ?? '');
+```
+
+(Les valeurs DB et URL changent en production vs local.)
+
+## AVANT / APRÈS
+
+```php
+// AVANT
+header('Location: ' . $GLOBALS['url'] . '/connexion');
+if ($GLOBALS['dev']) { ... }
+
+// APRÈS
+header('Location: ' . APP_URL . '/connexion');
+if (APP_DEV) { ... }
+```
+
+3 différences syntaxiques : pas de `$`, pas de quotes, pas de notation
+tableau `[...]`. Une constante est juste un identifiant.
+
+## OÙ ÇA APPARAÎT
+
+- Tous les `header('Location: ...')` des contrôleurs
+- Les `<a href="<?= APP_URL ?>/...">` et `<img src="...">` dans les vues
+- Les `<form action="<?= APP_URL ?>/...">` dans les formulaires
+- `config.php` (pour définir les constantes)
+- `classes/class.database.php` (charge `DB_HOST`, `DB_USERNAME`, etc. pour PDO)
+- `classes/class.users.php` (utilise `BASE_SALT` pour hasher les mots de passe)
+
+## MIGRATION EFFECTUÉE
+
+- 121 occurrences `$GLOBALS['X']` remplacées par leur constante équivalente
+- 65 fichiers PHP touchés
+- Parser PHP : OK sur les 66 fichiers du projet après migration
+- 0 référence résiduelle à `$GLOBALS['url|dev|base_salt|db_host|db_username|db_password|db_name']`

@@ -96,7 +96,7 @@ $horaires_error     = $horaires_error     ?? false;
                 <?php foreach ($dernierPlats as $plat): ?>
                     <div class="col-md-4 mb-4">
                         <div class="bg-white shadow-sm rounded border overflow-hidden">
-                            <img src="<?= $GLOBALS['url'] ?>/assets/img/plats/<?= !empty($plat['image']) ? htmlspecialchars($plat['image']) : 'default-plat.jpg' ?>"
+                            <img src="<?= APP_URL ?>/assets/img/plats/<?= !empty($plat['image']) ? htmlspecialchars($plat['image']) : 'default-plat.jpg' ?>"
                                 alt="<?= htmlspecialchars($plat['nom']) ?>"
                                 style="width:100%; height:180px; object-fit:cover;">
                             <div class="p-3">

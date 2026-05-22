@@ -19,10 +19,10 @@ class Database
 
     private function __construct()
     {
-        $this->_host     = $GLOBALS["db_host"];
-        $this->_username = $GLOBALS["db_username"];
-        $this->_password = $GLOBALS["db_password"];
-        $this->_database = $GLOBALS["db_name"];
+        $this->_host     = DB_HOST;
+        $this->_username = DB_USERNAME;
+        $this->_password = DB_PASSWORD;
+        $this->_database = DB_NAME;
 
         try {
             $this->_connection = new PDO(

@@ -81,11 +81,11 @@ class ImageUploader
 
     /**
      * Retourne le chemin filesystem du dossier d'upload, en tenant compte
-     * du flag $GLOBALS['dev'] (qui ajoute le prefixe /Miamy/ en local).
+     * du flag APP_DEV (qui ajoute le prefixe /Miamy/ en local).
      */
     private function resolveUploadDir(): string
     {
-        $base = $GLOBALS['dev']
+        $base = APP_DEV
             ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/'
             : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/';
         return $base . $this->folder . '/';

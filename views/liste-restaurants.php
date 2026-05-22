@@ -60,8 +60,8 @@
                     <div class="col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
                         <div class="theme_common_box_two img_hover">
                             <div class="theme_two_box_img">
-                                <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>">
-                                    <img src="<?= $GLOBALS['url'] ?>/assets/img/restaurants/<?= htmlspecialchars($image) ?>"
+                                <a href="<?= APP_URL ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>">
+                                    <img src="<?= APP_URL ?>/assets/img/restaurants/<?= htmlspecialchars($image) ?>"
                                          alt="<?= htmlspecialchars($resto['name']) ?>">
                                 </a>
                                 <?php if ($resto['is_featured']): ?>
@@ -72,7 +72,7 @@
                             </div>
                             <div class="theme_two_box_content">
                                 <h4>
-                                    <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>">
+                                    <a href="<?= APP_URL ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>">
                                         <?= htmlspecialchars($resto['name']) ?>
                                     </a>
                                 </h4>
@@ -83,7 +83,7 @@
                                     <i class="fas fa-map-marker-alt me-1 text-muted" style="font-size:.85rem;"></i>
                                     <?= htmlspecialchars($resto['city'] ?? '') ?>
                                     <span>
-                                        <a href="<?= $GLOBALS['url'] ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>"
+                                        <a href="<?= APP_URL ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>"
                                            class="btn btn_theme btn_sm cart_btn">Voir</a>
                                     </span>
                                 </h3>

@@ -7,7 +7,7 @@ date_default_timezone_set('Europe/Paris');
 
 require_once('config.php');
 
-if ($GLOBALS['dev'] == true) {
+if (APP_DEV == true) {
 	error_reporting(E_ALL);
 	ini_set('display_errors', 'on');
 } else {

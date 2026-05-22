@@ -29,7 +29,7 @@
 
         <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
-                <img src="<?= $GLOBALS['url'] ?>/assets/img/restaurants/<?= !empty($resto['main_image']) ? $resto['main_image'] : 'default-resto.jpg' ?>"
+                <img src="<?= APP_URL ?>/assets/img/restaurants/<?= !empty($resto['main_image']) ? $resto['main_image'] : 'default-resto.jpg' ?>"
                     alt="img" class="rounded shadow-sm" style="width:70px; height:50px; object-fit:cover;">
                 <div>
                     <h3 class="mb-0"><?= htmlspecialchars($resto['name']) ?></h3>
@@ -133,7 +133,7 @@
 
                                     <div class="flex-shrink-0 mb-3 mb-md-0">
                                         <?php if (!empty($plat['image'])): ?>
-                                            <img src="<?= $GLOBALS['url'] ?>/assets/img/plats/<?= htmlspecialchars($plat['image']) ?>"
+                                            <img src="<?= APP_URL ?>/assets/img/plats/<?= htmlspecialchars($plat['image']) ?>"
                                                 alt="<?= htmlspecialchars($plat['nom']) ?>"
                                                 class="rounded" style="width:110px; height:80px; object-fit:cover;">
                                         <?php else: ?>
@@ -197,7 +197,7 @@
 </section>
 
 <?php
-$url = $GLOBALS['url'];
+$url = APP_URL;
 $custom_js = <<<HTML
 <!-- SortableJS : drag & drop entre catégories -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>

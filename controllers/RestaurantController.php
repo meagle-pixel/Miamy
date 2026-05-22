@@ -100,7 +100,7 @@ class RestaurantController
         $resto      = $restoClass->getOwnedBy($id_restaurant, $id_restaurateur);
 
         if (!$resto) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -168,7 +168,7 @@ class RestaurantController
         $id_restaurateur = (int)$_SESSION['user']['profil_id'];
 
         if (!$id_restaurant) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -176,7 +176,7 @@ class RestaurantController
         $resto      = $restoClass->getOwnedBy($id_restaurant, $id_restaurateur);
 
         if (!$resto) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -185,7 +185,7 @@ class RestaurantController
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
             try {
                 if ($restoClass->delete($id_restaurant)) {
-                    header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur?success=deleted');
+                    header('Location: ' . APP_URL . '/mon-compte-restaurateur?success=deleted');
                     exit();
                 } else {
                     $message_error = "Une erreur est survenue lors de la suppression.";
@@ -210,13 +210,13 @@ class RestaurantController
         $id_restaurateur = (int)$_SESSION['user']['profil_id'];
 
         if (!$id_restaurant) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
         $restoClass = new Restaurant();
         if (!$restoClass->isOwnedBy($id_restaurant, $id_restaurateur)) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -225,7 +225,7 @@ class RestaurantController
         $ok            = $horairesClass->save($id_restaurant, $data);
 
         $status = $ok ? 'ok' : 'error';
-        header('Location: ' . $GLOBALS['url'] . '/details?id=' . $id_restaurant . '&horaires=' . $status);
+        header('Location: ' . APP_URL . '/details?id=' . $id_restaurant . '&horaires=' . $status);
         exit();
     }
 
@@ -240,7 +240,7 @@ class RestaurantController
         $id_restaurateur = (int)$_SESSION['user']['profil_id'];
 
         if (!$id_restaurant) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -249,7 +249,7 @@ class RestaurantController
         $resto      = $restoClass->getOwnedBy($id_restaurant, $id_restaurateur);
 
         if (!$resto) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 

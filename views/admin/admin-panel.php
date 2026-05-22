@@ -11,8 +11,8 @@ $users = $users ?? [];
 
     <h1 class="mt-4">Panel Administrateur</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="<?= $GLOBALS['url'] ?>/accueil">Accueil</a></li>
-        <li class="breadcrumb-item"><a href="<?= $GLOBALS['url'] ?>/dashboard">Admin</a></li>
+        <li class="breadcrumb-item"><a href="<?= APP_URL ?>/accueil">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="<?= APP_URL ?>/dashboard">Admin</a></li>
         <li class="breadcrumb-item active">Utilisateurs</li>
     </ol>
 

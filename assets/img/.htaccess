@@ -1,8 +1,0 @@
-RewriteEngine On
-
-# Si le fichier ou le dossier existe vraiment, on l'affiche normalement
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-
-# Sinon, on envoie tout vers index.php avec le paramètre 'mod'
-RewriteRule ^([a-zA-Z0-9\-_]+)/?$ index.php?mod=$1 [L,QSA]

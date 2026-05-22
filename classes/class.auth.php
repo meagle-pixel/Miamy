@@ -73,7 +73,7 @@ class Auth
 
     private static function reject(): void
     {
-        header('Location: ' . ($GLOBALS['url'] ?? '') . self::REDIRECT_URL);
+        header('Location: ' . (APP_URL ?? '') . self::REDIRECT_URL);
         exit();
     }
 }

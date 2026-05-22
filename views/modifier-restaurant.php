@@ -83,7 +83,7 @@
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3">
                                         <label>Photo actuelle</label><br>
-                                        <img src="<?= $GLOBALS['url'] ?>/assets/img/restaurants/<?= $resto['main_image'] ?>" alt="Photo actuelle" style="max-width: 200px; border-radius: 8px;">
+                                        <img src="<?= APP_URL ?>/assets/img/restaurants/<?= $resto['main_image'] ?>" alt="Photo actuelle" style="max-width: 200px; border-radius: 8px;">
                                     </div>
                                 </div>
 

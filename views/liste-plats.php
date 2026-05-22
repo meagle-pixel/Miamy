@@ -38,7 +38,7 @@ $nbPlats           = count($plats);
         <div class="row mb-5">
             <div class="col-lg-4 col-md-5 mb-3">
                 <div class="theme_two_box_img">
-                    <img src="<?= $GLOBALS['url'] ?>/assets/img/restaurants/<?= htmlspecialchars($resto['main_image'] ?? 'default-resto.jpg') ?>"
+                    <img src="<?= APP_URL ?>/assets/img/restaurants/<?= htmlspecialchars($resto['main_image'] ?? 'default-resto.jpg') ?>"
                          alt="<?= htmlspecialchars($resto['name'] ?? '') ?>"
                          style="width:100%; height:240px; object-fit:cover; border-radius:8px;">
                 </div>
@@ -87,7 +87,7 @@ $nbPlats           = count($plats);
                             <div class="col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
                                 <div class="theme_common_box_two img_hover">
                                     <div class="theme_two_box_img">
-                                        <img src="<?= $GLOBALS['url'] ?>/assets/img/plats/<?= !empty($plat['image']) ? htmlspecialchars($plat['image']) : 'default-plat.jpg' ?>"
+                                        <img src="<?= APP_URL ?>/assets/img/plats/<?= !empty($plat['image']) ? htmlspecialchars($plat['image']) : 'default-plat.jpg' ?>"
                                              alt="<?= htmlspecialchars($plat['nom']) ?>"
                                              style="width:100%; height:200px; object-fit:cover;">
                                     </div>

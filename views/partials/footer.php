@@ -52,7 +52,7 @@
                 </div>
                 <div class="co-lg-6 col-md-6 col-sm-12 col-12">
                     <div class="copyright_right">
-                        <img src="<?php echo $GLOBALS["url"]; ?>/assets/img/common/cards.png" alt="img">
+                        <img src="<?php echo APP_URL; ?>/assets/img/common/cards.png" alt="img">
                     </div>
                 </div>
             </div>

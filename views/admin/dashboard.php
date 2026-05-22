@@ -63,7 +63,7 @@ if (!function_exists('getActionBadgeStyle')) {
     <!-- Titre + breadcrumb (style SB Admin) -->
     <h1 class="mt-4">Tableau de bord</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="<?= $GLOBALS['url'] ?>/accueil">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="<?= APP_URL ?>/accueil">Accueil</a></li>
         <li class="breadcrumb-item active">Admin</li>
     </ol>
 
@@ -174,7 +174,7 @@ if (!function_exists('getActionBadgeStyle')) {
                             <i class="fas fa-store me-2" style="color:#1D9E75;"></i>
                             Derniers restaurants ajoutés
                         </h5>
-                        <a href="<?= $GLOBALS['url'] ?>/admin-restaurants" class="btn btn-sm btn_theme" style="font-size:12px;">
+                        <a href="<?= APP_URL ?>/admin-restaurants" class="btn btn-sm btn_theme" style="font-size:12px;">
                             Voir tout
                         </a>
                     </div>
@@ -223,7 +223,7 @@ if (!function_exists('getActionBadgeStyle')) {
                             <i class="fas fa-user-plus me-2" style="color:#4361EE;"></i>
                             Dernières inscriptions
                         </h5>
-                        <a href="<?= $GLOBALS['url'] ?>/admin-panel" class="btn btn-sm btn_theme" style="font-size:12px;">
+                        <a href="<?= APP_URL ?>/admin-panel" class="btn btn-sm btn_theme" style="font-size:12px;">
                             Voir tout
                         </a>
                     </div>

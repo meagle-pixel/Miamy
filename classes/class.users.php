@@ -38,7 +38,7 @@ class User
      */
     public function insertUtilisateur(array $utilisateur)
     {
-        $base_salt = $GLOBALS["base_salt"];
+        $base_salt = BASE_SALT;
         $options   = ['cost' => 9];
         $pass      = password_hash($utilisateur['motdepasse'] . $utilisateur['email'] . $base_salt, PASSWORD_BCRYPT, $options);
 
@@ -81,7 +81,7 @@ class User
      */
     public function tryToConnect(string $email, string $pass, bool $bypass = false): bool
     {
-        $base_salt = $GLOBALS["base_salt"] ?? "";
+        $base_salt = BASE_SALT ?? "";
         $logger    = new UserLog();
 
         $stmt = $this->pdo->prepare("SELECT * FROM `utilisateurs` WHERE `email` = :email AND actif = '1'");

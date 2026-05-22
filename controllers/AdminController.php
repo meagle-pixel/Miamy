@@ -158,7 +158,7 @@ class AdminController
 
                     try {
                         (new User())->changeUserProfile($user_id, $new_profil, $extraData);
-                        header('Location: ' . $GLOBALS['url'] . '/admin-panel');
+                        header('Location: ' . APP_URL . '/admin-panel');
                         exit();
                     } catch (Exception $e) {
                         $error = $e->getMessage();
@@ -173,7 +173,7 @@ class AdminController
 
                 try {
                     (new User())->deleteUser($profil_id, $profil);
-                    header('Location: ' . $GLOBALS['url'] . '/admin-panel');
+                    header('Location: ' . APP_URL . '/admin-panel');
                     exit();
                 } catch (PDOException $e) {
                     $error = "Erreur lors de la suppression.";
@@ -226,7 +226,7 @@ class AdminController
             try {
                 $restaurantModel = new Restaurant();
                 if ($restaurantModel->delete($idToDelete)) {
-                    header('Location: ' . $GLOBALS['url'] . '/admin-restaurants?success=deleted');
+                    header('Location: ' . APP_URL . '/admin-restaurants?success=deleted');
                     exit();
                 } else {
                     $error = "La suppression du restaurant a échoué.";
@@ -248,7 +248,7 @@ class AdminController
             try {
                 $restaurantModel = new Restaurant();
                 if ($restaurantModel->updateCategory($idRestaurant, $idCategorie)) {
-                    header('Location: ' . $GLOBALS['url'] . '/admin-restaurants?success=updated');
+                    header('Location: ' . APP_URL . '/admin-restaurants?success=updated');
                     exit();
                 } else {
                     $error = "La mise à jour de la catégorie a échoué.";

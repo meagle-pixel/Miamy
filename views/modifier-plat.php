@@ -90,7 +90,7 @@
                                     <div class="form-group mb-3">
                                         <label>Photo actuelle</label><br>
                                         <?php if (!empty($plat['image'])): ?>
-                                            <img src="<?= $GLOBALS['url'] ?>/assets/img/plats/<?= htmlspecialchars($plat['image']) ?>"
+                                            <img src="<?= APP_URL ?>/assets/img/plats/<?= htmlspecialchars($plat['image']) ?>"
                                                 alt="Photo du plat" style="max-width:200px; border-radius:8px;" class="shadow-sm">
                                         <?php else: ?>
                                             <div class="rounded bg-light d-inline-flex align-items-center justify-content-center p-4 border text-muted">

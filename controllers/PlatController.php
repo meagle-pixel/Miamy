@@ -10,7 +10,7 @@ class PlatController
         $id_restaurant = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
         if ($id_restaurant === 0) {
-            header('Location: ' . $GLOBALS['url'] . '/liste-restaurants');
+            header('Location: ' . APP_URL . '/liste-restaurants');
             exit();
         }
 
@@ -18,7 +18,7 @@ class PlatController
         $resto = $restoClass->getById($id_restaurant);
 
         if (!$resto) {
-            header('Location: ' . $GLOBALS['url'] . '/liste-restaurants');
+            header('Location: ' . APP_URL . '/liste-restaurants');
             exit();
         }
 
@@ -43,7 +43,7 @@ class PlatController
     public function gestionCarte()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-            header('Location: ' . $GLOBALS['url'] . '/connexion');
+            header('Location: ' . APP_URL . '/connexion');
             exit();
         }
 
@@ -51,7 +51,7 @@ class PlatController
         $id_restaurateur = $_SESSION['user']['profil_id'];
 
         if (!$id_restaurant) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -64,7 +64,7 @@ class PlatController
         $resto = $stmt->fetch();
 
         if (!$resto) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -96,7 +96,7 @@ class PlatController
     public function ajouter()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-            header('Location: ' . $GLOBALS['url'] . '/connexion');
+            header('Location: ' . APP_URL . '/connexion');
             exit();
         }
 
@@ -104,7 +104,7 @@ class PlatController
         $id_restaurateur = $_SESSION['user']['profil_id'];
 
         if (!$id_restaurant) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -117,7 +117,7 @@ class PlatController
         $resto = $stmt->fetch();
 
         if (!$resto) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -147,7 +147,7 @@ class PlatController
                     if (in_array($ext, $allowed) && $_FILES['image']['size'] < 5000000) {
                         $slug_plat   = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
                         $image_name  = $slug_plat . '-' . time() . '.' . $ext;
-                        $upload_dir  = $GLOBALS['dev']
+                        $upload_dir  = APP_DEV
                             ? $_SERVER['DOCUMENT_ROOT'] . '/Miamy/assets/img/plats/'
                             : $_SERVER['DOCUMENT_ROOT'] . '/assets/img/plats/';
                         $upload_path = $upload_dir . $image_name;
@@ -177,7 +177,7 @@ class PlatController
                     ];
 
                     if ($platClass->insert($data)) {
-                        header('Location: ' . $GLOBALS['url'] . '/gestion-carte?id=' . $id_restaurant . '&success=added');
+                        header('Location: ' . APP_URL . '/gestion-carte?id=' . $id_restaurant . '&success=added');
                         exit();
                     } else {
                         $message_error = "Erreur lors de l'ajout du plat.";
@@ -202,7 +202,7 @@ class PlatController
     public function modifier()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-            header('Location: ' . $GLOBALS['url'] . '/connexion');
+            header('Location: ' . APP_URL . '/connexion');
             exit();
         }
 
@@ -210,7 +210,7 @@ class PlatController
         $id_restaurateur = $_SESSION['user']['profil_id'];
 
         if (!$id_plat) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -218,7 +218,7 @@ class PlatController
         $plat      = $platClass->getById($id_plat);
 
         if (!$plat) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -233,7 +233,7 @@ class PlatController
         $resto = $stmt->fetch();
 
         if (!$resto) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -270,7 +270,7 @@ class PlatController
                 } else {
                     $slug_plat   = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $nom));
                     $new_image   = $slug_plat . '-' . time() . '.' . $ext;
-                    $upload_dir  = $GLOBALS['dev'] ? '/Miamy/assets/img/plats/' : '/assets/img/plats/';
+                    $upload_dir  = APP_DEV ? '/Miamy/assets/img/plats/' : '/assets/img/plats/';
                     $upload_path = $_SERVER['DOCUMENT_ROOT'] . $upload_dir . $new_image;
 
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
@@ -292,7 +292,7 @@ class PlatController
                 ];
 
                 if ($platClass->update($id_plat, $data)) {
-                    header('Location: ' . $GLOBALS['url'] . '/gestion-carte?id=' . $id_restaurant . '&success=updated');
+                    header('Location: ' . APP_URL . '/gestion-carte?id=' . $id_restaurant . '&success=updated');
                     exit();
                 } else {
                     $errors[] = "Une erreur est survenue lors de la mise à jour en base de données.";
@@ -309,7 +309,7 @@ class PlatController
     public function supprimer()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
-            header('Location: ' . $GLOBALS['url'] . '/connexion');
+            header('Location: ' . APP_URL . '/connexion');
             exit();
         }
 
@@ -318,7 +318,7 @@ class PlatController
         $id_restaurateur = $_SESSION['user']['profil_id'];
 
         if (!$id_plat || !$id_restaurant) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -326,7 +326,7 @@ class PlatController
         $plat      = $platClass->getById($id_plat);
 
         if (!$plat || $plat['id_restaurant'] !== $id_restaurant) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -339,7 +339,7 @@ class PlatController
         $resto = $stmt->fetch();
 
         if (!$resto) {
-            header('Location: ' . $GLOBALS['url'] . '/mon-compte-restaurateur');
+            header('Location: ' . APP_URL . '/mon-compte-restaurateur');
             exit();
         }
 
@@ -347,7 +347,7 @@ class PlatController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
             if ($platClass->delete($id_plat)) {
-                header('Location: ' . $GLOBALS['url'] . '/gestion-carte?id=' . $id_restaurant . '&success=deleted');
+                header('Location: ' . APP_URL . '/gestion-carte?id=' . $id_restaurant . '&success=deleted');
                 exit();
             } else {
                 $message_error = "Une erreur est survenue lors de la suppression.";

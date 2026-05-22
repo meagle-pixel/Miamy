@@ -11,8 +11,8 @@ $message_error   = $message_error   ?? '';
 
     <h1 class="mt-4">Ajouter un administrateur</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="<?= $GLOBALS['url'] ?>/accueil">Accueil</a></li>
-        <li class="breadcrumb-item"><a href="<?= $GLOBALS['url'] ?>/dashboard">Admin</a></li>
+        <li class="breadcrumb-item"><a href="<?= APP_URL ?>/accueil">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="<?= APP_URL ?>/dashboard">Admin</a></li>
         <li class="breadcrumb-item active">Ajouter un admin</li>
     </ol>
 
@@ -29,7 +29,7 @@ $message_error   = $message_error   ?? '';
 
                     <?php if ($message_success): ?>
                         <div class="alert alert-success"><?= $message_success ?></div>
-                        <a href="<?= $GLOBALS['url'] ?>/dashboard" class="btn btn-primary btn-sm">Retour au dashboard</a>
+                        <a href="<?= APP_URL ?>/dashboard" class="btn btn-primary btn-sm">Retour au dashboard</a>
                     <?php else: ?>
 
                         <?php if ($message_error): ?>

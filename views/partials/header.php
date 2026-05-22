@@ -64,7 +64,7 @@
 					<div class="main-responsive-menu">
 						<div class="logo">
 							<a href="accueil">
-								<img src="<?php echo $GLOBALS["url"]; ?>/assets/img/miamy-logo-mini.jpg" alt="Logo miamy menu de restaurant interactif">
+								<img src="<?php echo APP_URL; ?>/assets/img/miamy-logo-mini.jpg" alt="Logo miamy menu de restaurant interactif">
 							</a>
 						</div>
 					</div>
@@ -74,7 +74,7 @@
 				<div class="container">
 					<nav class="navbar navbar-expand-md navbar-light">
 						<a class="navbar-brand" href="accueil">
-							<img src="<?php echo $GLOBALS["url"]; ?>/assets/img/miamy-logo-mini.jpg" alt="logo miamy menu de restaurant interactif">
+							<img src="<?php echo APP_URL; ?>/assets/img/miamy-logo-mini.jpg" alt="logo miamy menu de restaurant interactif">
 						</a>
 						<div class="collapse navbar-collapse mean-menu" id="navbarSupportedContent">
 							<ul class="navbar-nav">

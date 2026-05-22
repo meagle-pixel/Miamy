@@ -75,8 +75,4 @@ $error_message  = $error_message  ?? '';
     </div>
 </section>
 
-<?php
-echo '<pre>'; // La balise <pre> permet de garder le formatage (retours à la ligne)
-var_dump($_SESSION);
-echo '</pre>';
-?>
+

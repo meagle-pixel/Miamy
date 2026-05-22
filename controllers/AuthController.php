@@ -28,7 +28,7 @@ class AuthController
                         $redirect_url = 'mon-compte';
                     }
 
-                    header('Location: ' . $GLOBALS['url'] . '/' . $redirect_url);
+                    header('Location: ' . APP_URL . '/' . $redirect_url);
                     exit();
                 } else {
                     $message_error = "Identifiants invalides ou compte non activé.";
@@ -51,7 +51,7 @@ class AuthController
         }
         $_SESSION = [];
         session_destroy();
-        header('Location: ' . $GLOBALS['url'] . '/accueil');
+        header('Location: ' . APP_URL . '/accueil');
         exit();
     }
 

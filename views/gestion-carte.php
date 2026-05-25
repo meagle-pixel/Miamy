@@ -253,7 +253,7 @@ $custom_js = <<<HTML
                 });
             },
 
-            onEnd: function (evt) {
+            onEnd: async function (evt) {
                 // Retire la mise en évidence
                 document.querySelectorAll('.sortable-list').forEach(function (l) {
                     l.classList.remove('drag-over');
@@ -276,21 +276,20 @@ $custom_js = <<<HTML
                 fd.append('id_plat', platId);
                 fd.append('categorie', newCateg);
 
-                fetch(BASE_URL + '/update-plat-categorie', {
-                    method: 'POST',
-                    body: fd
-                })
-                .then(function (response) { return response.json(); })
-                .then(function (resp) {
+                try {
+                    const response = await fetch(BASE_URL + '/update-plat-categorie', {
+                        method: 'POST',
+                        body: fd
+                    });
+                    const resp = await response.json();
                     if (!resp.success) {
                         revert(evt, oldCateg, newCateg);
                         alert('Erreur lors du changement de catégorie. Le plat a été replacé.');
                     }
-                })
-                .catch(function () {
+                } catch (err) {
                     revert(evt, oldCateg, newCateg);
                     alert('Erreur réseau. Veuillez réessayer.');
-                });
+                }
             }
         });
     });
@@ -305,7 +304,7 @@ $custom_js = <<<HTML
     }
 
     // --- Toggle disponible / indisponible (délégation d'événement vanilla) ---
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', async function (e) {
         const btn = e.target.closest('.btn-toggle-dispo');
         if (!btn) return;
 
@@ -319,12 +318,13 @@ $custom_js = <<<HTML
         const fd = new FormData();
         fd.append('id_plat', platId);
 
-        fetch(BASE_URL + '/toggle-disponible-plat', {
-            method: 'POST',
-            body: fd
-        })
-        .then(function (response) { return response.json(); })
-        .then(function (resp) {
+        try {
+            const response = await fetch(BASE_URL + '/toggle-disponible-plat', {
+                method: 'POST',
+                body: fd
+            });
+            const resp = await response.json();
+
             if (resp.success) {
                 const dispo = resp.disponible; // 1 = disponible, 0 = indisponible
                 btn.dataset.disponible = dispo;
@@ -368,13 +368,11 @@ $custom_js = <<<HTML
             } else {
                 alert('Erreur lors de la mise à jour. Veuillez réessayer.');
             }
-        })
-        .catch(function () {
+        } catch (err) {
             alert('Erreur réseau. Veuillez réessayer.');
-        })
-        .finally(function () {
+        } finally {
             btn.disabled = false;
-        });
+        }
     });
 })();
 </script>

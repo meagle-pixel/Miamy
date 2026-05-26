@@ -160,7 +160,7 @@ ESPACE ADMIN (profil = 1)
 - Ajouter un admin      -> AdminController::ajouterAdmin
 
 CLASSES DE SERVICE (classes/)
-- Database, User, UserLog, Auth, Restaurant, Restaurateur, Plat, Client,
+- Database, User, UserLog, Restaurant, Restaurateur, Plat, Client,
   Category, Horaires, Page, ImageUploader, plus class.functions.php
   (utilitaires : get_ip, sanitizeString, array_sort).
 
@@ -202,8 +202,8 @@ HTML déplaçables par glisser-déposer. Elle est chargée via CDN :
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 ```
 
-Aucune installation npm, aucune dépendance. jQuery (déjà présent) est utilisé
-uniquement pour l'appel AJAX.
+Aucune installation npm, aucune dépendance. L'appel AJAX utilise `fetch()`, l'API
+native du navigateur (vanilla JavaScript, pas de jQuery requis).
 
 ## FICHIERS MODIFIÉS / CRÉÉS
 
@@ -473,24 +473,33 @@ data-disponible : l'état actuel (1 ou 0), mis à jour par le JS après chaque t
 
 ## 2. JAVASCRIPT dans gestion-carte.php
 
-On écoute les clics sur tous les boutons .btn-toggle-dispo avec jQuery.
+On écoute les clics sur tous les boutons `.btn-toggle-dispo` via délégation
+d'événement vanilla (un seul listener pour tous les boutons de la page).
 Le bouton est désactivé pendant la requête pour éviter les double-clics.
 
 ```javascript
-$(document).on('click', '.btn-toggle-dispo', function () {
-    var btn    = $(this);
-    var platId = btn.data('plat-id');
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-toggle-dispo');
+    if (!btn) return;
 
-    btn.prop('disabled', true); // désactive pendant la requête
+    const platId = btn.dataset.platId;
+    btn.disabled = true; // désactive pendant la requête
 
-    fetch(BASE_URL + '/toggle-disponible-plat', { id_plat: platId },
-    function (resp) {
+    const fd = new FormData();
+    fd.append('id_plat', platId);
+
+    fetch(BASE_URL + '/toggle-disponible-plat', {
+        method: 'POST',
+        body: fd
+    })
+    .then(function (response) { return response.json(); })
+    .then(function (resp) {
         if (resp.success) {
             // resp.disponible = nouvel état retourné par le serveur (0 ou 1)
             // → mettre à jour le badge, le bouton, griser la carte
         }
-    }, 'json')
-    .always(function () { btn.prop('disabled', false); });
+    })
+    .finally(function () { btn.disabled = false; });
 });
 ```
 
@@ -853,7 +862,7 @@ $dispatchMap = [
 ```
 
 Et créer la méthode correspondante dans le contrôleur. Pour une page admin,
-ajouter `AdminController::gestionPlats()` qui appelle `Auth::requireAdmin()`
+ajouter `AdminController::gestionPlats()` avec un bloc de vérification de session (profil ≤ 1)
 en tête et retourne les données via `compact(...)`.
 
 ### (c) Ajouter un lien dans la sidebar de admin_head.php
@@ -976,8 +985,7 @@ Vues `register.php` et `register-client.php` réduites au HTML pur. Routes
 
 Nouveau `controllers/AdminController.php` avec :
 
-- `requireAdmin()` (privée à l'époque, supprimée à l'étape 5 au profit de
-  `Auth::requireAdmin`).
+- `requireAdmin()` (méthode privée d.origine, depuis simplifiée en bloc inline).
 - `dashboard()` — 10 indicateurs (compteurs + dernières inscriptions /
   restaurants / logs).
 - `panel()` — gestion utilisateurs (POST update + delete).
@@ -1060,55 +1068,6 @@ Au passage, `isClear($profil, $page)` était la même chose que
 `Page::hasAccess($page, $profil)` (params inversés) : un duplicat de moins.
 
 
-# REFACTOR MVC — ÉTAPE 5 : CENTRALISATION DES PERMISSIONS
-
-Le bloc de check de session était copié-collé 13 fois dans les contrôleurs.
-Tout passe maintenant par une seule classe `Auth`.
-
-## NOUVELLE CLASSE Auth (classes/class.auth.php)
-
-Deux familles de méthodes statiques :
-
-**`require*()`** — `header()+exit()` si refus :
-- `Auth::requireConnected()` — juste connecté
-- `Auth::requireAdmin()` — admin (profil ≤ 1)
-- `Auth::requireRestaurateur()` — admin OU restaurateur (profil ≤ 2)
-- `Auth::requireExactProfile(int)` — profil strictement égal à N
-
-**`is*()`** — version booléenne pour endpoints AJAX qui renvoient du JSON :
-- `Auth::isConnected()`, `Auth::isAdmin()`, `Auth::isRestaurateur()`,
-  `Auth::hasExactProfile(int)`
-
-## AVANT / APRÈS
-
-```php
-// AVANT (4 lignes répétées 13 fois)
-if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true
-    || $_SESSION['user']['profil'] > 2) {
-    header('Location: ' . $GLOBALS['url'] . '/connexion');
-    exit();
-}
-
-// APRÈS
-Auth::requireRestaurateur();
-```
-
-Pour les endpoints AJAX :
-
-```php
-if (!Auth::isRestaurateur()) {
-    echo json_encode(['success' => false, 'message' => 'Non autorise']);
-    exit();
-}
-```
-
-## NETTOYAGE COLLATÉRAL
-
-La méthode privée `AdminController::requireAdmin()` (introduite à l'étape 2)
-est devenue redondante : supprimée + 4 appels `$this->requireAdmin()`
-remplacés par `Auth::requireAdmin()` direct.
-
-
 # REFACTOR MVC — ÉTAPE 6 : HELPER ImageUploader
 
 L'upload d'images était dupliqué dans 4 méthodes (PlatController::ajouter,
@@ -1178,7 +1137,7 @@ en CDN (S3, Cloudinary…), tu modifies UN seul fichier
 
 # BILAN GLOBAL DU REFACTOR MVC
 
-Les 6 points du rapport initial sont tous traités :
+Les 6 points du rapport initial ont été abordés :
 
 | # | Sujet                                          | Statut |
 |---|------------------------------------------------|--------|
@@ -1186,7 +1145,7 @@ Les 6 points du rapport initial sont tous traités :
 | 2 | Dossier actions/                               | Étape 3 |
 | 3 | SQL brut dans PlatController/RestaurantController | Étape 4 |
 | 4 | classes/ hétérogène (procédural + OO)          | Étape 4 bis |
-| 5 | Blocs de permission copiés-collés              | Étape 5 |
+| 5 | Blocs de permission copiés-collés              | Bloc `if` inline directement dans chaque méthode |
 | 6 | Upload d'images dupliqué                       | Étape 6 |
 
 `views/details.php` est volontairement resté hors scope (décision initiale).

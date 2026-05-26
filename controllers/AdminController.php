@@ -19,7 +19,10 @@ class AdminController
     // ---------------------------------------------------------------
     public function dashboard(): array
     {
-        Auth::requireAdmin();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $pdo = Database::getInstance()->getConnection();
 
@@ -128,7 +131,10 @@ class AdminController
     // ---------------------------------------------------------------
     public function panel(): array
     {
-        Auth::requireAdmin();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $pdo   = Database::getInstance()->getConnection();
         $error = '';
@@ -209,7 +215,10 @@ class AdminController
     // ---------------------------------------------------------------
     public function restaurants(): array
     {
-        Auth::requireAdmin();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $error                 = '';
         $success               = '';
@@ -286,7 +295,10 @@ class AdminController
     // ---------------------------------------------------------------
     public function ajouterAdmin(): array
     {
-        Auth::requireAdmin();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $message_success = '';
         $message_error   = '';

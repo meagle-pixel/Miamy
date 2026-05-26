@@ -95,7 +95,10 @@ class PlatController
     // ---------------------------------------------------------------
     public function ajouter()
     {
-        Auth::requireRestaurateur();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $id_restaurant   = isset($_GET['id_restaurant']) ? (int)$_GET['id_restaurant'] : 0;
         $id_restaurateur = $_SESSION['user']['profil_id'];
@@ -178,7 +181,10 @@ class PlatController
     // ---------------------------------------------------------------
     public function modifier()
     {
-        Auth::requireRestaurateur();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $id_plat         = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $id_restaurateur = $_SESSION['user']['profil_id'];
@@ -318,7 +324,7 @@ class PlatController
     {
         header('Content-Type: application/json');
 
-        if (!Auth::isRestaurateur()) {
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
             echo json_encode(['success' => false, 'message' => 'Non autorise']);
             exit();
         }
@@ -353,7 +359,7 @@ class PlatController
     {
         header('Content-Type: application/json');
 
-        if (!Auth::isRestaurateur()) {
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
             echo json_encode(['success' => false, 'message' => 'Non autorise']);
             exit();
         }

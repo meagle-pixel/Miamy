@@ -26,7 +26,6 @@ require_once('classes/class.functions.php');
 //require_once('classes/class.messages.php');
 require_once('classes/class.pages.php');
 require_once('classes/class.userlogs.php');
-require_once('classes/class.auth.php');
 require_once('classes/class.imageuploader.php');
 require_once('classes/class.users.php');
 require_once('classes/class.restaurants.php');

@@ -15,7 +15,10 @@ class UserController
     // ---------------------------------------------------------------
     public function monCompteRestaurateur()
     {
-        Auth::requireRestaurateur();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $restaurateur    = $_SESSION['user-info'] ?? [];
         $id_restaurateur = $_SESSION['user']['profil_id'] ?? null;
@@ -36,7 +39,10 @@ class UserController
     // ---------------------------------------------------------------
     public function profilEditer()
     {
-        Auth::requireConnected();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $id_restaurateur = $_SESSION['user']['profil_id'];
         $pdo             = Database::getInstance()->getConnection();

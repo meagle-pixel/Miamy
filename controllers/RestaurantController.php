@@ -25,7 +25,10 @@ class RestaurantController
     // ---------------------------------------------------------------
     public function ajouter()
     {
-        Auth::requireExactProfile(2);
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || (int)$_SESSION['user']['profil'] !== 2) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $message_success = '';
         $message_error   = '';
@@ -91,7 +94,10 @@ class RestaurantController
     // ---------------------------------------------------------------
     public function modifier()
     {
-        Auth::requireRestaurateur();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $id_restaurateur = (int)$_SESSION['user']['profil_id'];
@@ -162,7 +168,10 @@ class RestaurantController
     // ---------------------------------------------------------------
     public function supprimer()
     {
-        Auth::requireRestaurateur();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $id_restaurateur = (int)$_SESSION['user']['profil_id'];
@@ -204,7 +213,10 @@ class RestaurantController
     // ---------------------------------------------------------------
     public function saveHoraires()
     {
-        Auth::requireRestaurateur();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $id_restaurant   = isset($_POST['id_restaurant']) ? (int)$_POST['id_restaurant'] : 0;
         $id_restaurateur = (int)$_SESSION['user']['profil_id'];
@@ -234,7 +246,10 @@ class RestaurantController
     // ---------------------------------------------------------------
     public function details()
     {
-        Auth::requireRestaurateur();
+        if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
+            header('Location: ' . APP_URL . '/connexion');
+            exit();
+        }
 
         $id_restaurant   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $id_restaurateur = (int)$_SESSION['user']['profil_id'];

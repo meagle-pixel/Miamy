@@ -99,6 +99,24 @@
 								</li>
 
 
+
+								<!-- Liens compte visibles uniquement dans le menu burger (mobile/tablette) -->
+								<?php if (isset($_SESSION['connected']) && $_SESSION['connected']): ?>
+									<?php $profil_mb = $_SESSION['user']['profil'] ?? 3; ?>
+									<li class="nav-item d-xl-none">
+										<a href="<?= $profil_mb <= 2 ? 'mon-compte-restaurateur' : 'mon-compte' ?>" class="nav-link">Mon compte</a>
+									</li>
+									<li class="nav-item d-xl-none">
+										<a href="deconnexion" class="nav-link">Déconnexion</a>
+									</li>
+								<?php else: ?>
+									<li class="nav-item d-xl-none">
+										<a href="connexion" class="nav-link">Connexion</a>
+									</li>
+									<li class="nav-item d-xl-none">
+										<a href="inscription-client" class="nav-link">Inscription</a>
+									</li>
+								<?php endif; ?>
 							</ul>
 							<div class="others-options d-flex align-items-center">
 

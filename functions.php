@@ -15,15 +15,9 @@ if (APP_DEV == true) {
 	ini_set('display_errors', 'off');
 }
 
-//require_once('classes/class.adresses.php');
 require_once('classes/class.clients.php');
-//require_once('classes/class.commandes.php');
-//require_once('classes/class.configuration.php');
 require_once('classes/class.database.php');
 require_once('classes/class.functions.php');
-//require_once('classes/class.lang.php');
-//require_once('classes/class.mail.php');
-//require_once('classes/class.messages.php');
 require_once('classes/class.pages.php');
 require_once('classes/class.userlogs.php');
 require_once('classes/class.imageuploader.php');

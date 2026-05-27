@@ -649,7 +649,6 @@ Miamy/
         │   ├── scripts.js
         │   └── datatables-simple-demo.js
         └── assets/
-            ├── demo/             (chart-area-demo.js, etc.)
             └── img/
 ```
 

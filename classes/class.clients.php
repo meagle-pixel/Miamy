@@ -43,17 +43,18 @@ class Client
     }
 
     /**
-     * Cree un nouveau client. Retourne l'ID insere.
+     * Cree un nouveau client. Requiert un user_id (FK vers utilisateurs).
+     * Retourne l'ID insere.
      */
     public function insert(array $client)
     {
         $stmt = $this->pdo->prepare(
             "INSERT INTO `clients`
-            (`id`, `civilite`, `nom`, `prenom`, `telephone`,
-             `adresse`, `adresse_comp`, `codepostal`, `ville`)
+            (`civilite`, `nom`, `prenom`, `telephone`,
+             `adresse`, `adresse_comp`, `codepostal`, `ville`, `user_id`)
             VALUES
-            (NULL, :civilite, :nom, :prenom, :telephone,
-             :adresse, :adresse_comp, :codepostal, :ville)"
+            (:civilite, :nom, :prenom, :telephone,
+             :adresse, :adresse_comp, :codepostal, :ville, :user_id)"
         );
         $stmt->execute([
             'civilite'     => $client['civilite'],
@@ -64,6 +65,7 @@ class Client
             'adresse_comp' => $client['adresse_comp'],
             'codepostal'   => $client['codepostal'],
             'ville'        => $client['ville'],
+            'user_id'      => (int)$client['user_id'],
         ]);
         return $this->pdo->lastInsertId();
     }

@@ -21,13 +21,14 @@ class User
     public function insertAdmin(array $data)
     {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO `administrateurs` (`nom`, `prenom`, `telephone`)
-             VALUES (:nom, :prenom, :telephone)"
+            "INSERT INTO `administrateurs` (`nom`, `prenom`, `telephone`, `user_id`)
+             VALUES (:nom, :prenom, :telephone, :user_id)"
         );
         $stmt->execute([
             'nom'       => $data['nom'],
             'prenom'    => $data['prenom'],
             'telephone' => $data['telephone'] ?? '',
+            'user_id'   => (int)$data['user_id'],
         ]);
         return $this->pdo->lastInsertId();
     }
@@ -144,11 +145,13 @@ class User
             $row            = $s->fetch();
             $userIdToDelete = $row['id'] ?? 0;
 
-            // Recupere dynamiquement la table metier depuis profils.type
-            $sp = $this->pdo->prepare("SELECT type FROM `profils` WHERE id = :id");
-            $sp->execute(['id' => $profil]);
-            $profilRow = $sp->fetch();
-            $table     = $profilRow['type'] ?? null;
+            // Table metier selon le profil (1=admin, 2=restaurateur, 3=client)
+            $tablesByProfil = [
+                1 => 'administrateurs',
+                2 => 'restaurateurs',
+                3 => 'clients',
+            ];
+            $table = $tablesByProfil[$profil] ?? null;
 
             if ($table) {
                 $this->pdo->prepare("DELETE FROM `$table` WHERE `id` = :id")

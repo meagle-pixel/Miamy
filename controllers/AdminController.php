@@ -111,11 +111,8 @@ class AdminController
             error_log('[dashboard] derniers_logs : ' . $e->getMessage());
         }
 
-        try {
-            $nb_promos_actives = (int) $pdo->query("SELECT COUNT(*) FROM promos WHERE actif = 1")->fetchColumn();
-        } catch (Exception $e) {
-            error_log('[dashboard] nb_promos_actives : ' . $e->getMessage());
-        }
+        // Codes promos : table supprimée (fonctionnalité non implémentée).
+        // Le compteur reste à 0 (valeur par défaut initialisée plus haut).
 
         return compact(
             'nb_restaurants_total', 'nb_restaurants_actifs',
@@ -324,27 +321,35 @@ class AdminController
                 $message_error = "Les mots de passe ne correspondent pas.";
             } else {
 
-                $id_admin = (new User())->insertAdmin([
-                    'nom'       => $nom,
-                    'prenom'    => $prenom,
-                    'telephone' => $tel,
+                // 1. Création du compte utilisateur (profil_id NULL temporairement)
+                $id_user = (new User())->insertUtilisateur([
+                    'email'      => $email,
+                    'motdepasse' => $pass,
+                    'profil'     => 1,
+                    'profil_id'  => null,
                 ]);
 
-                if ($id_admin) {
-                    $id_user = (new User())->insertUtilisateur([
-                        'email'      => $email,
-                        'motdepasse' => $pass,
-                        'profil'     => 1,
-                        'profil_id'  => $id_admin,
+                if ($id_user) {
+                    // 2. Création de l'administrateur avec FK user_id
+                    $id_admin = (new User())->insertAdmin([
+                        'nom'       => $nom,
+                        'prenom'    => $prenom,
+                        'telephone' => $tel,
+                        'user_id'   => $id_user,
                     ]);
 
-                    if ($id_user) {
+                    if ($id_admin) {
+                        // 3. Maj du profil_id côté utilisateurs (lien réciproque)
+                        $pdo = Database::getInstance()->getConnection();
+                        $pdo->prepare("UPDATE `utilisateurs` SET `profil_id` = :pid WHERE `id` = :id")
+                            ->execute(['pid' => $id_admin, 'id' => $id_user]);
+
                         $message_success = "Administrateur <strong>" . htmlspecialchars($prenom . ' ' . $nom) . "</strong> créé avec succès.";
                     } else {
-                        $message_error = "Erreur lors de la création du compte utilisateur.";
+                        $message_error = "Erreur lors de la création de l'administrateur.";
                     }
                 } else {
-                    $message_error = "Erreur lors de la création de l'administrateur.";
+                    $message_error = "Erreur lors de la création du compte utilisateur.";
                 }
             }
         }

@@ -1,44 +1,28 @@
 
 
+-- ============================================================
+-- Miamy - Base de données (export prod)
+-- ============================================================
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET NAMES utf8mb4;
 SET time_zone = "+00:00";
 
-
-
-SET FOREIGN_KEY_CHECKS = 0;
-
-DROP TABLE IF EXISTS `autorisations`;
-DROP TABLE IF EXISTS `configuration`;
-DROP TABLE IF EXISTS `langues`;
-DROP TABLE IF EXISTS `messages`;
-DROP TABLE IF EXISTS `moyens_paiement`;
-DROP TABLE IF EXISTS `profils`;
-DROP TABLE IF EXISTS `promos`;
-DROP TABLE IF EXISTS `status`;
-
-DROP TABLE IF EXISTS `user_logs`;
-DROP TABLE IF EXISTS `horaires`;
-DROP TABLE IF EXISTS `plats`;
-DROP TABLE IF EXISTS `restaurant_categories`;
-DROP TABLE IF EXISTS `restaurants`;
-DROP TABLE IF EXISTS `clients`;
-DROP TABLE IF EXISTS `restaurateurs`;
-DROP TABLE IF EXISTS `administrateurs`;
-DROP TABLE IF EXISTS `utilisateurs`;
-DROP TABLE IF EXISTS `civilites`;
-DROP TABLE IF EXISTS `categories`;
-DROP TABLE IF EXISTS `pages`;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
 START TRANSACTION;
 
-
-
-CREATE TABLE `civilites` (
+CREATE TABLE `administrateurs` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
-    `libelle` varchar(250) NOT NULL,
+    `nom` varchar(150) NOT NULL,
+    `prenom` varchar(150) NOT NULL,
+    `telephone` varchar(20) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `autorisations` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `page` int(11) NOT NULL,
+    `profil` int(11) NOT NULL,
+    `etat` int(11) NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
@@ -50,6 +34,59 @@ CREATE TABLE `categories` (
     PRIMARY KEY (`id_categorie`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `civilites` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `libelle` varchar(250) NOT NULL,
+    `lang` int(11) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `clients` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `civilite` tinyint(4) NOT NULL,
+    `nom` varchar(150) NOT NULL,
+    `prenom` varchar(150) NOT NULL,
+    `telephone` varchar(20) NOT NULL,
+    `adresse` text DEFAULT NULL,
+    `adresse_comp` text NOT NULL,
+    `codepostal` varchar(20) NOT NULL,
+    `ville` varchar(200) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `configuration` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `name` varchar(50) NOT NULL,
+    `proper_name` varchar(50) NOT NULL,
+    `value` varchar(300) NOT NULL,
+    `order` int(11) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `langues` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `nom` varchar(50) NOT NULL,
+    `code` varchar(10) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `messages` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `expediteur` int(11) NOT NULL,
+    `destinataire` int(11) NOT NULL,
+    `message` text NOT NULL,
+    `date` timestamp NOT NULL DEFAULT current_timestamp(),
+    `unread` tinyint(1) NOT NULL DEFAULT 1,
+    `delete` tinyint(4) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `moyens_paiement` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `nom` varchar(30) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 CREATE TABLE `pages` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `nom` varchar(255) NOT NULL,
@@ -58,6 +95,48 @@ CREATE TABLE `pages` (
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `profils` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `libelle` varchar(50) NOT NULL,
+    `type` varchar(50) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `promos` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `code` text NOT NULL,
+    `percent` int(11) NOT NULL,
+    `actif` int(11) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `restaurateurs` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `nom` varchar(100) DEFAULT NULL,
+    `prenom` varchar(100) DEFAULT NULL,
+    `email` varchar(150) DEFAULT NULL,
+    `telephone` varchar(20) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `email` (`email`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `status` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `libelle` varchar(100) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `user_logs` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `user_id` int(11) NOT NULL,
+    `action_type` varchar(50) NOT NULL,
+    `message` varchar(255) NOT NULL,
+    `ip_address` varchar(45) DEFAULT NULL,
+    `created_at` datetime DEFAULT current_timestamp(),
+    PRIMARY KEY (`id`),
+    KEY `idx_user_log` (`user_id`),
+    KEY `idx_date_log` (`created_at`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `utilisateurs` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -75,54 +154,6 @@ CREATE TABLE `utilisateurs` (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
-
-CREATE TABLE `administrateurs` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `nom` varchar(150) NOT NULL,
-    `prenom` varchar(150) NOT NULL,
-    `telephone` varchar(20) NOT NULL,
-    `user_id` int(11) NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uq_admin_user` (`user_id`),
-    CONSTRAINT `fk_admin_user` FOREIGN KEY (`user_id`)
-        REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
-CREATE TABLE `restaurateurs` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `nom` varchar(100) DEFAULT NULL,
-    `prenom` varchar(100) DEFAULT NULL,
-    `email` varchar(150) DEFAULT NULL,
-    `telephone` varchar(20) DEFAULT NULL,
-    `user_id` int(11) NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `email` (`email`),
-    UNIQUE KEY `uq_resto_user` (`user_id`),
-    CONSTRAINT `fk_restaurateur_user` FOREIGN KEY (`user_id`)
-        REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
-CREATE TABLE `clients` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `civilite` int(11) NOT NULL,
-    `nom` varchar(150) NOT NULL,
-    `prenom` varchar(150) NOT NULL,
-    `telephone` varchar(20) NOT NULL,
-    `adresse` text DEFAULT NULL,
-    `adresse_comp` text NOT NULL,
-    `codepostal` varchar(20) NOT NULL,
-    `ville` varchar(200) NOT NULL,
-    `user_id` int(11) NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uq_client_user` (`user_id`),
-    CONSTRAINT `fk_client_user` FOREIGN KEY (`user_id`)
-        REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_client_civilite` FOREIGN KEY (`civilite`)
-        REFERENCES `civilites` (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
-
-
 CREATE TABLE `restaurants` (
     `id_restaurant` int(11) NOT NULL AUTO_INCREMENT,
     `name` varchar(150) NOT NULL,
@@ -138,18 +169,15 @@ CREATE TABLE `restaurants` (
     `id_restaurateur` int(11) NOT NULL,
     PRIMARY KEY (`id_restaurant`),
     UNIQUE KEY `slug` (`slug`),
-    CONSTRAINT `fk_resto_patron` FOREIGN KEY (`id_restaurateur`)
-        REFERENCES `restaurateurs` (`id`) ON DELETE CASCADE
+    CONSTRAINT `fk_resto_patron` FOREIGN KEY (`id_restaurateur`) REFERENCES `restaurateurs` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `restaurant_categories` (
     `id_categorie` int(11) NOT NULL,
     `id_restaurant` int(11) NOT NULL,
     PRIMARY KEY (`id_categorie`, `id_restaurant`),
-    CONSTRAINT `fk_cle_categorie` FOREIGN KEY (`id_categorie`)
-        REFERENCES `categories` (`id_categorie`) ON DELETE CASCADE,
-    CONSTRAINT `fk_cle_restaurant` FOREIGN KEY (`id_restaurant`)
-        REFERENCES `restaurants` (`id_restaurant`) ON DELETE CASCADE
+    CONSTRAINT `fk_cle_categorie` FOREIGN KEY (`id_categorie`) REFERENCES `categories` (`id_categorie`) ON DELETE CASCADE,
+    CONSTRAINT `fk_cle_restaurant` FOREIGN KEY (`id_restaurant`) REFERENCES `restaurants` (`id_restaurant`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `plats` (
@@ -164,8 +192,7 @@ CREATE TABLE `plats` (
     `created_at` timestamp NULL DEFAULT current_timestamp(),
     PRIMARY KEY (`id`),
     KEY `id_restaurant` (`id_restaurant`),
-    CONSTRAINT `fk_plat_restaurant` FOREIGN KEY (`id_restaurant`)
-        REFERENCES `restaurants` (`id_restaurant`) ON DELETE CASCADE
+    CONSTRAINT `plats_ibfk_1` FOREIGN KEY (`id_restaurant`) REFERENCES `restaurants` (`id_restaurant`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `horaires` (
@@ -178,32 +205,33 @@ CREATE TABLE `horaires` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_resto_jour` (`id_restaurant`, `jour`),
     KEY `idx_resto_jour` (`id_restaurant`, `jour`),
-    CONSTRAINT `fk_horaires_restaurant` FOREIGN KEY (`id_restaurant`)
-        REFERENCES `restaurants` (`id_restaurant`) ON DELETE CASCADE
+    CONSTRAINT `fk_horaires_restaurant` FOREIGN KEY (`id_restaurant`) REFERENCES `restaurants` (`id_restaurant`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 
+INSERT INTO `civilites` (`id`, `libelle`, `lang`) VALUES
+    (1, 'M.',   1),
+    (2, 'Mme',  1),
+    (3, 'Mlle', 1);
 
-CREATE TABLE `user_logs` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `user_id` int(11) NOT NULL,
-    `action_type` varchar(50) NOT NULL,
-    `message` varchar(255) NOT NULL,
-    `ip_address` varchar(45) DEFAULT NULL,
-    `created_at` datetime DEFAULT current_timestamp(),
-    PRIMARY KEY (`id`),
-    KEY `idx_user_log` (`user_id`),
-    KEY `idx_date_log` (`created_at`),
-    CONSTRAINT `fk_userlog_user` FOREIGN KEY (`user_id`)
-        REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+INSERT INTO `langues` (`id`, `nom`, `code`) VALUES
+    (1, 'Français', 'fr'),
+    (2, 'Anglais',  'en');
 
+INSERT INTO `profils` (`id`, `libelle`, `type`) VALUES
+    (1, 'Administrateurs',        'administrateurs'),
+    (2, 'Restaurants',            'restaurateurs'),
+    (3, 'Clients de restaurants', 'clients');
 
+INSERT INTO `status` (`id`, `libelle`) VALUES
+    (1, 'Paiement en attente'),
+    (2, 'Paiement accepté'),
+    (3, 'Commande en cours de préparation'),
+    (4, 'Commande finalisée'),
+    (5, 'Commande annulée');
 
-INSERT INTO `civilites` (`id`, `libelle`) VALUES
-    (1, 'M.'),
-    (2, 'Mme'),
-    (3, 'Mlle');
+INSERT INTO `moyens_paiement` (`id`, `nom`) VALUES
+    (1, 'Carte Bancaire');
 
 INSERT INTO `categories` (`name`, `icon`, `ordre`) VALUES
     ('Français',      'fa-wine-glass',      1),
@@ -251,8 +279,16 @@ INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
     ('Détails restaurant',       'details',                 'views/details.php'),
     ('Admin Panel',              'admin-panel',             'views/admin/admin-panel.php'),
     ('Dashboard',                'dashboard',               'views/admin/dashboard.php'),
-    ('Ajouter un administrateur','ajouter-admin',           'views/admin/ajouter-admin.php'),
-    ('Vue admin restaurants',    'admin-restaurants',       'views/admin/admin-restaurants.php'),
-    ('Liste des plats',          'liste-plats',             'views/liste-plats.php');
+    ('Ajouter un administrateur','ajouter-admin',           'views/admin/ajouter-admin.php');
+
+-- Donne tous les droits à l'admin (profil 1) sur toutes les pages
+INSERT INTO `autorisations` (`page`, `profil`, `etat`)
+SELECT `id`, 1, 1 FROM `pages`;
+
+INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
+('Vue admin restaurants', 'admin-restaurants', 'views/admin/admin-restaurants.php');
+
+INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
+('Liste des plats', 'liste-plats', 'views/liste-plats.php');
 
 COMMIT;

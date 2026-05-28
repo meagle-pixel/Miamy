@@ -97,34 +97,38 @@ class AuthController
 
             if (empty($erreurs)) {
 
-                $data_resto = [
-                    'nom'       => $nom,
-                    'prenom'    => $prenom,
-                    'email'     => $email,
-                    'telephone' => $tel,
-                ];
+                // 1. Création du compte utilisateur (profil_id NULL temporairement)
+                $id_user = (new User())->insertUtilisateur([
+                    'email'      => $email,
+                    'motdepasse' => $pass,
+                    'profil'     => 2,
+                    'profil_id'  => null,
+                ]);
 
-                $restaurateurModel = new Restaurateur();
-                $id_restaurateur   = $restaurateurModel->insert($data_resto);
+                if ($id_user) {
+                    // 2. Création du restaurateur avec FK user_id
+                    $restaurateurModel = new Restaurateur();
+                    $id_restaurateur   = $restaurateurModel->insert([
+                        'nom'       => $nom,
+                        'prenom'    => $prenom,
+                        'email'     => $email,
+                        'telephone' => $tel,
+                        'user_id'   => $id_user,
+                    ]);
 
-                if ($id_restaurateur) {
-                    $user_account = [
-                        'email'      => $email,
-                        'motdepasse' => $pass,
-                        'profil'     => 2,
-                        'profil_id'  => $id_restaurateur,
-                    ];
+                    if ($id_restaurateur) {
+                        // 3. Maj du profil_id côté utilisateurs (lien réciproque)
+                        $pdo = Database::getInstance()->getConnection();
+                        $pdo->prepare("UPDATE `utilisateurs` SET `profil_id` = :pid WHERE `id` = :id")
+                            ->execute(['pid' => $id_restaurateur, 'id' => $id_user]);
 
-                    $id_user = (new User())->insertUtilisateur($user_account);
-
-                    if ($id_user) {
                         $succes = true;
                         $prenom = $nom = $email = $tel = '';
                     } else {
-                        $erreurs[] = "Erreur lors de la création de vos identifiants de connexion.";
+                        $erreurs[] = "Impossible d'enregistrer vos informations professionnelles.";
                     }
                 } else {
-                    $erreurs[] = "Impossible d'enregistrer vos informations professionnelles.";
+                    $erreurs[] = "Erreur lors de la création de vos identifiants de connexion.";
                 }
             }
         }
@@ -199,38 +203,42 @@ class AuthController
 
             if (empty($erreurs)) {
 
-                $data_client = [
-                    'civilite'     => $civilite,
-                    'nom'          => $nom,
-                    'prenom'       => $prenom,
-                    'telephone'    => $tel,
-                    'adresse'      => $adresse,
-                    'adresse_comp' => $adresse_comp,
-                    'codepostal'   => $codepostal,
-                    'ville'        => $ville,
-                ];
+                // 1. Création du compte utilisateur (profil_id NULL temporairement)
+                $id_user = (new User())->insertUtilisateur([
+                    'email'      => $email,
+                    'motdepasse' => $pass,
+                    'profil'     => 3,
+                    'profil_id'  => null,
+                ]);
 
-                $clientModel = new Client();
-                $id_client   = $clientModel->insert($data_client);
+                if ($id_user) {
+                    // 2. Création du client avec FK user_id
+                    $clientModel = new Client();
+                    $id_client   = $clientModel->insert([
+                        'civilite'     => $civilite,
+                        'nom'          => $nom,
+                        'prenom'       => $prenom,
+                        'telephone'    => $tel,
+                        'adresse'      => $adresse,
+                        'adresse_comp' => $adresse_comp,
+                        'codepostal'   => $codepostal,
+                        'ville'        => $ville,
+                        'user_id'      => $id_user,
+                    ]);
 
-                if ($id_client) {
-                    $user_account = [
-                        'email'      => $email,
-                        'motdepasse' => $pass,
-                        'profil'     => 3,
-                        'profil_id'  => $id_client,
-                    ];
+                    if ($id_client) {
+                        // 3. Maj du profil_id côté utilisateurs (lien réciproque)
+                        $pdo = Database::getInstance()->getConnection();
+                        $pdo->prepare("UPDATE `utilisateurs` SET `profil_id` = :pid WHERE `id` = :id")
+                            ->execute(['pid' => $id_client, 'id' => $id_user]);
 
-                    $id_user = (new User())->insertUtilisateur($user_account);
-
-                    if ($id_user) {
                         $succes = true;
                         $civilite = $prenom = $nom = $email = $tel = $adresse = $adresse_comp = $codepostal = $ville = '';
                     } else {
-                        $erreurs[] = "Erreur lors de la création de vos identifiants de connexion.";
+                        $erreurs[] = "Impossible d'enregistrer vos informations.";
                     }
                 } else {
-                    $erreurs[] = "Impossible d'enregistrer vos informations.";
+                    $erreurs[] = "Erreur lors de la création de vos identifiants de connexion.";
                 }
             }
         }

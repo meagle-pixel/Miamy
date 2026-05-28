@@ -28,14 +28,15 @@ class Restaurateur
     public function insert(array $data)
     {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO `restaurateurs` (nom, prenom, email, telephone)
-             VALUES (:nom, :prenom, :email, :telephone)"
+            "INSERT INTO `restaurateurs` (nom, prenom, email, telephone, user_id)
+             VALUES (:nom, :prenom, :email, :telephone, :user_id)"
         );
         $stmt->execute([
             'nom'       => $data['nom'],
             'prenom'    => $data['prenom'],
             'email'     => $data['email'],
             'telephone' => $data['telephone'],
+            'user_id'   => (int)$data['user_id'],
         ]);
         return $this->pdo->lastInsertId();
     }

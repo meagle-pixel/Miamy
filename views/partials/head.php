@@ -28,6 +28,8 @@
     <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/style.css" />
     <!-- Responsive css -->
     <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/responsive.css" />
+    <!-- Responsive fixes (overrides du template Foodingly) -->
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/responsive-fixes.css" />
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?php echo APP_URL; ?>/assets/img/favicon-96x96.png">
     

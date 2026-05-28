@@ -41,7 +41,7 @@
 						<ul class="topbar-others-options">
 							<?php if (isset($_SESSION['connected']) && $_SESSION['connected'] == true): ?>
 								<?php $profil = $_SESSION['user']['profil'] ?? 3; ?>
-								<li><span><?= htmlspecialchars($_SESSION['user-info']['prenom'] ?? 'Mon compte') ?></span></li>
+								<li class="topbar-username"><span><?= htmlspecialchars($_SESSION['user-info']['prenom'] ?? 'Mon compte') ?></span></li>
 								<?php if ($profil === 1): ?>
 									<li><a href="dashboard">Dashboard Admin</a></li>
 								<?php endif; ?>

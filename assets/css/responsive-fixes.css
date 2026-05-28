@@ -1,0 +1,160 @@
+/* =============================================================
+   responsive-fixes.css
+   -----------------------------------------------------------
+   Patches additionnels pour Miamy. Chargé en DERNIER (après
+   responsive.css) pour overrider le template Foodingly et SB Admin
+   sans modifier les fichiers d'origine.
+   ============================================================= */
+
+
+/* -------------------------------------------------------------
+   BUG 1 — Couleur de la topbar
+   -----------------------------------------------------------
+   Le template Foodingly laisse la topbar transparente en desktop
+   (elle laisse passer le fond du banner), puis la met en
+   #262626 (gris très foncé / quasi-noir) dans navber.css ligne
+   ~1198 dès qu'on passe sous 1200px. Résultat : un bandeau noir
+   incohérent entre 768 et 1199px.
+   On force l'orange Miamy à toutes les tailles où la topbar est
+   visible. Sous 768px elle est display:none (responsive.css:194),
+   on n'y touche pas.
+   ------------------------------------------------------------- */
+.topbar-area {
+    background-color: #FF7B2C !important;
+}
+
+
+/* -------------------------------------------------------------
+   BUG 2 — H1 du banner accueil masqué par la navbar
+   -----------------------------------------------------------
+   Le <header class="main_header_arae"> est en position:absolute
+   et superposé par-dessus le banner. En desktop large ça passe
+   parce que la navbar reste compacte, mais entre 768 et 1199px
+   la hauteur cumulée topbar + navbar (~218px) dépasse le
+   padding-top du banner (150px). Le titre se retrouve coincé.
+   ------------------------------------------------------------- */
+@media (max-width: 1199px) {
+    #home_one_banner {
+        padding-top: 230px;
+    }
+    /* Même bug sur les bannières secondaires (liste-restaurants,
+       connexion, inscription, etc.) qui utilisent #common_banner */
+    #common_banner {
+        padding-top: 250px;
+    }
+}
+
+
+/* -------------------------------------------------------------
+   BUG 3 — Doublon burger ☰ + dot-menu ⋯
+   -----------------------------------------------------------
+   Le plugin meanmenu transforme déjà la .navbar-nav en menu
+   burger sur les petits écrans. Le bloc
+   .others-option-for-responsive du template ajoute en plus un
+   dot-menu (3 points verticaux) qui ouvre un panneau latéral
+   redondant. Comme on a déjà mis nos liens Connexion / Mon
+   compte / Déconnexion dans le burger meanmenu, on masque ce
+   dot-menu pour éviter la duplication visuelle.
+   ------------------------------------------------------------- */
+@media (max-width: 1199px) {
+    .others-option-for-responsive {
+        display: none !important;
+    }
+}
+
+
+/* -------------------------------------------------------------
+   BUG 5 — Doublon liens compte entre 768 et 1199px
+   -----------------------------------------------------------
+   Le plugin meanmenu est configuré avec meanScreenWidth: 1199
+   (cf. assets/js/custom.js ligne 19) : le menu burger est donc
+   actif sur toute la tranche 0-1199px. Mais la topbar reste
+   visible entre 768 et 1199 (display: none uniquement sous 768)
+   ce qui crée un doublon : Mon compte / Déconnexion apparaissent
+   à la fois dans la topbar ET dans le burger. Et comme la colonne
+   col-md-6 n'a pas la place pour 3-4 items, "Déconnexion" wrappe
+   sous "Mon compte".
+   On masque la colonne droite de la topbar entre 768 et 1199
+   et le burger devient l'unique point d'accès au compte.
+   La colonne gauche (email + réseaux sociaux) prend 100% pour
+   ne pas laisser un vide à droite.
+   ------------------------------------------------------------- */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .topbar-others-options {
+        display: none;
+    }
+    .topbar-area .col-md-6:first-child {
+        flex: 0 0 100%;
+        max-width: 100%;
+        text-align: center;
+    }
+}
+
+
+/* -------------------------------------------------------------
+   BUG 4 — Tableaux admin tronqués sur petits écrans
+   -----------------------------------------------------------
+   Sur /admin-restaurants et /admin-panel les colonnes (Email,
+   Catégories, Modifier, Supprimer) finissent juste au bord du
+   viewport autour de 960px. Le bouton "Supprimer" peut sortir
+   du cadre. On force le scroll horizontal du wrapper SB Admin
+   pour permettre la lecture intégrale au doigt.
+   ------------------------------------------------------------- */
+@media (max-width: 1199px) {
+    .card-body > .datatable-container,
+    .card-body > .table-responsive,
+    .dataTable-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+
+/* -------------------------------------------------------------
+   BUG 7 — Items du burger coupés sous 992px
+   -----------------------------------------------------------
+   meanmenu.css ligne ~336 (dans @media max-width:991px) impose
+   .mobile-nav nav .navbar-nav { height: 300px; overflow-y: scroll }.
+   Selon la résolution du téléphone et le nombre de liens dans le
+   menu, certains items (A propos, FAQ, etc.) se retrouvent sous
+   le seuil scrollable et ne sont pas visibles à l'ouverture.
+   On laisse le menu prendre toute la hauteur nécessaire pour
+   afficher l'intégralité des liens d'un coup.
+   ------------------------------------------------------------- */
+@media (max-width: 991px) {
+    .mobile-nav nav .navbar-nav,
+    .mean-container .mean-nav ul,
+    .mean-container .mean-nav ul > li {
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+}
+
+
+/* -------------------------------------------------------------
+   BUG 8 — Item Accueil invisible / items mal alignés dans burger
+   -----------------------------------------------------------
+   meanmenu copie la <ul class="navbar-nav"> dans .mean-nav.
+   Cette UL hérite des styles Bootstrap qui forcent
+   `display: flex; flex-direction: row` à partir de 768px (à
+   cause de .navbar-expand-md). Le mix flex-row + float natif
+   meanmenu casse le layout : le premier <li> (avec .active)
+   se retrouve avec largeur 0 et n'est plus visible.
+   On force flex-direction: column + width: 100% sans toucher
+   à `display` (pour ne pas casser slideUp/slideDown jQuery
+   qui pilote l'ouverture/fermeture du burger).
+   ------------------------------------------------------------- */
+.mean-container .mean-nav ul {
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+}
+.mean-container .mean-nav ul > li {
+    width: 100% !important;
+    flex: 0 0 100% !important;
+    float: none !important;
+}
+.mean-container .mean-nav ul > li > a {
+    width: 100% !important;
+    float: none !important;
+}

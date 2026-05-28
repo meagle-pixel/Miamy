@@ -18,6 +18,8 @@ $current_mod = $_GET['mod'] ?? '';
     <link href="<?= APP_URL ?>/assets/admins/css/styles.css" rel="stylesheet" />
     <!-- Font Awesome -->
     <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/fontawesome.all.min.css" />
+    <!-- Responsive fixes (overrides du template SB Admin) -->
+    <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/responsive-fixes.css" />
 </head>
 
 <body class="sb-nav-fixed">

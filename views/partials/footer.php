@@ -32,8 +32,8 @@
                         <ul>
                             <li><a href="a-propos">A propos</a></li>
                             <li><a href="vis-clients">Testimonials</a></li>
-                            <li><a href="aq">FAQ</a></li>
-                            <li><a href="onditions-generales">CGV</a></li>
+                            <li><a href="faq">FAQ</a></li>
+                            <li><a href="conditions-generales">CGV</a></li>
                         </ul>
                     </div>
                 </div>

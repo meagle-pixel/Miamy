@@ -88,6 +88,7 @@ CREATE TABLE `administrateurs` (
         REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+
 CREATE TABLE `restaurateurs` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `nom` varchar(100) DEFAULT NULL,
@@ -101,6 +102,7 @@ CREATE TABLE `restaurateurs` (
     CONSTRAINT `fk_restaurateur_user` FOREIGN KEY (`user_id`)
         REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 
 CREATE TABLE `clients` (
     `id` int(11) NOT NULL AUTO_INCREMENT,

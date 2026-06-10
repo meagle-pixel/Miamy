@@ -75,11 +75,7 @@ class User
         return $stmt->fetch() !== false;
     }
 
-    /**
-     * Tentative de connexion. Si OK, hydrate $_SESSION (user + user-info + admin).
-     * Loggue le succes ou l'echec. $bypass = true permet de se connecter sans
-     * verifier le mot de passe (utilise pour les outils admin du type "connect as").
-     */
+   
     public function tryToConnect(string $email, string $pass, bool $bypass = false): bool
     {
         $base_salt = BASE_SALT ?? "";

@@ -2,9 +2,7 @@
 
 class AuthController
 {
-    // ---------------------------------------------------------------
-    // Connexion
-    // ---------------------------------------------------------------
+    
     public function login()
     {
         $message_error = '';
@@ -41,9 +39,9 @@ class AuthController
         return compact('message_error');
     }
 
-    // ---------------------------------------------------------------
+    
     // Déconnexion (aucune vue : on header()+exit())
-    // ---------------------------------------------------------------
+    
     public function logout()
     {
         if (isset($_SESSION['user']['id'])) {
@@ -55,9 +53,9 @@ class AuthController
         exit();
     }
 
-    // ---------------------------------------------------------------
+    
     // Inscription Restaurateur (profil = 2)
-    // ---------------------------------------------------------------
+    
     public function register()
     {
         $erreurs         = [];
@@ -136,9 +134,9 @@ class AuthController
         return compact('erreurs', 'succes', 'message_success', 'prenom', 'nom', 'email', 'tel');
     }
 
-    // ---------------------------------------------------------------
+   
     // Inscription Client (profil = 3)
-    // ---------------------------------------------------------------
+    
     public function registerClient()
     {
         $erreurs         = [];

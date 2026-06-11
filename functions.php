@@ -26,3 +26,4 @@ require_once('classes/class.restaurants.php');
 require_once('classes/class.restaurateurs.php');
 require_once('classes/class.category.php');
 require_once('classes/class.plats.php');
+require_once('classes/class.horaires.php');

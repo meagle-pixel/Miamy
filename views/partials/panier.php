@@ -20,7 +20,7 @@
                                 <span class="price">30.00 € TTC</span>
                             </div>
                         </div>
-                        <a href="#" class="remove-btn"><i class="fas fa-trash-alt"></i></a>
+                        <a href="#" class="remove-btn" aria-label="Retirer l'article du panier"><i class="fas fa-trash-alt" aria-hidden="true"></i></a>
                     </div>
                     <div class="foods-cart d-flex align-items-center">
                         <div class="foods-image">
@@ -34,7 +34,7 @@
                                 <span class="price">20.00 € TTC</span>
                             </div>
                         </div>
-                        <a href="#" class="remove-btn"><i class="fas fa-trash-alt"></i></a>
+                        <a href="#" class="remove-btn" aria-label="Retirer l'article du panier"><i class="fas fa-trash-alt" aria-hidden="true"></i></a>
                     </div>
                     <div class="foods-cart d-flex align-items-center">
                         <div class="foods-image">
@@ -48,7 +48,7 @@
                                 <span class="price">15.00 € TTC</span>
                             </div>
                         </div>
-                        <a href="#" class="remove-btn"><i class="fas fa-trash-alt"></i></a>
+                        <a href="#" class="remove-btn" aria-label="Retirer l'article du panier"><i class="fas fa-trash-alt" aria-hidden="true"></i></a>
                     </div>
                 </div>
                 <div class="foods-cart-subtotal">

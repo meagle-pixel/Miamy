@@ -28,7 +28,10 @@ $error_message  = $error_message  ?? '';
                 </div>
             </div>
             <div class="col-lg-6">
-                <img src="assets/img/banner/bg1.png" alt="img" class="responsive">
+                <picture>
+                    <source srcset="assets/img/banner/bg1.webp" type="image/webp">
+                    <img src="assets/img/banner/bg1.png" alt="Illustration Miamy" class="responsive" width="610" height="610">
+                </picture>
             </div>
         </div>
     </div>

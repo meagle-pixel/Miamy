@@ -16,10 +16,10 @@
                         <div class="footer_inquery_area">
                             <h5>Nous suivre</h5>
                             <ul class="soical_icon_footer">
-                                <li><a href="#!"><i class="fab fa-facebook"></i></a></li>
-                                <li><a href="#!"><i class="fab fa-twitter-square"></i></a></li>
-                                <li><a href="#!"><i class="fab fa-instagram"></i></a></li>
-                                <li><a href="#!"><i class="fab fa-linkedin"></i></a></li>
+                                <li><a href="#!" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a></li>
+                                <li><a href="#!" aria-label="Twitter"><i class="fab fa-twitter-square" aria-hidden="true"></i></a></li>
+                                <li><a href="#!" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a></li>
+                                <li><a href="#!" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a></li>
                             </ul>
                         </div>
                     </div>

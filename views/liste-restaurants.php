@@ -62,7 +62,8 @@
                             <div class="theme_two_box_img">
                                 <a href="<?= APP_URL ?>/liste-plats?id=<?= $resto['id_restaurant'] ?>">
                                     <img src="<?= APP_URL ?>/assets/img/restaurants/<?= htmlspecialchars($image) ?>"
-                                         alt="<?= htmlspecialchars($resto['name']) ?>">
+                                         alt="<?= htmlspecialchars($resto['name']) ?>"
+                                         width="482" height="278" loading="lazy" decoding="async">
                                 </a>
                                 <?php if ($resto['is_featured']): ?>
                                     <div class="discount_tab">

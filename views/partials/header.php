@@ -29,10 +29,10 @@
 					<div class="col-lg-6 col-md-6">
 						<ul class="topbar-list">
 							<li>
-								<a href="#!"><i class="fab fa-facebook"></i></a>
-								<a href="#!"><i class="fab fa-twitter-square"></i></a>
-								<a href="#!"><i class="fab fa-instagram"></i></a>
-								<a href="#!"><i class="fab fa-linkedin"></i></a>
+								<a href="#!" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+								<a href="#!" aria-label="Twitter"><i class="fab fa-twitter-square" aria-hidden="true"></i></a>
+								<a href="#!" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+								<a href="#!" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
 							</li>
 							<li><a href="#!"><span>contact@miamy.fr</span></a></li>
 						</ul>
@@ -122,8 +122,8 @@
 
 								<div class="option-item">
 									<div class="cart-btn">
-										<a href="#" data-bs-toggle="modal" data-bs-target="#CartModal"><i
-												class='fas fa-shopping-bag'></i><span>3</span></a>
+										<a href="#" data-bs-toggle="modal" data-bs-target="#CartModal" aria-label="Voir le panier"><i
+												class='fas fa-shopping-bag' aria-hidden="true"></i><span>3</span></a>
 									</div>
 								</div>
 
@@ -156,13 +156,13 @@
 						<div class="option-inner">
 							<div class="others-options d-flex align-items-center">
 								<div class="option-item">
-									<a href="#" class="search-box"><i class="fas fa-search"></i></a>
+									<a href="#" class="search-box" aria-label="Rechercher"><i class="fas fa-search" aria-hidden="true"></i></a>
 								</div>
 
 								<div class="option-item">
 									<div class="cart-btn">
-										<a href="#" data-bs-toggle="modal" data-bs-target="#CartModal"><i
-												class='fas fa-shopping-bag'></i><span>3</span></a>
+										<a href="#" data-bs-toggle="modal" data-bs-target="#CartModal" aria-label="Voir le panier"><i
+												class='fas fa-shopping-bag' aria-hidden="true"></i><span>3</span></a>
 									</div>
 								</div>
 							</div>

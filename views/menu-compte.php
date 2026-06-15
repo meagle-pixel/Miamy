@@ -1,7 +1,7 @@
 <div class="col-lg-4">
 	<div class="dashboard_sidebar">
 		<div class="dashboard_sidebar_user">
-			<img src="assets/img/common/dashboard-user.png" alt="img">
+			<img src="assets/img/common/dashboard-user.png" alt="">
 			<h3>Yann GOGUET-GALLI</h3>
 			<p><a href="tel:+336247171">06 24 99 71 71</a></p>
 			<p><a href="mailto:yann@youonline.fr">yann@youonline.fr</a></p>

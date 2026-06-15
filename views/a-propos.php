@@ -22,7 +22,7 @@
             <div class="row">
                 <div class="col-lg-6">
                     <div class="about_us_right">
-                        <img src="assets/img/common/abour_right.png" alt="img">
+                        <img src="assets/img/common/abour_right.png" alt="">
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -50,7 +50,7 @@
             <div class="row">
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="about_service_boxed">
-                        <img src="assets/img/icon/best-reservation.png" alt="img">
+                        <img src="assets/img/icon/best-reservation.png" alt="">
                         <h5><a href="#!">Best Reservation</a></h5>
                         <p>Phaseus site amet tristique ligua donec iaculis leo sus cipit. Consec tetur adipiscing elit.
                             Incididunt ut dolore.</p>
@@ -58,7 +58,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="about_service_boxed">
-                        <img src="assets/img/icon/trusted-payment.png" alt="img">
+                        <img src="assets/img/icon/trusted-payment.png" alt="">
                         <h5><a href="#!">Trusted payment</a></h5>
                         <p>Phaseus site amet tristique ligua donec iaculis leo sus cipit. Consec tetur adipiscing elit.
                             Incididunt ut dolore.</p>
@@ -66,7 +66,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="about_service_boxed">
-                        <img src="assets/img/icon/top-facility.png" alt="img">
+                        <img src="assets/img/icon/top-facility.png" alt="">
                         <h5><a href="#!">Top facility</a></h5>
                         <p>Phaseus site amet tristique ligua donec iaculis leo sus cipit. Consec tetur adipiscing elit.
                             Incididunt ut dolore.</p>
@@ -74,7 +74,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="about_service_boxed">
-                        <img src="assets/img/icon/awesome-food.png" alt="img">
+                        <img src="assets/img/icon/awesome-food.png" alt="">
                         <h5><a href="#!">Awesome foods</a></h5>
                         <p>Phaseus site amet tristique ligua donec iaculis leo sus cipit. Consec tetur adipiscing elit.
                             Incididunt ut dolore.</p>
@@ -91,9 +91,9 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-12">
                     <div class="section_heading_center">
                         <div class="subheading_text">
-                            <img src="assets/img/icon/arrow-left.png" alt="img">
+                            <img src="assets/img/icon/arrow-left.png" alt="">
                             <h3>Meet Our Chefs</h3>
-                            <img src="assets/img/icon/arrow-right.png" alt="img">
+                            <img src="assets/img/icon/arrow-right.png" alt="">
                         </div>
                         <h2>Our Experienced chefs</h2>
                     </div>
@@ -102,7 +102,7 @@
             <div class="row">
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="chefs_boxed">
-                        <img src="assets/img/chefs/chefs-1.png" alt="img">
+                        <img src="assets/img/chefs/chefs-1.png" alt="">
                         <div class="chefs_content">
                             <ul>
                                 <li><a href="!#"><i class="fab fa-facebook-f"></i></a></li>
@@ -117,7 +117,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="chefs_boxed">
-                        <img src="assets/img/chefs/chefs-2.png" alt="img">
+                        <img src="assets/img/chefs/chefs-2.png" alt="">
                         <div class="chefs_content">
                             <ul>
                                 <li><a href="!#"><i class="fab fa-facebook-f"></i></a></li>
@@ -132,7 +132,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="chefs_boxed">
-                        <img src="assets/img/chefs/chefs-3.png" alt="img">
+                        <img src="assets/img/chefs/chefs-3.png" alt="">
                         <div class="chefs_content">
                             <ul>
                                 <li><a href="!#"><i class="fab fa-facebook-f"></i></a></li>
@@ -147,7 +147,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="chefs_boxed">
-                        <img src="assets/img/chefs/chefs-4.png" alt="img">
+                        <img src="assets/img/chefs/chefs-4.png" alt="">
                         <div class="chefs_content">
                             <ul>
                                 <li><a href="!#"><i class="fab fa-facebook-f"></i></a></li>
@@ -174,28 +174,28 @@
                         <div class="row">
                             <div class="col-lg-3 col-md-6 clo-sm-12 col-12">
                                 <div class="counter_item">
-                                    <img src="assets/img/icon/reservation.png" alt="icon">
+                                    <img src="assets/img/icon/reservation.png" alt="">
                                     <h3 class="counter">120</h3>
                                     <h6>Reservation</h6>
                                 </div>
                             </div>
                             <div class="col-lg-3 col-md-6 clo-sm-12 col-12">
                                 <div class="counter_item">
-                                    <img src="assets/img/icon/chefs.png" alt="icon">
+                                    <img src="assets/img/icon/chefs.png" alt="">
                                     <h3 class="counter">20</h3>
                                     <h6>Master Chef</h6>
                                 </div>
                             </div>
                             <div class="col-lg-3 col-md-6 clo-sm-12 col-12">
                                 <div class="counter_item">
-                                    <img src="assets/img/icon/food.png" alt="icon">
+                                    <img src="assets/img/icon/food.png" alt="">
                                     <h3 class="counter">50</h3>
                                     <h6>Food Menu</h6>
                                 </div>
                             </div>
                             <div class="col-lg-3 col-md-6 clo-sm-12 col-12">
                                 <div class="counter_item">
-                                    <img src="assets/img/icon/satisfy-user.png" alt="icon">
+                                    <img src="assets/img/icon/satisfy-user.png" alt="">
                                     <h3 class="counter">60,690</h3>
                                     <h6>Satisfy User</h6>
                                 </div>
@@ -215,9 +215,9 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-12">
                     <div class="section_heading_center">
                         <div class="subheading_text">
-                            <img src="assets/img/icon/arrow-left.png" alt="img">
+                            <img src="assets/img/icon/arrow-left.png" alt="">
                             <h3>Testimonials</h3>
-                            <img src="assets/img/icon/arrow-right.png" alt="img">
+                            <img src="assets/img/icon/arrow-right.png" alt="">
                         </div>
                         <h2>What Our Client's Say About Us</h2>
                     </div>
@@ -244,7 +244,7 @@
                                     </div>
                                 </div>
                                 <div class="all_review_text">
-                                    <img src="assets/img/review/review1.png" alt="img">
+                                    <img src="assets/img/review/review1.png" alt="">
                                     <h4>Manresh Chandra</h4>
                                     <p>“Eu ipsum ut dolore magna minim cupidatat ullamco anim sit minim irure.
                                         Consectetur
@@ -272,7 +272,7 @@
                                     </div>
                                 </div>
                                 <div class="all_review_text">
-                                    <img src="assets/img/review/review2.png" alt="img">
+                                    <img src="assets/img/review/review2.png" alt="">
                                     <h4>Santa mariam</h4>
                                     <p>“Eu ipsum ut dolore magna minim cupidatat ullamco anim sit minim irure.
                                         Consectetur
@@ -300,7 +300,7 @@
                                     </div>
                                 </div>
                                 <div class="all_review_text">
-                                    <img src="assets/img/review/review3.png" alt="img">
+                                    <img src="assets/img/review/review3.png" alt="">
                                     <h4>Jack cremer</h4>
                                     <p>“Eu ipsum ut dolore magna minim cupidatat ullamco anim sit minim irure.
                                         Consectetur
@@ -328,7 +328,7 @@
                                     </div>
                                 </div>
                                 <div class="all_review_text">
-                                    <img src="assets/img/review/review4.png" alt="img">
+                                    <img src="assets/img/review/review4.png" alt="">
                                     <h4>Mandeep harshaal</h4>
                                     <p>“Eu ipsum ut dolore magna minim cupidatat ullamco anim sit minim irure.
                                         Consectetur

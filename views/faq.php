@@ -312,7 +312,7 @@
                     </div>
                     <div class="col-lg-4">
                         <div class="faqs_call_area">
-                            <img src="assets/img/icon/call.png" alt="img">
+                            <img src="assets/img/icon/call.png" alt="">
                             <h5>Contact us 24/7</h5>
                             <h3><a href="tel:+00-123-456-789">+00 123 456 789</a></h3>
                         </div>

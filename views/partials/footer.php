@@ -6,15 +6,15 @@
             <div class="row">
                 <div class="col-lg-9 col-md-6 col-sm-6 col-12">
                     <div class="footer_heading_area">
-                        <h5>Besoin d'aide ?</h5>
+                        <h2>Besoin d'aide ?</h2>
                     </div>
                     <div class="footer_first_area">
                         <div class="footer_inquery_area">
-                            <h5>Message au support</h5>
-                            <h3> <a href="contact.php">Contactez-nous</a></h3>
+                            <h3>Message au support</h3>
+                            <h4> <a href="contact.php">Contactez-nous</a></h4>
                         </div>
                         <div class="footer_inquery_area">
-                            <h5>Nous suivre</h5>
+                            <h3>Nous suivre</h3>
                             <ul class="soical_icon_footer">
                                 <li><a href="#!" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a></li>
                                 <li><a href="#!" aria-label="Twitter"><i class="fab fa-twitter-square" aria-hidden="true"></i></a></li>
@@ -26,7 +26,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6 col-12">
                     <div class="footer_heading_area">
-                        <h5>Liens rapide</h5>
+                        <h2>Liens rapide</h2>
                     </div>
                     <div class="footer_link_area">
                         <ul>
@@ -52,7 +52,7 @@
                 </div>
                 <div class="co-lg-6 col-md-6 col-sm-12 col-12">
                     <div class="copyright_right">
-                        <img src="<?php echo APP_URL; ?>/assets/img/common/cards.png" alt="img">
+                        <img src="<?php echo APP_URL; ?>/assets/img/common/cards.png" alt="Cartes bancaires acceptées">
                     </div>
                 </div>
             </div>

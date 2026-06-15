@@ -42,7 +42,7 @@
                                         </td>
                                         <td class="food_thumb">
                                             <a href="food-details.html">
-                                                <img src="assets/img/tab-img/item7.png" alt="img"></a>
+                                                <img src="assets/img/tab-img/item7.png" alt=""></a>
                                         </td>
                                         <td class="food_name">
                                             <a href="food-details.html">Full Chicken Grill</a>
@@ -79,7 +79,7 @@
                                         </td>
                                         <td class="food_thumb">
                                             <a href="food-details.html">
-                                                <img src="assets/img/tab-img/item1.png" alt="img">
+                                                <img src="assets/img/tab-img/item1.png" alt="">
                                             </a>
                                         </td>
                                         <td class="food_name">

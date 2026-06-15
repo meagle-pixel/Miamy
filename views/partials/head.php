@@ -12,28 +12,28 @@
     <!-- Title -->
     <title><?php if(isset($page_title)){ echo $page_title; } else { ?> Miamy - Le menu interactif de votre restaurant<?php } ?></title>
     <!-- Bootstrap css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/bootstrap.min.css">
     <!-- animate css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/animate.min.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/animate.min.css">
     <!-- Fontawesome css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/fontawesome.all.min.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/fontawesome.all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
     <!-- owl.carousel css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/owl.carousel.min.css">
 	<!-- Rangeslider css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/nouislider.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/nouislider.css">
     <!-- owl.theme.default css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/owl.theme.default.min.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/owl.theme.default.min.css">
     <!-- navber css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/navber.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/navber.css">
     <!-- meanmenu css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/meanmenu.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/meanmenu.css">
     <!-- Style css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/style.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/style.css">
     <!-- Responsive css -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/responsive.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/responsive.css">
     <!-- Responsive fixes (overrides du template Foodingly) -->
-    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/responsive-fixes.css" />
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/responsive-fixes.css">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?php echo APP_URL; ?>/assets/img/favicon-96x96.png">
     

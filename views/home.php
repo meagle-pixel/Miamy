@@ -39,6 +39,7 @@ $error_message  = $error_message  ?? '';
 
 <section class="section_padding_top">
     <div class="container">
+        <div class="section_heading_center"><h2>Nos catégories</h2></div>
         <div class="row">
             <?php foreach ($allCategories as $cat): ?>
             <div class="col-lg-3 col-md-4 col-sm-6">
@@ -67,7 +68,7 @@ $error_message  = $error_message  ?? '';
                         <img src="assets/img/restaurants/<?= $resto['main_image'] ?>" alt="<?= $resto['name'] ?>">
                     </div>
                     <div class="theme_two_box_content p-3">
-                        <h4><?= htmlspecialchars($resto['name']) ?></h4>
+                        <h3><?= htmlspecialchars($resto['name']) ?></h3>
                         <p><?= htmlspecialchars($resto['city']) ?></p>
                         <a href="restaurant-profile.php?slug=<?= $resto['slug'] ?>" class="btn btn_theme btn_sm">Voir la carte</a>
                     </div>
@@ -77,5 +78,3 @@ $error_message  = $error_message  ?? '';
         </div>
     </div>
 </section>
-
-

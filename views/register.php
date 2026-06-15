@@ -65,32 +65,38 @@ $tel             = $tel             ?? '';
                                 <div class="row">
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="prenom" class="form-control" placeholder="Prénom*" value="<?= htmlspecialchars($prenom) ?>" required />
+                                            <label for="prenom" class="visually-hidden">Prénom</label>
+                                            <input type="text" name="prenom" id="prenom" class="form-control" placeholder="Prénom*" value="<?= htmlspecialchars($prenom) ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="nom" class="form-control" placeholder="Nom de famille*" value="<?= htmlspecialchars($nom) ?>" required />
+                                            <label for="nom" class="visually-hidden">Nom de famille</label>
+                                            <input type="text" name="nom" id="nom" class="form-control" placeholder="Nom de famille*" value="<?= htmlspecialchars($nom) ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
-                                            <input type="email" name="email" class="form-control" placeholder="Email (identifiant)*" value="<?= htmlspecialchars($email) ?>" required />
+                                            <label for="email" class="visually-hidden">Email (identifiant)</label>
+                                            <input type="email" name="email" id="email" class="form-control" placeholder="Email (identifiant)*" value="<?= htmlspecialchars($email) ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="telephone" class="form-control" placeholder="Téléphone" value="<?= htmlspecialchars($tel) ?>" />
+                                            <label for="telephone" class="visually-hidden">Téléphone</label>
+                                            <input type="text" name="telephone" id="telephone" class="form-control" placeholder="Téléphone" value="<?= htmlspecialchars($tel) ?>" />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
-                                            <input type="password" name="password" class="form-control" placeholder="Mot de passe* (8 caractères min.)" required />
+                                            <label for="password" class="visually-hidden">Mot de passe</label>
+                                            <input type="password" name="password" id="password" class="form-control" placeholder="Mot de passe* (8 caractères min.)" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-4">
-                                            <input type="password" name="password2" class="form-control" placeholder="Confirmer le mot de passe*" required />
+                                            <label for="password2" class="visually-hidden">Confirmer le mot de passe</label>
+                                            <input type="password" name="password2" id="password2" class="form-control" placeholder="Confirmer le mot de passe*" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">

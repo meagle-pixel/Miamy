@@ -36,10 +36,12 @@ $message_error = $message_error ?? '';
                     <div class="common_author_form">
                         <form action="connexion" method="POST" id="main_author_form">
                             <div class="form-group">
-                                <input type="email" name="email" class="form-control" placeholder="Email" required />
+                                <label for="email" class="visually-hidden">Email</label>
+                                <input type="email" name="email" id="email" class="form-control" placeholder="Email" required />
                             </div>
                             <div class="form-group">
-                                <input type="password" name="password" class="form-control" placeholder="Mot de passe" required />
+                                <label for="password" class="visually-hidden">Mot de passe</label>
+                                <input type="password" name="password" id="password" class="form-control" placeholder="Mot de passe" required />
                                 <a href="forgot-password">Mot de passe oublié ?</a>
                             </div>
                             <div class="common_form_submit">

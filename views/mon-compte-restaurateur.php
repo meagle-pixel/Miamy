@@ -26,7 +26,7 @@
             <div class="col-lg-4">
                 <div class="dashboard_sidebar shadow-sm p-4 bg-white rounded">
                     <div class="dashboard_sidebar_user text-center mb-4">
-                        <img src="<?= APP_URL ?>/assets/img/common/user-placeholder.png" alt="img" class="rounded-circle mb-3" style="width:100px;">
+                        <img src="<?= APP_URL ?>/assets/img/common/user-placeholder.png" alt="" class="rounded-circle mb-3" style="width:100px;">
                         <h3><?= htmlspecialchars(($restaurateur['prenom'] ?? '') . ' ' . ($restaurateur['nom'] ?? 'Administrateur')) ?></h3>
                         <p class="text-muted"><?= htmlspecialchars($restaurateur['email'] ?? $_SESSION['user']['email'] ?? '') ?></p>
                     </div>
@@ -83,7 +83,7 @@
                                     <div class="restaurant_card_admin d-md-flex align-items-center bg-white shadow-sm rounded overflow-hidden p-3 border">
                                         <div class="resto_img me-md-4 mb-3 mb-md-0">
                                             <img src="<?= APP_URL ?>/assets/img/restaurants/<?= !empty($resto['main_image']) ? $resto['main_image'] : 'default-resto.jpg' ?>"
-                                                alt="img" class="rounded" style="width:150px; height:100px; object-fit:cover;">
+                                                alt="" class="rounded" style="width:150px; height:100px; object-fit:cover;">
                                         </div>
                                         <div class="resto_info flex-grow-1">
                                             <h4 class="mb-1">

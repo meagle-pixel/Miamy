@@ -90,7 +90,7 @@ class User
                 if (!password_verify($pass . $email . $base_salt, $userFound['motdepasse'])) {
                     $_SESSION['connected'] = false;
                     $_SESSION['user']      = false;
-                    $logger->log(0, 'login_fail', "Echec connexion pour $email");
+                    $logger->log((int)$userFound['id'], 'login_fail', "Echec connexion pour $email");
                     return false;
                 }
             }

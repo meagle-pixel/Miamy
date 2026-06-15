@@ -75,6 +75,7 @@ $ville           = $ville           ?? '';
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
+                                            <label for="civilite" class="visually-hidden">Civilité</label>
                                             <select name="civilite" id="civilite">
                                                 <option value="1" <?= $civilite === '1' ? 'selected' : '' ?>>M.</option>
                                                 <option value="2" <?= $civilite === '2' ? 'selected' : '' ?>>Mme</option>
@@ -84,52 +85,62 @@ $ville           = $ville           ?? '';
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="prenom" class="form-control" placeholder="Prénom*" value="<?= htmlspecialchars($prenom) ?>" required />
+                                            <label for="prenom" class="visually-hidden">Prénom</label>
+                                            <input type="text" name="prenom" id="prenom" class="form-control" placeholder="Prénom*" value="<?= htmlspecialchars($prenom) ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="nom" class="form-control" placeholder="Nom de famille*" value="<?= htmlspecialchars($nom) ?>" required />
+                                            <label for="nom" class="visually-hidden">Nom de famille</label>
+                                            <input type="text" name="nom" id="nom" class="form-control" placeholder="Nom de famille*" value="<?= htmlspecialchars($nom) ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
-                                            <input type="email" name="email" class="form-control" placeholder="Email (identifiant)*" value="<?= htmlspecialchars($email) ?>" required />
+                                            <label for="email" class="visually-hidden">Email (identifiant)</label>
+                                            <input type="email" name="email" id="email" class="form-control" placeholder="Email (identifiant)*" value="<?= htmlspecialchars($email) ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="telephone" class="form-control" placeholder="Téléphone" value="<?= htmlspecialchars($tel) ?>" />
+                                            <label for="telephone" class="visually-hidden">Téléphone</label>
+                                            <input type="text" name="telephone" id="telephone" class="form-control" placeholder="Téléphone" value="<?= htmlspecialchars($tel) ?>" />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="adresse" class="form-control" placeholder="Votre adresse" value="<?= htmlspecialchars($adresse) ?>" required />
+                                            <label for="adresse" class="visually-hidden">Adresse</label>
+                                            <input type="text" name="adresse" id="adresse" class="form-control" placeholder="Votre adresse" value="<?= htmlspecialchars($adresse) ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="adresse_comp" class="form-control" placeholder="Adresse complémentaire" value="<?= htmlspecialchars($adresse_comp) ?>" />
+                                            <label for="adresse_comp" class="visually-hidden">Adresse complémentaire</label>
+                                            <input type="text" name="adresse_comp" id="adresse_comp" class="form-control" placeholder="Adresse complémentaire" value="<?= htmlspecialchars($adresse_comp) ?>" />
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="codepostal" class="form-control" placeholder="Code postal" value="<?= htmlspecialchars($codepostal) ?>" />
+                                            <label for="codepostal" class="visually-hidden">Code postal</label>
+                                            <input type="text" name="codepostal" id="codepostal" class="form-control" placeholder="Code postal" value="<?= htmlspecialchars($codepostal) ?>" />
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group mb-3">
-                                            <input type="text" name="ville" class="form-control" placeholder="Ville" value="<?= htmlspecialchars($ville) ?>" />
+                                            <label for="ville" class="visually-hidden">Ville</label>
+                                            <input type="text" name="ville" id="ville" class="form-control" placeholder="Ville" value="<?= htmlspecialchars($ville) ?>" />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-3">
-                                            <input type="password" name="password" class="form-control" placeholder="Mot de passe* (8 caractères min.)" required />
+                                            <label for="password" class="visually-hidden">Mot de passe</label>
+                                            <input type="password" name="password" id="password" class="form-control" placeholder="Mot de passe* (8 caractères min.)" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">
                                         <div class="form-group mb-4">
-                                            <input type="password" name="password2" class="form-control" placeholder="Confirmer le mot de passe*" required />
+                                            <label for="password2" class="visually-hidden">Confirmer le mot de passe</label>
+                                            <input type="password" name="password2" id="password2" class="form-control" placeholder="Confirmer le mot de passe*" required />
                                         </div>
                                     </div>
                                     <div class="col-lg-12">

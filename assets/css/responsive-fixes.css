@@ -20,7 +20,7 @@
    on n'y touche pas.
    ------------------------------------------------------------- */
 .topbar-area {
-    background-color: #FF7B2C !important;
+    background-color: #B5530E !important;
 }
 
 
@@ -158,3 +158,13 @@
     width: 100% !important;
     float: none !important;
 }
+
+
+/* -------------------------------------------------------------
+   BUG 9 — Contraste WCAG sur le bandeau orange
+   -----------------------------------------------------------
+   Le texte blanc sur l'orange clair (#FF7B2C) ne passait pas le
+   seuil WCAG AA (~2,3:1). Plutôt que d'assombrir le texte, on a
+   foncé le fond du bandeau (voir BUG 1 ci-dessus, #B5530E) : le
+   texte reste blanc et le contraste atteint ~5:1.
+   ------------------------------------------------------------- */

@@ -128,8 +128,8 @@
 								</div>
 
 								<div class="option-item">
-									<a href="#" class="search-box">
-										<i class="bi bi-search"></i></a>
+									<a href="#" class="search-box" aria-label="Rechercher">
+										<i class="bi bi-search" aria-hidden="true"></i></a>
 								</div>
 
 								<div class="option-item">
@@ -186,8 +186,9 @@
 				</div>
 				<div class="search-overlay-form">
 					<form>
-						<input type="text" class="input-search" placeholder="Rechercher...">
-						<button type="button"><i class="fas fa-search"></i></button>
+						<label for="search-input" class="visually-hidden">Rechercher</label>
+							<input type="text" id="search-input" class="input-search" placeholder="Rechercher...">
+						<button type="button" aria-label="Rechercher"><i class="fas fa-search" aria-hidden="true"></i></button>
 					</form>
 				</div>
 			</div>

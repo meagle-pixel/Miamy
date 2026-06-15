@@ -10,7 +10,7 @@
                 <div class="foods-cart-content">
                     <div class="foods-cart d-flex align-items-center">
                         <div class="foods-image">
-                            <a href="#"><img src="assets/img/tab-img/item7.png" alt=""></a>
+                            <a href="#"><img src="assets/img/tab-img/item7.png" alt="Poulet rôti"></a>
                         </div>
                         <div class="foods-content">
                             <h3><a href="#">Poulet rôti</a></h3>
@@ -24,7 +24,7 @@
                     </div>
                     <div class="foods-cart d-flex align-items-center">
                         <div class="foods-image">
-                            <a href="#"><img src="assets/img/tab-img/item4.png" alt=""></a>
+                            <a href="#"><img src="assets/img/tab-img/item4.png" alt="Spaghettis carbonara"></a>
                         </div>
                         <div class="foods-content">
                             <h3><a href="#">Spaghettis carbonara</a></h3>
@@ -38,7 +38,7 @@
                     </div>
                     <div class="foods-cart d-flex align-items-center">
                         <div class="foods-image">
-                            <a href="#"><img src="assets/img/tab-img/item1.png" alt=""></a>
+                            <a href="#"><img src="assets/img/tab-img/item1.png" alt="Double Cheese Burger"></a>
                         </div>
                         <div class="foods-content">
                             <h3><a href="#">Double Cheese Burger</a></h3>

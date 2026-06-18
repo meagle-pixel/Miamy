@@ -76,53 +76,50 @@ class User
     }
 
    
-    public function tryToConnect(string $email, string $pass, bool $bypass = false): bool
-    {
-        $base_salt = BASE_SALT ?? "";
-        $logger    = new UserLog();
+ 
+ 
+public function tryToConnect(string $email, string $pass): bool
+{
+    // Par défaut, on considère l'utilisateur comme NON connecté.
+    $_SESSION['connected'] = false;
+    $_SESSION['user']      = false;
 
-        $stmt = $this->pdo->prepare("SELECT * FROM `utilisateurs` WHERE `email` = :email AND actif = '1'");
-        $stmt->execute(['email' => $email]);
-        $userFound = $stmt->fetch();
+    // 1. On cherche un compte ACTIF qui a cet email
+    $stmt = $this->pdo->prepare("SELECT * FROM `utilisateurs` WHERE `email` = :email AND `actif` = '1'");
+    $stmt->execute(['email' => $email]);
+    $user = $stmt->fetch();
 
-        if ($userFound) {
-            if (!$bypass) {
-                if (!password_verify($pass . $email . $base_salt, $userFound['motdepasse'])) {
-                    $_SESSION['connected'] = false;
-                    $_SESSION['user']      = false;
-                    $logger->log((int)$userFound['id'], 'login_fail', "Echec connexion pour $email");
-                    return false;
-                }
-            }
 
-            $_SESSION['connected'] = true;
-            $_SESSION['user']      = $userFound;
+    // 2. Aucun compte trouvé → on arrête
+    if (!$user) {
 
-            $upd = $this->pdo->prepare("UPDATE utilisateurs SET `dateconnect` = NOW() WHERE id = :id");
-            $upd->execute(['id' => (int)$userFound['id']]);
-
-            $logger->log((int)$userFound['id'], 'login', "Connexion au site réussie");
-
-            $tables = [1 => 'administrateurs', 2 => 'restaurateurs', 3 => 'clients'];
-            $_SESSION['user-info'] = null;
-            if (isset($tables[(int)$userFound['profil']])) {
-                $table = $tables[(int)$userFound['profil']];
-                $s = $this->pdo->prepare("SELECT * FROM `$table` WHERE `id` = :id");
-                $s->execute(['id' => (int)$userFound['profil_id']]);
-                $_SESSION['user-info'] = $s->fetch() ?: null;
-
-                if ((int)$userFound['profil'] < 3) {
-                    $_SESSION['admin'] = true;
-                }
-            }
-
-            return true;
-        }
-
-        $_SESSION['connected'] = false;
-        $_SESSION['user']      = false;
         return false;
     }
+
+    // 3. Mauvais mot de passe → on note l'échec et on arrête
+    if (!password_verify($pass . $email . BASE_SALT, $user['motdepasse'])) {
+        (new UserLog())->log(0, 'login_fail', "Echec connexion pour $email");
+        return false;
+    }
+
+    // 4. Identifiants valides → on ouvre vraiment la session
+    $_SESSION['connected'] = true;
+    $_SESSION['user']      = $user;
+
+    $this->pdo->prepare("UPDATE `utilisateurs` SET `dateconnect` = NOW() WHERE `id` = :id")
+              ->execute(['id' => (int)$user['id']]);
+    (new UserLog())->log((int)$user['id'], 'login', "Connexion réussie");
+
+    // 5. On charge sa fiche détaillée selon son rôle
+    $tables = [1 => 'administrateurs', 2 => 'restaurateurs', 3 => 'clients'];
+    $table  = $tables[(int)$user['profil']];
+
+    $fiche = $this->pdo->prepare("SELECT * FROM `$table` WHERE `id` = :id");
+    $fiche->execute(['id' => (int)$user['profil_id']]);
+    $_SESSION['user-info'] = $fiche->fetch() ?: null;
+
+    return true;
+}
 
     /**
      * Suppression complete d'un utilisateur (fiche metier + compte utilisateur).

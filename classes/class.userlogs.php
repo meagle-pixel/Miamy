@@ -1,12 +1,5 @@
 <?php
-/**
- * UserLog : journalisation des actions utilisateur (table `user_logs`).
- *
- * Conserve seulement la methode log() qui est activement utilisee.
- * Les helpers de presentation (getForUser, formatElapsed) et le tracking IP
- * (insertIP, getIPs) ont ete elagues : ils n'avaient aucun caller.
- * Si besoin, l'historique est dans git (commit pre-refactor de class.users.php).
- */
+
 class UserLog
 {
     private $pdo;

@@ -92,7 +92,6 @@ public function tryToConnect(string $email, string $pass): bool
 
     // 2. Aucun compte trouvé → on arrête
     if (!$user) {
-
         return false;
     }
 

@@ -1,16 +1,7 @@
 <?php
 
-/**
- * AdminController : pages d'administration (profil = 1).
- *
- * Methodes :
- *   - dashboard()       : statistiques globales + listes recentes
- *   - panel()           : gestion des utilisateurs (clients + restaurateurs)
- *   - restaurants()     : gestion des restaurants (suppression + categorie)
- *   - ajouterAdmin()    : creation d'un nouveau compte admin
- *
- * Toutes les methodes verifient en entree que l'utilisateur est connecte
- * en tant qu'admin (profil <= 1). Sinon redirection vers /connexion.
+/*
+  AdminController : pages d'administration (profil = 1).
  */
 class AdminController
 {
@@ -123,9 +114,9 @@ class AdminController
         );
     }
 
-    // ---------------------------------------------------------------
+    // 
     // Panel utilisateurs (clients + restaurateurs)
-    // ---------------------------------------------------------------
+    // 
     public function panel(): array
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
@@ -207,9 +198,9 @@ class AdminController
         return compact('error', 'users');
     }
 
-    // ---------------------------------------------------------------
+    // 
     // Gestion des restaurants (vue admin)
-    // ---------------------------------------------------------------
+    // 
     public function restaurants(): array
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
@@ -287,9 +278,9 @@ class AdminController
         return compact('error', 'success', 'restaurants', 'categories_restaurant');
     }
 
-    // ---------------------------------------------------------------
+    // 
     // Ajouter un administrateur
-    // ---------------------------------------------------------------
+    // 
     public function ajouterAdmin(): array
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {

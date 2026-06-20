@@ -88,15 +88,9 @@ class Restaurant
         return $stmt->execute(['id' => $id]);
     }
 
-    /**
-     * Met à jour la catégorie d'un restaurant (vue admin).
-     *
-     * On efface les liens existants dans `restaurant_categories` pour ce restaurant,
-     * puis on insère le nouveau lien si une catégorie a été choisie. Si $idCategorie
-     * vaut 0, le restaurant se retrouve sans catégorie (cas "— Aucune —").
-     *
-     * Le tout est encapsulé dans une transaction pour garantir un état cohérent
-     * même en cas d'erreur entre le DELETE et l'INSERT.
+    /*
+      Met à jour la catégorie d'un restaurant (vue admin).
+     
      */
     public function updateCategory(int $idRestaurant, int $idCategorie): bool
     {
@@ -122,7 +116,6 @@ class Restaurant
 
             $this->pdo->commit();
             return true;
-
         } catch (PDOException $e) {
             $this->pdo->rollBack();
             throw $e; // on relance pour que le caller affiche le message

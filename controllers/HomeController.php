@@ -2,9 +2,9 @@
 
 class HomeController
 {
-    // ---------------------------------------------------------------
+    // 
     // Page d'accueil : catégories + restaurants mis en avant
-    // ---------------------------------------------------------------
+    // 
     public function index()
     {
         $allCategories  = [];

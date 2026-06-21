@@ -2,9 +2,7 @@
 
 class PlatController
 {
-    // ---------------------------------------------------------------
-    // Liste des plats (publique — vue déjà pure HTML, rien à préparer)
-    // ---------------------------------------------------------------
+    // Liste des plats 
     public function liste()
     {
         $id_restaurant = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -37,9 +35,9 @@ class PlatController
         return compact('resto', 'plats', 'platsParCategorie', 'id_restaurant');
     }
 
-    // ---------------------------------------------------------------
+    
     // Gestion de la carte (restaurateur)
-    // ---------------------------------------------------------------
+    
     public function gestionCarte()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
@@ -90,9 +88,9 @@ class PlatController
         return compact('resto', 'plats', 'platsParCategorie', 'message_success', 'message_error', 'id_restaurant');
     }
 
-    // ---------------------------------------------------------------
+    
     // Ajouter un plat
-    // ---------------------------------------------------------------
+    
     public function ajouter()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
@@ -176,9 +174,9 @@ class PlatController
         return compact('resto', 'id_restaurant', 'categoriesSuggestions', 'message_success', 'message_error');
     }
 
-    // ---------------------------------------------------------------
+    
     // Modifier un plat
-    // ---------------------------------------------------------------
+    
     public function modifier()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {

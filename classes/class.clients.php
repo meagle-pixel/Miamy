@@ -2,7 +2,7 @@
 /**
  * Client : gestion des comptes clients (table `clients`).
  * Le compte de connexion associe vit dans `utilisateurs` (profil = 3).
- *
+ 
  * NOTE : seule la methode insert() a un caller actuellement (AuthController::registerClient).
  * Les autres methodes sont conservees pour les fonctionnalites futures (panier, commandes,
  * espace client) mais ne sont actuellement appelees nulle part.
@@ -68,31 +68,6 @@ class Client
             'user_id'      => (int)$client['user_id'],
         ]);
         return $this->pdo->lastInsertId();
-    }
-
-    /**
-     * Charge un client dans la session et met a jour sa date d'action.
-     * Utilise par le flux de connexion client (pas encore branche).
-     */
-    public function refreshSession(int $id): void
-    {
-        $stmt = $this->pdo->prepare("SELECT * FROM `clients` WHERE `id` = :id");
-        $stmt->execute(['id' => $id]);
-        $result = $stmt->fetch();
-
-        if ($result) {
-            $_SESSION['connected'] = true;
-            $_SESSION['user']      = $result;
-        } else {
-            $_SESSION['connected'] = false;
-            $_SESSION['user']      = false;
-        }
-
-        $upd = $this->pdo->prepare("UPDATE `clients` SET `dateaction` = NOW() WHERE `id` = :id");
-        $upd->execute(['id' => $id]);
-
-        // insertIP est encore une fonction globale (class.users.php pas encore converti).
-        insertIP($id, 2);
     }
 
     /**

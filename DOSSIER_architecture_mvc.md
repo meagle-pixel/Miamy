@@ -30,7 +30,6 @@ Miamy/
 │
 ├── classes/                          ← MODÈLES — uniquement du SQL et de la logique métier
 │   ├── class.database.php            ← Singleton PDO
-│   ├── class.auth.php                ← Helpers de permissions (requireX, isX)
 │   ├── class.users.php               ← Comptes utilisateurs + authentification
 │   ├── class.restaurateurs.php       ← Profils restaurateurs
 │   ├── class.clients.php             ← Profils clients
@@ -38,16 +37,10 @@ Miamy/
 │   ├── class.plats.php               ← Plats de la carte
 │   ├── class.category.php            ← Catégories de plats
 │   ├── class.horaires.php            ← Horaires d'ouverture
-│   ├── class.commandes.php           ← Commandes
-│   ├── class.adresses.php            ← Adresses de livraison
-│   ├── class.messages.php            ← Messages internes
-│   ├── class.mail.php                ← Envoi d'emails
-│   ├── class.pages.php               ← Pages dynamiques (CMS)
+│   ├── class.pages.php               ← Table de routage (slug → vue + titre)
 │   ├── class.userlogs.php            ← Journalisation des actions utilisateur
 │   ├── class.imageuploader.php       ← Helper d'upload d'images centralisé
-│   ├── class.functions.php           ← Fonctions utilitaires globales
-│   ├── class.configuration.php       ← Paramètres applicatifs
-│   └── class.lang.php                ← Internationalisation
+│   └── class.functions.php           ← Fonctions utilitaires globales
 │
 ├── controllers/                      ← CONTRÔLEURS — orchestrent modèles + vues
 │   ├── HomeController.php            ← Page d'accueil
@@ -101,35 +94,21 @@ Miamy/
 │       ├── admin_foot.php            ← Scripts JS admin
 │       └── panier.php                ← Widget panier
 │
-├── assets/                           ← Ressources statiques
-│   ├── css/                          ← Feuilles de style
-│   ├── js/                           ← Scripts JS publics
-│   ├── webfonts/                     ← Polices d'icônes (Font Awesome)
-│   ├── favicon.ico
-│   ├── admins/                       ← Assets du template d'administration
-│   └── img/                          ← Toutes les images du site
-│       ├── plats/                    ← Photos des plats uploadées
-│       ├── restaurants/              ← Photos des restaurants uploadées
-│       ├── banner/                   ← Bannières d'accueil
-│       ├── chefs/                    ← Photos d'équipe
-│       ├── common/                   ← Visuels communs
-│       ├── icon/                     ← Icônes décoratives
-│       ├── classes/                  ← Visuels de la page d'accueil
-│       ├── review/                   ← Visuels des avis
-│       ├── tab-img/                  ← Visuels des onglets
-│       ├── actions/                  ← Visuels promotionnels
-│       ├── error/                    ← Visuels des pages d'erreur
-│       └── views/                    ← Visuels divers des vues
-│
-├── error/                            ← Pages d'erreur HTML statiques
-│   ├── 400.html  401.html  403.html
-│   ├── 404.html  405.html  500.html
-│   └── 502.html  503.html
-│
-└── users/                            ← Photos de profil utilisateurs
-    ├── 1.jpg
-    ├── 2.jpg
-    └── default.jpg
+└── assets/                           ← Ressources statiques
+    ├── css/                          ← Feuilles de style
+    ├── js/                           ← Scripts JS publics
+    ├── webfonts/                     ← Polices d'icônes (Font Awesome)
+    ├── favicon.ico
+    ├── admins/                       ← Assets du template d'administration
+    └── img/                          ← Toutes les images du site
+        ├── plats/                    ← Photos des plats uploadées
+        ├── restaurants/              ← Photos des restaurants uploadées
+        ├── banner/                   ← Bannières d'accueil
+        ├── chefs/                    ← Photos d'équipe
+        ├── common/                   ← Visuels communs
+        ├── icon/                     ← Icônes décoratives
+        ├── review/                   ← Visuels des avis
+        └── tab-img/                  ← Visuels des onglets
 ```
 
 Chaque dossier a un rôle clair et exclusif :
@@ -194,7 +173,7 @@ Prenons un exemple concret : un restaurateur clique sur le lien **"Gestion de la
                           ↓
 3. La table de routage associe 'gestion-carte' à PlatController::gestionCarte()
                           ↓
-4. Le contrôleur vérifie les droits (Auth::requireRestaurateur)
+4. Le contrôleur vérifie les droits (test inline de $_SESSION : connecté + profil restaurateur)
                           ↓
 5. Le contrôleur appelle les modèles (Restaurant::getOwnedBy, Plat::getByRestaurant)
                           ↓

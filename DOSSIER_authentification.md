@@ -92,7 +92,7 @@ C'est ce qu'on appelle de la **défense en profondeur** : même en cas de compro
 Quand l'utilisateur saisit son email et son mot de passe pour se connecter, on récupère son hash stocké en base et on utilise `password_verify` pour comparer.
 
 ```php
-public function tryToConnect(string $email, string $pass, bool $bypass = false): bool
+public function tryToConnect(string $email, string $pass): bool
 {
     $base_salt = BASE_SALT ?? "";
 
@@ -207,7 +207,7 @@ La déconnexion fait trois choses :
                           ↓
 5. Si trouvé : password_verify(pass + email + BASE_SALT, hashStocké)
                           ↓
-6. Si OK : hydrate $_SESSION (user, user-info, admin si profil < 3)
+6. Si OK : hydrate $_SESSION (connected, user, user-info)
    ET met à jour dateconnect en base
    ET loggue 'login' dans userlogs
                           ↓

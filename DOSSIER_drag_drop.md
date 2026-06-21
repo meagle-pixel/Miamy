@@ -138,7 +138,7 @@ public function updateCategorie()
     header('Content-Type: application/json');
 
     // 1. L'utilisateur est-il un restaurateur connecté ?
-    if (!Auth::isRestaurateur()) {
+    if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
         echo json_encode(['success' => false, 'message' => 'Non autorise']);
         exit();
     }

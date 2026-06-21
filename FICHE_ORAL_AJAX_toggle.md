@@ -73,8 +73,9 @@ document.addEventListener('click', async function (e) {
 ```php
 header('Content-Type: application/json');     // on annonce qu'on renvoie du JSON
 
-if (!Auth::isRestaurateur()) {                // 1. l'utilisateur est-il connecté ?
-    echo json_encode(['success' => false]);
+// 1. l'utilisateur est-il un restaurateur connecté ?
+if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
+    echo json_encode(['success' => false, 'message' => 'Non autorise']);
     exit();
 }
 

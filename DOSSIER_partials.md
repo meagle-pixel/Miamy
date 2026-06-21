@@ -81,7 +81,7 @@ Le titre change selon la page : "Inscription", "Connexion", "Mon compte"... Le c
 
 **Les CSS, dans l'ordre qui compte**
 
-Je charge 11 feuilles de style, dans un ordre précis :
+Je charge 12 feuilles de style, dans un ordre précis :
 
 ```
 bootstrap.min.css        ← framework de base (grille + composants)

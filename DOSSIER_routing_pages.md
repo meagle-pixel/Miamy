@@ -1,12 +1,12 @@
 ## Le routing en base de données : la table `pages`
 
-Au moment où j'ai mis en place le Front Controller, je me suis posé une question pratique : où stocker la **liste des routes** de mon application ? Autrement dit, comment faire le lien entre une URL comme `/Miamy/accueil` et le fichier de vue à inclure (`views/accueil.php`) ainsi que le titre à afficher dans l'onglet du navigateur ?
+Au moment où j'ai mis en place le Front Controller, je me suis posé une question pratique : où stocker la **liste des routes** de mon application ? Autrement dit, comment faire le lien entre une URL comme `/Miamy/accueil` et le fichier de vue à inclure (`views/home.php`) ainsi que le titre à afficher dans l'onglet du navigateur ?
 
 La solution la plus courante en PHP, c'est de **hardcoder** cette table dans un tableau associatif au début de `index.php`. Quelque chose comme :
 
 ```php
 $routes = [
-    'accueil'   => ['file' => 'views/accueil.php',   'title' => 'Accueil'],
+    'accueil'   => ['file' => 'views/home.php',      'title' => 'Accueil'],
     'connexion' => ['file' => 'views/login.php',     'title' => 'Connexion'],
     'dashboard' => ['file' => 'views/admin/dashboard.php', 'title' => 'Dashboard - Miamy'],
     // ... etc pour chaque page
@@ -21,13 +21,13 @@ J'ai choisi une approche différente : **stocker la table de routage en base de 
 |---|---|---|
 | `mod` | VARCHAR | Le slug de l'URL (le `?mod=xxx` du paramètre, ou la partie après `/Miamy/` grâce au `.htaccess`) |
 | `nom` | VARCHAR | Le titre de la page, affiché dans `<title>` |
-| `url` | VARCHAR | Le chemin du fichier de vue à inclure (`views/accueil.php`, `views/admin/dashboard.php`, etc.) |
+| `url` | VARCHAR | Le chemin du fichier de vue à inclure (`views/home.php`, `views/admin/dashboard.php`, etc.) |
 
 Concrètement, voici un extrait de ce qu'elle contient :
 
 | id | mod | nom | url |
 |---|---|---|---|
-| 1 | accueil | Accueil | views/accueil.php |
+| 1 | accueil | Accueil | views/home.php |
 | 2 | connexion | Connexion | views/login.php |
 | 3 | dashboard | Dashboard - Miamy | views/admin/dashboard.php |
 | 4 | gestion-carte | Gestion de la carte | views/gestion-carte.php |

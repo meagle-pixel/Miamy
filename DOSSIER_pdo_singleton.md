@@ -146,4 +146,6 @@ Cette approche combine trois bonnes pratiques :
 - **Singleton** pour ne pas multiplier les connexions à la base, ce qui économise des ressources serveur.
 - **Requêtes préparées systématiques** pour bloquer les injections SQL au niveau structurel, indépendamment de toute validation côté formulaire.
 
-Aucune requête SQL du projet ne concatène de variable utilisateur directement dans la chaîne SQL. C'est une règle absolue que je me suis fixée dès le début et que j'ai respectée partout, dans tous les modèles (`User`, `Restaurant`, `Plat`, `Restaurateur`, `Horaire`, `UserLog`, etc.).
+Toutes les valeurs venant de l'utilisateur passent par des requêtes préparées : aucune donnée utilisateur n'est concaténée directement dans une chaîne SQL, dans tous les modèles (`User`, `Restaurant`, `Plat`, `Restaurateur`, `Horaires`, `UserLog`, etc.).
+
+Il reste deux endroits où des valeurs sont concaténées dans la requête, mais **jamais des données utilisateur brutes** : dans `Horaires::getTodayForRestaurants`, la liste d'identifiants du `IN (...)` est construite après un `array_map('intval', ...)` (donc uniquement des entiers) ; et lorsqu'un nom de table doit être inséré dynamiquement (changement de profil), il est choisi dans une liste blanche codée en dur (`administrateurs`, `restaurateurs`, `clients`). Dans les deux cas, l'injection reste impossible.

@@ -1,0 +1,45 @@
+<svg width="100%" viewBox="0 0 680 452" role="img" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, sans-serif">
+  <title>head.php — l'essentiel</title>
+  <desc>Extrait de head.php avec trois lignes clés annotées : lang fr pour l'accessibilité et le SEO, base href pour la portabilité local/production, et le title dynamique pour le SEO.</desc>
+
+  <text x="40" y="30" font-size="20" font-weight="500" fill="#1a1a18">head.php — l'essentiel à montrer</text>
+
+  <rect x="40" y="48" width="600" height="200" rx="8" fill="#faf9f6" stroke="#d8d6cd"/>
+
+  <rect x="50" y="92" width="540" height="20" rx="4" fill="#E1F5EE"/>
+  <rect x="50" y="136" width="540" height="20" rx="4" fill="#E1F5EE"/>
+  <rect x="50" y="180" width="540" height="20" rx="4" fill="#E1F5EE"/>
+
+  <g font-family="ui-monospace, Menlo, Consolas, monospace" font-size="13" fill="#1a1a18">
+    <text x="60" y="84">&lt;!DOCTYPE html&gt;</text>
+    <text x="60" y="106">&lt;html lang="fr"&gt;</text>
+    <text x="60" y="128">&lt;head&gt;</text>
+    <text x="76" y="150">&lt;base href="&lt;?= APP_URL ?&gt;/"&gt;</text>
+    <text x="76" y="172">&lt;meta name="viewport" content="width=device-width…"&gt;</text>
+    <text x="76" y="194">&lt;title&gt;&lt;?= $page_title ?? 'Miamy…' ?&gt;&lt;/title&gt;</text>
+    <text x="76" y="216">&lt;!-- 12 feuilles CSS, responsive-fixes.css en dernier --&gt;</text>
+    <text x="60" y="238">&lt;/head&gt;</text>
+  </g>
+
+  <g>
+    <circle cx="606" cy="101" r="9" fill="#1D9E75"/><text x="606" y="105" text-anchor="middle" font-size="11" font-weight="500" fill="#fff">1</text>
+    <circle cx="606" cy="145" r="9" fill="#1D9E75"/><text x="606" y="149" text-anchor="middle" font-size="11" font-weight="500" fill="#fff">2</text>
+    <circle cx="606" cy="189" r="9" fill="#1D9E75"/><text x="606" y="193" text-anchor="middle" font-size="11" font-weight="500" fill="#fff">3</text>
+  </g>
+
+  <g>
+    <circle cx="52" cy="284" r="11" fill="#1D9E75"/><text x="52" y="288" text-anchor="middle" font-size="12" font-weight="500" fill="#fff">1</text>
+    <text x="74" y="280" font-size="14" font-weight="500" fill="#1a1a18">lang="fr" — accessibilité &amp; SEO</text>
+    <text x="74" y="299" font-size="13" fill="#6f6e68">aide les lecteurs d'écran à choisir la bonne voix et le moteur à bien indexer.</text>
+
+    <circle cx="52" cy="332" r="11" fill="#1D9E75"/><text x="52" y="336" text-anchor="middle" font-size="12" font-weight="500" fill="#fff">2</text>
+    <text x="74" y="328" font-size="14" font-weight="500" fill="#1a1a18">&lt;base href="…APP_URL…"&gt; — portabilité</text>
+    <text x="74" y="347" font-size="13" fill="#6f6e68">tous les liens relatifs marchent en local ET en production, sans changer le code.</text>
+
+    <circle cx="52" cy="380" r="11" fill="#1D9E75"/><text x="52" y="384" text-anchor="middle" font-size="12" font-weight="500" fill="#fff">3</text>
+    <text x="74" y="376" font-size="14" font-weight="500" fill="#1a1a18">&lt;title&gt; dynamique — SEO</text>
+    <text x="74" y="395" font-size="13" fill="#6f6e68">chaque page a son propre titre, fourni par le contrôleur via extract().</text>
+  </g>
+
+  <text x="40" y="432" font-size="12" fill="#6f6e68" font-style="italic">CSS : 12 feuilles chargées, responsive-fixes.css en dernier → surcharge propre du thème (pas montré ici).</text>
+</svg>

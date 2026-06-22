@@ -1,0 +1,63 @@
+<svg width="100%" viewBox="0 0 680 520" role="img" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+  <title>Développer sans framework : un choix pédagogique</title>
+  <desc>Comparaison entre développer à la main (Miamy), où chaque étape du cycle d'une requête est visible, et utiliser un framework comme Laravel ou Symfony, où ces étapes sont fournies mais masquées.</desc>
+
+  <!-- Titre -->
+  <text x="340" y="34" text-anchor="middle" font-size="22" font-weight="500" fill="#1a1a18">Développer sans framework : un choix pédagogique</text>
+  <text x="340" y="58" text-anchor="middle" font-size="14" fill="#6f6e68">comprendre le cycle complet d'une requête</text>
+
+  <!-- En-têtes colonnes -->
+  <text x="175" y="92" text-anchor="middle" font-size="16" font-weight="500" fill="#1D9E75">À la main — Miamy</text>
+  <text x="505" y="92" text-anchor="middle" font-size="16" font-weight="500" fill="#6f6e68">Avec un framework</text>
+
+  <!-- Colonne gauche : étapes visibles -->
+  <g>
+    <rect x="70" y="110" width="210" height="30" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+    <text x="175" y="129" text-anchor="middle" font-size="13" fill="#1a1a18">URL demandée</text>
+
+    <rect x="70" y="148" width="210" height="30" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+    <text x="175" y="167" text-anchor="middle" font-size="13" fill="#1a1a18">.htaccess : réécriture d'URL</text>
+
+    <rect x="70" y="186" width="210" height="30" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+    <text x="175" y="205" text-anchor="middle" font-size="13" fill="#1a1a18">index.php : front controller</text>
+
+    <rect x="70" y="224" width="210" height="30" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+    <text x="175" y="243" text-anchor="middle" font-size="13" fill="#1a1a18">$dispatchMap : routage</text>
+
+    <rect x="70" y="262" width="210" height="30" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+    <text x="175" y="281" text-anchor="middle" font-size="13" fill="#1a1a18">Contrôleur</text>
+
+    <rect x="70" y="300" width="210" height="30" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+    <text x="175" y="319" text-anchor="middle" font-size="13" fill="#1a1a18">Modèle : SQL préparé</text>
+
+    <rect x="70" y="338" width="210" height="30" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+    <text x="175" y="357" text-anchor="middle" font-size="13" fill="#1a1a18">Vue : HTML</text>
+
+    <!-- connecteurs -->
+    <g stroke="#1D9E75" stroke-width="1.5">
+      <line x1="175" y1="140" x2="175" y2="148"/>
+      <line x1="175" y1="178" x2="175" y2="186"/>
+      <line x1="175" y1="216" x2="175" y2="224"/>
+      <line x1="175" y1="254" x2="175" y2="262"/>
+      <line x1="175" y1="292" x2="175" y2="300"/>
+      <line x1="175" y1="330" x2="175" y2="338"/>
+    </g>
+  </g>
+  <text x="175" y="392" text-anchor="middle" font-size="13" fill="#6f6e68">je vois et j'écris chaque étape</text>
+
+  <!-- Colonne droite : boîte noire -->
+  <rect x="400" y="110" width="210" height="258" rx="8" fill="#5f5e59"/>
+  <text x="505" y="142" text-anchor="middle" font-size="14" font-weight="500" fill="#ffffff">boîte noire</text>
+  <line x1="430" y1="156" x2="580" y2="156" stroke="#8a897f" stroke-width="1"/>
+  <text x="505" y="190" text-anchor="middle" font-size="13" fill="#ffffff">Routage automatique</text>
+  <text x="505" y="222" text-anchor="middle" font-size="13" fill="#ffffff">ORM : accès base</text>
+  <text x="505" y="254" text-anchor="middle" font-size="13" fill="#ffffff">Sécurité intégrée</text>
+  <text x="505" y="286" text-anchor="middle" font-size="13" fill="#ffffff">Sessions, validations…</text>
+  <text x="505" y="338" text-anchor="middle" font-size="12" fill="#d6d5cd">étapes fournies, mais masquées</text>
+  <text x="505" y="392" text-anchor="middle" font-size="13" fill="#6f6e68">rapide, mais le cycle est caché</text>
+
+  <!-- Bandeau conclusion -->
+  <rect x="40" y="424" width="600" height="60" rx="10" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="340" y="450" text-anchor="middle" font-size="15" font-weight="500" fill="#1a1a18">Mon choix : tout coder à la main</text>
+  <text x="340" y="471" text-anchor="middle" font-size="13" fill="#1a1a18">pour vraiment comprendre comment une requête traverse l'application.</text>
+</svg>

@@ -1,0 +1,34 @@
+<svg width="100%" viewBox="0 0 680 440" role="img" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <title>Exemple : résolution de la page gestion-carte</title>
+  <desc>Déroulé : $page vaut gestion-carte, $dispatchMap renvoie la paire PlatController et gestionCarte, on déballe dans deux variables, puis on appelle dynamiquement la méthode.</desc>
+
+  <text x="340" y="32" text-anchor="middle" font-size="20" font-weight="500" fill="#1a1a18" font-family="system-ui, -apple-system, sans-serif">Exemple : la requête /gestion-carte</text>
+
+  <rect x="80" y="58" width="520" height="58" rx="10" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="340" y="86" text-anchor="middle" font-size="15" font-weight="500" fill="#1a1a18">$page = 'gestion-carte'</text>
+  <text x="340" y="106" text-anchor="middle" font-size="12" fill="#6f6e68" font-family="system-ui, -apple-system, sans-serif">le nom de la page, lu dans l'URL (paramètre mod)</text>
+
+  <line x1="340" y1="116" x2="340" y2="132" stroke="#1D9E75" stroke-width="2"/>
+  <path d="M340 134 l-5 -7 l10 0 z" fill="#1D9E75"/>
+
+  <rect x="80" y="134" width="520" height="86" rx="10" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="340" y="160" text-anchor="middle" font-size="13" fill="#1a1a18">$dispatchMap['gestion-carte']  renvoie :</text>
+  <text x="340" y="190" text-anchor="middle" font-size="15" font-weight="500" fill="#1a1a18">[ new PlatController() , 'gestionCarte' ]</text>
+  <text x="232" y="210" text-anchor="middle" font-size="11" fill="#6f6e68" font-family="system-ui, -apple-system, sans-serif">↑ contrôleur</text>
+  <text x="450" y="210" text-anchor="middle" font-size="11" fill="#6f6e68" font-family="system-ui, -apple-system, sans-serif">↑ méthode</text>
+
+  <line x1="340" y1="220" x2="340" y2="236" stroke="#1D9E75" stroke-width="2"/>
+  <path d="M340 238 l-5 -7 l10 0 z" fill="#1D9E75"/>
+
+  <rect x="80" y="238" width="520" height="84" rx="10" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="340" y="262" text-anchor="middle" font-size="13" fill="#1a1a18">[$controller, $method] = …   (on déballe la paire)</text>
+  <text x="340" y="288" text-anchor="middle" font-size="14" font-weight="500" fill="#1a1a18">$controller  →  objet PlatController</text>
+  <text x="340" y="310" text-anchor="middle" font-size="14" font-weight="500" fill="#1a1a18">$method  →  'gestionCarte'</text>
+
+  <line x1="340" y1="322" x2="340" y2="338" stroke="#1D9E75" stroke-width="2"/>
+  <path d="M340 340 l-5 -7 l10 0 z" fill="#1D9E75"/>
+
+  <rect x="80" y="340" width="520" height="74" rx="10" fill="#5f5e59"/>
+  <text x="340" y="368" text-anchor="middle" font-size="15" font-weight="500" fill="#ffffff">$controller-&gt;$method()</text>
+  <text x="340" y="394" text-anchor="middle" font-size="13" fill="#ffffff">≡  $controller-&gt;gestionCarte()   (appel dynamique)</text>
+</svg>

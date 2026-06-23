@@ -1,0 +1,40 @@
+<svg width="100%" viewBox="0 0 680 392" role="img" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, sans-serif">
+  <title>Accessibilité : lang, alt et aria-label dans le code</title>
+  <desc>Trois exemples concrets : la langue de la page, le texte alternatif d'une image, et un aria-label sur un lien à icône seule.</desc>
+
+  <text x="40" y="30" font-size="20" font-weight="500" fill="#1a1a18">Accessibilité : 3 réflexes dans le code</text>
+
+  <rect x="40" y="46" width="600" height="184" rx="8" fill="#faf9f6" stroke="#d8d6cd"/>
+
+  <rect x="50" y="66" width="170" height="18" rx="4" fill="#E1F5EE"/>
+  <rect x="50" y="106" width="500" height="18" rx="4" fill="#E1F5EE"/>
+  <rect x="50" y="146" width="290" height="18" rx="4" fill="#E1F5EE"/>
+
+  <g font-family="ui-monospace, Menlo, Consolas, monospace" font-size="12.5" fill="#1a1a18">
+    <text x="60" y="79">&lt;html lang="fr"&gt;</text>
+    <text x="60" y="119">&lt;img src="…/miamy-logo.jpg" alt="Logo Miamy, menu interactif"&gt;</text>
+    <text x="60" y="159">&lt;a href="#!" aria-label="Facebook"&gt;</text>
+    <text x="80" y="181">&lt;i class="fab fa-facebook" aria-hidden="true"&gt;&lt;/i&gt;</text>
+    <text x="60" y="203">&lt;/a&gt;</text>
+  </g>
+
+  <g>
+    <circle cx="612" cy="74" r="9" fill="#1D9E75"/><text x="612" y="78" text-anchor="middle" font-size="11" font-weight="500" fill="#fff">1</text>
+    <circle cx="612" cy="114" r="9" fill="#1D9E75"/><text x="612" y="118" text-anchor="middle" font-size="11" font-weight="500" fill="#fff">2</text>
+    <circle cx="612" cy="154" r="9" fill="#1D9E75"/><text x="612" y="158" text-anchor="middle" font-size="11" font-weight="500" fill="#fff">3</text>
+  </g>
+
+  <g>
+    <circle cx="52" cy="258" r="10" fill="#1D9E75"/><text x="52" y="262" text-anchor="middle" font-size="11" font-weight="500" fill="#fff">1</text>
+    <text x="72" y="256" font-size="13.5" font-weight="500" fill="#1a1a18">lang="fr" — la langue de la page</text>
+    <text x="72" y="274" font-size="12.5" fill="#5f5e59">le lecteur d'écran choisit la bonne prononciation.</text>
+
+    <circle cx="52" cy="300" r="10" fill="#1D9E75"/><text x="52" y="304" text-anchor="middle" font-size="11" font-weight="500" fill="#fff">2</text>
+    <text x="72" y="298" font-size="13.5" font-weight="500" fill="#1a1a18">alt — texte alternatif de l'image</text>
+    <text x="72" y="316" font-size="12.5" fill="#5f5e59">lu à voix haute, et affiché si l'image ne se charge pas.</text>
+
+    <circle cx="52" cy="342" r="10" fill="#1D9E75"/><text x="52" y="346" text-anchor="middle" font-size="11" font-weight="500" fill="#fff">3</text>
+    <text x="72" y="340" font-size="13.5" font-weight="500" fill="#1a1a18">aria-label — nomme un lien qui n'a qu'une icône</text>
+    <text x="72" y="358" font-size="12.5" fill="#5f5e59">et aria-hidden="true" masque l'icône décorative au lecteur d'écran.</text>
+  </g>
+</svg>

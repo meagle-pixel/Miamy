@@ -61,13 +61,10 @@ PROD_DB_USER=ton_user_mysql
 PROD_DB_PASS=ton_mdp_mysql
 PROD_DB_NAME=ta_base
 PROD_URL=https://miamy.yaxo7081.odns.fr
-
-# Sécurité (IDENTIQUE au BASE_SALT du local !)
-BASE_SALT=la_meme_chaine_que_ton_local
 ```
 
 - [ ] ⚠️ Ce `.env` est DIFFÉRENT du `.env` Docker (MYSQL_* / PMA_*).
-      `config.php` lit uniquement les clés `PROD_*` / `BASE_SALT`.
+      `config.php` lit uniquement les clés `PROD_*`.
 
 ## Étape 7 — Dossiers d'images
 
@@ -100,7 +97,7 @@ BASE_SALT=la_meme_chaine_que_ton_local
 | Page blanche / 500 | `.env` absent → valeurs par défaut vides |
 | URL `/connexion` en 404 | `.htaccess` non uploadé (fichier caché — activer l'affichage dans FileZilla) |
 | « Connexion non sécurisée » | Certificat SSL pas encore émis → lancer AutoSSL, patienter |
-| Impossible de se connecter à un compte | `BASE_SALT` différent de celui du local |
+| Impossible de se connecter à un compte | base importée incomplète (table `utilisateurs` vide) ou mauvais identifiants |
 | Pas d'images après upload | Dossiers `assets/img/...` manquants sur le serveur |
 
 > Astuce FileZilla : pour voir les fichiers cachés comme `.env` et `.htaccess`,

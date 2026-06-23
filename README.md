@@ -1237,7 +1237,6 @@ define('DB_PASSWORD', $_ENV['DEV_DB_PASS'] ?? 'root');
 define('DB_NAME',     $_ENV['DEV_DB_NAME'] ?? 'Miamy');
 define('APP_URL',     $_ENV['DEV_URL']     ?? 'http://localhost/Miamy');
 define('APP_DEV',     true);
-define('BASE_SALT',   $_ENV['BASE_SALT']   ?? '');
 ```
 
 (Les valeurs DB et URL changent en production vs local.)
@@ -1264,7 +1263,7 @@ tableau `[...]`. Une constante est juste un identifiant.
 - Les `<form action="<?= APP_URL ?>/...">` dans les formulaires
 - `config.php` (pour définir les constantes)
 - `classes/class.database.php` (charge `DB_HOST`, `DB_USERNAME`, etc. pour PDO)
-- `classes/class.users.php` (utilise `BASE_SALT` pour hasher les mots de passe)
+- `classes/class.users.php` (hache les mots de passe avec bcrypt via `password_hash`)
 
 ## MIGRATION EFFECTUÉE
 

@@ -11,7 +11,7 @@
 ### Authentification & sécurité
 - [x] **Inscription restaurateur et client** — validation serveur, création en 2 tables liées (`utilisateurs` + fiche métier)
 - [x] **Connexion / déconnexion** — sessions PHP, redirection par profil, message d'erreur générique
-- [x] **Hachage des mots de passe** — bcrypt (`password_hash`) + pepper `BASE_SALT`, jamais en clair
+- [x] **Hachage des mots de passe** — bcrypt (`password_hash`), sel automatique, jamais en clair
 - [x] **Contrôle d'accès par profil** — gardes en début de méthode (admin / restaurateur / client) + vérifs côté serveur sur l'AJAX
 - [x] **Contrôle d'ownership** — un restaurateur n'agit que sur ses propres restaurants et plats (`getOwnedBy` / `isOwnedBy`)
 - [x] **Journalisation des actions** — table `user_logs` (connexions, échecs, créations, suppressions)

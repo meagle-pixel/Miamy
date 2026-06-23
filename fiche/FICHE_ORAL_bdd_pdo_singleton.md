@@ -233,11 +233,11 @@ R — Ils ne sont **jamais** stockés en clair. J'utilise la fonction `password_
 
 ---
 
-**Q — C'est quoi le "salt" / pourquoi concaténer l'email et une clé ?**
+**Q — C'est quoi le "salt" (le sel) ?**
 
-R — Avant de hasher, je concatène le mot de passe avec l'email de l'utilisateur et une clé secrète (`BASE_SALT`) stockée dans le `.env`. Cette clé secrète joue le rôle de **« poivre »** (pepper) : c'est un secret côté serveur qui rend les attaques par dictionnaire plus difficiles, même si la base fuite.
+R — Le sel, c'est une donnée aléatoire ajoutée au mot de passe avant le hachage, pour que deux mots de passe identiques produisent des empreintes différentes. Je n'ai pas à le gérer moi-même : `password_hash()` avec bcrypt **génère automatiquement un sel aléatoire unique** pour chaque mot de passe, et l'inclut directement dans la chaîne stockée. C'est ce qui protège contre les tables précalculées (rainbow tables).
 
-> **À savoir (honnêteté technique)** : bcrypt génère **déjà** automatiquement un sel aléatoire unique pour chaque mot de passe. Donc l'essentiel de la sécurité vient de bcrypt lui-même ; ma concaténation email + `BASE_SALT` est un **plus** (un pepper), pas une obligation. Si le jury demande « bcrypt ne sale-t-il pas déjà ? », la bonne réponse est : « si, bcrypt sale tout seul ; le `BASE_SALT` que j'ajoute est un secret serveur supplémentaire ». Ne prétends pas que sans cette concaténation ce serait non sécurisé — ce serait faux.
+> **À savoir (honnêteté technique)** : si le jury demande « ajoutes-tu un poivre, un pepper ? », réponds non : je m'appuie sur bcrypt et son sel automatique, je n'ajoute pas de secret serveur supplémentaire. Je concatène encore l'email avant le hachage, mais c'est un reliquat sans valeur cryptographique réelle (bcrypt sale déjà), que je documente comme axe de simplification. Ne prétends pas avoir un pepper : ce serait faux.
 
 ---
 

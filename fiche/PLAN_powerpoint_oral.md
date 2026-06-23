@@ -181,9 +181,9 @@ Description : qui peut accéder à quoi, persistance via `$_SESSION`.
 Capture : capture de `password_hash(...)` dans `insertUtilisateur`.
 Description : le mot de passe en clair n'est jamais stocké.
 
-**41. Le pepper (BASE_SALT)**
-Capture : capture de la concaténation mot de passe + email + BASE_SALT.
-Description : un secret hors base, en plus du sel automatique de bcrypt.
+**41. Le sel automatique de bcrypt**
+Capture : un hash bcrypt commenté (`$2y$09$...` : algorithme, cost, sel, empreinte).
+Description : bcrypt génère un sel aléatoire unique par mot de passe ; pas de pepper.
 
 **42. Inscription**
 Capture : capture du formulaire + de la création en 2 tables.

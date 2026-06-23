@@ -265,13 +265,13 @@ $custom_js = <<<HTML
 
                 if (newCateg === oldCateg) return; // Juste un réordonnancement, rien à faire
 
-                // --- Mise à jour optimiste de l'interface ---
+                //  Mise à jour optimiste de l'interface
                 updateCount(oldCateg, -1);
                 updateCount(newCateg, +1);
                 checkEmpty(evt.from); // cache le placeholder si la source se vide
                 checkEmpty(evt.to);   // cache le placeholder si la destination reçoit un plat
 
-                // --- Appel AJAX vanilla (fetch) pour persister en base ---
+                //  Appel AJAX vanilla (fetch) pour persister en base 
                 const fd = new FormData();
                 fd.append('id_plat', platId);
                 fd.append('categorie', newCateg);
@@ -303,7 +303,7 @@ $custom_js = <<<HTML
         checkEmpty(evt.to);
     }
 
-    // --- Toggle disponible / indisponible (délégation d'événement vanilla) ---
+    //  Toggle disponible / indisponible (délégation d'événement vanilla)
     document.addEventListener('click', async function (e) {
         const btn = e.target.closest('.btn-toggle-dispo');
         if (!btn) return;

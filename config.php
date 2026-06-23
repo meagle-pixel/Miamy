@@ -33,5 +33,4 @@ if ($isLocal) {
     define('APP_DEV',     false);
 }
 
-// Sel utilisé pour hasher les mots de passe (UserInsert + tryToConnect)
-define('BASE_SALT', $_ENV['BASE_SALT'] ?? '');
+// Mots de passe : hashés avec bcrypt via password_hash() (voir class.users.php)

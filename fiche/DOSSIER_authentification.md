@@ -20,11 +20,10 @@ Quand un nouvel utilisateur s'inscrit, son mot de passe est immédiatement **hac
 ```php
 public function insertUtilisateur(array $utilisateur)
 {
-    $base_salt = BASE_SALT;
-    $options   = ['cost' => 9];
+    $options = ['cost' => 9];
 
     $pass = password_hash(
-        $utilisateur['motdepasse'] . $utilisateur['email'] . $base_salt,
+        $utilisateur['motdepasse'] . $utilisateur['email'],
         PASSWORD_BCRYPT,
         $options
     );
@@ -60,28 +59,7 @@ $2y$09$abcdef0123456789xxxxxxOoR3M5VBJ8YT0nU8eC1V2WLcQE6vC5K2
 
 Conséquence : deux utilisateurs avec le même mot de passe produisent des hashs **complètement différents** en base, sans aucune action de ma part. Je n'ai donc **pas besoin d'ajouter mon propre sel aléatoire** — PHP s'en charge.
 
-### Le poivre (`BASE_SALT`) : une couche de défense supplémentaire
-
-En plus du sel automatique, je concatène une chaîne secrète globale `BASE_SALT` (stockée dans `.env`, jamais versionnée) au mot de passe avant le hachage. Techniquement, ce n'est pas un **sel** mais un **poivre** (pepper en anglais) : c'est un concept distinct.
-
-| Concept | Sel (salt) | Poivre (pepper) |
-|---|---|---|
-| **Aléatoire ?** | Oui, unique par mot de passe | Non, identique pour tous |
-| **Stocké où ?** | En base, inclus dans le hash | Dans le `.env`, **jamais en base** |
-| **Géré par qui ?** | `password_hash` automatiquement | Moi, manuellement |
-| **Protège contre** | Tables arc-en-ciel | Vol de la base seule |
-
-**Le rôle du poivre :** si un attaquant arrivait à voler uniquement ma base de données (par exemple via une faille sur un autre composant), il aurait les hashs et leurs sels — mais **pas le poivre**, qui est dans le code/`.env`. Sans cette chaîne secrète, aucune attaque par force brute ne peut reproduire le bon hash, parce que la formule complète est :
-
-```
-bcrypt( motdepasse + email + PEPPER )
-```
-
-C'est ce qu'on appelle de la **défense en profondeur** : même en cas de compromission partielle, les mots de passe restent protégés.
-
-**Remarque sur le nommage :** la constante s'appelle historiquement `BASE_SALT` dans le projet, mais le terme techniquement correct serait `PEPPER` ou `PASSWORD_PEPPER`. C'est un héritage de nommage que je laisse en l'état pour ne pas casser la compatibilité, mais que je documenterais comme axe de refactorisation.
-
-**Remarque sur l'email concaténé :** comme bcrypt génère déjà un sel aléatoire unique, ajouter l'email avant le hachage n'apporte pas de protection cryptographique supplémentaire. C'est sans risque, mais redondant.
+**Remarque sur l'email concaténé :** comme bcrypt génère déjà un sel aléatoire unique, ajouter l'email avant le hachage n'apporte pas de protection cryptographique supplémentaire. C'est sans risque, mais redondant — c'est un point que je documenterais comme axe de simplification.
 
 ---
 
@@ -94,8 +72,6 @@ Quand l'utilisateur saisit son email et son mot de passe pour se connecter, on r
 ```php
 public function tryToConnect(string $email, string $pass): bool
 {
-    $base_salt = BASE_SALT ?? "";
-
     $stmt = $this->pdo->prepare(
         "SELECT * FROM utilisateurs WHERE email = :email AND actif = '1'"
     );
@@ -103,7 +79,7 @@ public function tryToConnect(string $email, string $pass): bool
     $userFound = $stmt->fetch();
 
     if ($userFound) {
-        if (!password_verify($pass . $email . $base_salt, $userFound['motdepasse'])) {
+        if (!password_verify($pass . $email, $userFound['motdepasse'])) {
             $_SESSION['connected'] = false;
             (new UserLog())->log(0, 'login_fail', "Echec connexion pour $email");
             return false;
@@ -205,7 +181,7 @@ La déconnexion fait trois choses :
                           ↓
 4. tryToConnect() cherche l'utilisateur en base par email (requête préparée)
                           ↓
-5. Si trouvé : password_verify(pass + email + BASE_SALT, hashStocké)
+5. Si trouvé : password_verify(pass + email, hashStocké)
                           ↓
 6. Si OK : hydrate $_SESSION (connected, user, user-info)
    ET met à jour dateconnect en base
@@ -224,14 +200,12 @@ La déconnexion fait trois choses :
 Cette implémentation combine plusieurs bonnes pratiques :
 
 - **Hachage bcrypt** avec sel aléatoire généré automatiquement par `password_hash` : protection contre les attaques par dictionnaire et par tables arc-en-ciel.
-- **Poivre global (`BASE_SALT`)** concaténé au mot de passe avant hachage : couche de défense en profondeur qui rend les hashs inutilisables sans accès au code source/`.env`.
 - **Message d'erreur générique** côté login : ne révèle pas si un email est enregistré ou non.
 - **Vérification du flag `actif`** : un compte désactivé ne peut pas se connecter, même avec les bons identifiants.
 - **Logging systématique** des connexions réussies et échouées dans la table `userlogs`, pour pouvoir détecter des tentatives d'intrusion.
 
 **Axes d'amélioration possibles :**
 
-- Renommer la constante `BASE_SALT` en `PASSWORD_PEPPER` pour refléter sa nature réelle.
 - Retirer la concaténation de l'email avant le hachage : elle est techniquement redondante (le sel aléatoire de bcrypt rend déjà chaque hash unique).
 - Mettre en place un **token CSRF** sur le formulaire de connexion pour empêcher la soumission depuis un autre site.
 - Ajouter une **limitation du nombre de tentatives** (rate limiting) par adresse IP pour ralentir les attaques par force brute.

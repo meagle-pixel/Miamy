@@ -1,10 +1,5 @@
 <?php
-/**
- * User : gestion des comptes utilisateurs (table `utilisateurs`) et des comptes
- * administrateurs (table `administrateurs`). Inclut l'authentification.
- *
- * Pour la journalisation, voir UserLog (class.userlogs.php).
- */
+
 class User
 {
     private $pdo;
@@ -14,10 +9,7 @@ class User
         $this->pdo = Database::getInstance()->getConnection();
     }
 
-    /**
-     * Cree un compte administrateur (fiche metier seule, sans compte de connexion).
-     * Retourne l'ID insere.
-     */
+    
     public function insertAdmin(array $data)
     {
         $stmt = $this->pdo->prepare(
@@ -33,15 +25,12 @@ class User
         return $this->pdo->lastInsertId();
     }
 
-    /**
-     * Cree un compte utilisateur (mot de passe hashe avec sel global).
-     * Loggue la creation. Retourne l'ID ou false.
-     */
+    // Crée un compte utilisateur (mot de passe hashe)
+
     public function insertUtilisateur(array $utilisateur)
     {
-        $base_salt = BASE_SALT;
-        $options   = ['cost' => 9];
-        $pass      = password_hash($utilisateur['motdepasse'] . $utilisateur['email'] . $base_salt, PASSWORD_BCRYPT, $options);
+        $options = ['cost' => 9];
+        $pass    = password_hash($utilisateur['motdepasse'] . $utilisateur['email'], PASSWORD_BCRYPT, $options);
 
         $stmt = $this->pdo->prepare(
             "INSERT INTO `utilisateurs`
@@ -65,9 +54,7 @@ class User
         return false;
     }
 
-    /**
-     * Verifie si un email est deja enregistre.
-     */
+    // Verifie si un email est deja enregistre.
     public function isRegistered(string $email): bool
     {
         $stmt = $this->pdo->prepare("SELECT id FROM `utilisateurs` WHERE `email` = :email");
@@ -96,7 +83,7 @@ public function tryToConnect(string $email, string $pass): bool
     }
 
     // 3. Mauvais mot de passe → on note l'échec et on arrête
-    if (!password_verify($pass . $email . BASE_SALT, $user['motdepasse'])) {
+    if (!password_verify($pass . $email, $user['motdepasse'])) {
         (new UserLog())->log(0, 'login_fail', "Echec connexion pour $email");
         return false;
     }
@@ -120,12 +107,9 @@ public function tryToConnect(string $email, string $pass): bool
     return true;
 }
 
-    /**
-     * Suppression complete d'un utilisateur (fiche metier + compte utilisateur).
-     * Atomique : transaction + rollback en cas d'erreur. Loggue la suppression.
-     * Recupere dynamiquement le nom de la table metier depuis profils.type
-     * (cascade ON DELETE geree cote MySQL).
-     */
+    //  Suppression complete d'un utilisateur (fiche metier + compte utilisateur).
+    
+    
     public function deleteUser(int $id, int $profil): bool
     {
         try {
@@ -166,19 +150,7 @@ public function tryToConnect(string $email, string $pass): bool
         }
     }
 
-    /**
-     * Migre un utilisateur d'un profil a un autre en garantissant la coherence
-     * entre `utilisateurs` et les tables metier (`administrateurs`,
-     * `restaurateurs`, `clients`).
-     *
-     * Tout est encapsule dans une transaction SQL :
-     *   1. Lit la ligne actuelle dans la table metier d'origine
-     *   2. Insere dans la table metier de destination en reprenant les champs
-     *      compatibles (nom, prenom, telephone...) + $extraData pour les NOT NULL
-     *      specifiques (ex. civilite, codepostal, ville pour `clients`)
-     *   3. Met a jour `utilisateurs` (profil ET profil_id)
-     *   4. Supprime l'ancienne ligne metier
-     */
+    
     public function changeUserProfile(int $userId, int $newProfil, array $extraData = []): bool
     {
         $tables = [

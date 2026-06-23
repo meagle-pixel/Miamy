@@ -226,8 +226,8 @@
 [À dire] L'authentification est le socle de toute la partie privée.
 
 **Diapo 46 — Hachage du mot de passe**
-[Sur la diapo] `password_hash` + bcrypt ; sel automatique ; pepper (BASE_SALT) hors base (.env).
-[À dire] Jamais de mot de passe en clair ; même si la base fuit, le pepper rend les hash inexploitables. Image : purée de fruit irréversible.
+[Sur la diapo] `password_hash` + bcrypt ; sel aléatoire automatique inclus dans le hash.
+[À dire] Jamais de mot de passe en clair ; bcrypt est lent par conception et génère un sel unique par mot de passe, donc deux mots de passe identiques donnent des empreintes différentes. Pas de pepper. Image : purée de fruit irréversible.
 
 **Diapo 47 — Le contrôleur d'inscription**
 [Sur la diapo] `register()` / `registerClient()` : validation des champs → création compte → fiche métier liée.

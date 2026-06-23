@@ -2,17 +2,16 @@
 
 class UserController
 {
-    // ---------------------------------------------------------------
     // Mon compte (client — vue statique, rien à préparer)
-    // ---------------------------------------------------------------
+    
     public function monCompte()
     {
         return [];
     }
 
-    // ---------------------------------------------------------------
+   
     // Mon compte restaurateur
-    // ---------------------------------------------------------------
+    
     public function monCompteRestaurateur()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
@@ -34,9 +33,9 @@ class UserController
         return compact('restaurateur', 'mesRestos', 'message_success');
     }
 
-    // ---------------------------------------------------------------
+    
     // Profil — éditer
-    // ---------------------------------------------------------------
+    
     public function profilEditer()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true) {
@@ -95,9 +94,9 @@ class UserController
         return compact('restaurateur', 'message_success', 'message_error');
     }
 
-    // ---------------------------------------------------------------
+    
     // Profile (client — vue statique, rien à préparer)
-    // ---------------------------------------------------------------
+    
     public function profile()
     {
         return [];

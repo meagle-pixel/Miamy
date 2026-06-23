@@ -315,9 +315,8 @@ class PlatController
         return compact('resto', 'plat', 'id_plat', 'id_restaurant', 'message_error');
     }
 
-    // ---------------------------------------------------------------
     // AJAX : bascule la disponibilite d'un plat (returns JSON)
-    // ---------------------------------------------------------------
+
     public function toggleDisponible()
     {
         header('Content-Type: application/json');
@@ -350,9 +349,9 @@ class PlatController
         exit();
     }
 
-    // ---------------------------------------------------------------
+    
     // AJAX : changer la categorie d'un plat (returns JSON)
-    // ---------------------------------------------------------------
+    
     public function updateCategorie()
     {
         header('Content-Type: application/json');

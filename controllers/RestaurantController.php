@@ -2,9 +2,9 @@
 
 class RestaurantController
 {
-    // ---------------------------------------------------------------
+    
     // Liste des restaurants (publique)
-    // ---------------------------------------------------------------
+    
     public function liste()
     {
         $restoClass  = new Restaurant();
@@ -20,9 +20,9 @@ class RestaurantController
         return compact('restaurants', 'horairesAujourdhui');
     }
 
-    // ---------------------------------------------------------------
+    
     // Ajouter un restaurant
-    // ---------------------------------------------------------------
+    
     public function ajouter()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || (int)$_SESSION['user']['profil'] !== 2) {
@@ -89,9 +89,9 @@ class RestaurantController
         return compact('categories', 'message_success', 'message_error');
     }
 
-    // ---------------------------------------------------------------
+   
     // Modifier un restaurant
-    // ---------------------------------------------------------------
+   
     public function modifier()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
@@ -163,9 +163,9 @@ class RestaurantController
         return compact('resto', 'id_restaurant', 'categories', 'current_category_id', 'message_success', 'message_error');
     }
 
-    // ---------------------------------------------------------------
+    
     // Supprimer un restaurant
-    // ---------------------------------------------------------------
+   
     public function supprimer()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
@@ -208,9 +208,9 @@ class RestaurantController
         return compact('resto', 'id_restaurant', 'message_error');
     }
 
-    // ---------------------------------------------------------------
+    
     // Sauvegarde des horaires d'un restaurant (POST depuis details.php)
-    // ---------------------------------------------------------------
+    
     public function saveHoraires()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {
@@ -241,9 +241,9 @@ class RestaurantController
         exit();
     }
 
-    // ---------------------------------------------------------------
+    
     // Page details (restaurateur) : stats de la carte + horaires
-    // ---------------------------------------------------------------
+   
     public function details()
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 2) {

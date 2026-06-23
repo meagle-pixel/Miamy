@@ -1,13 +1,11 @@
 <?php
 
-/*
-  AdminController : pages d'administration (profil = 1).
- */
+
 class AdminController
 {
-    // ---------------------------------------------------------------
+   
     // Tableau de bord admin
-    // ---------------------------------------------------------------
+    
     public function dashboard(): array
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {
@@ -114,9 +112,9 @@ class AdminController
         );
     }
 
-    // 
+ 
     // Panel utilisateurs (clients + restaurateurs)
-    // 
+ 
     public function panel(): array
     {
         if (!isset($_SESSION['connected']) || $_SESSION['connected'] !== true || $_SESSION['user']['profil'] > 1) {

@@ -22,10 +22,10 @@ $derniers_utilisateurs = $derniers_utilisateurs ?? [];
 $derniers_restaurants  = $derniers_restaurants  ?? [];
 $derniers_logs         = $derniers_logs         ?? [];
 
-/**
- * Retourne le style CSS d'un badge selon le type d'action de log.
- * Fonction de presentation uniquement : reste dans la vue.
- */
+
+  // Retourne le style CSS d'un badge selon le type d'action de log.
+ // Fonction de presentation uniquement : reste dans la vue.
+
 if (!function_exists('getActionBadgeStyle')) {
     function getActionBadgeStyle($action_type) {
         switch ($action_type) {

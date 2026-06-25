@@ -1,15 +1,10 @@
 <?php
-/**
- * Page : routage URL (table `pages`).
- *
- * Cette table sert au Front Controller (index.php) pour résoudre
- * un slug d'URL ($_GET['mod']) vers le titre + le fichier de vue
- * correspondant. C'est notre "table de routage".
- *
- * NOTE : seule la methode getByMod() est utilisee activement.
- * Les autres methodes (insert, update, listAll, getById) sont
- * conservees pour une future page admin de gestion des routes.
+/*
+Cette table sert au Front Controller (index.php) pour résoudre
+un slug d'URL ($_GET['mod']) vers le titre + le fichier de vue
+correspondant. C'est ma "table de routage".
  */
+
 class Page
 {
     private $pdo;
@@ -38,9 +33,8 @@ class Page
         return $idp ?: false;
     }
 
-    /**
-     * Met a jour une entree de page existante.
-     */
+    // Met a jour une entree de page existante.
+    
     public function update(int $id, string $nom, string $mod, string $url): bool
     {
         $stmt = $this->pdo->prepare(
@@ -56,18 +50,16 @@ class Page
         return true;
     }
 
-    /**
-     * Retourne toutes les pages.
-     */
+    // Retourne toutes les pages.
+     
     public function listAll(bool $onlyCount = false)
     {
         $data = $this->pdo->query("SELECT * FROM `pages` ORDER BY `nom` ASC")->fetchAll();
         return $onlyCount ? count($data) : $data;
     }
 
-    /**
-     * Retourne une page par son id.
-     */
+    // Retourne une page par son id.
+
     public function getById(int $id): array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM `pages` WHERE `id` = :id");
@@ -75,10 +67,7 @@ class Page
         return $stmt->fetch() ?: [];
     }
 
-    /**
-     * Retourne la page correspondant a un mod (slug d'URL).
-     * Utilisee par le routeur index.php — DO NOT BREAK.
-     */
+    
     public function getByMod(string $mod): array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM `pages` WHERE `mod` = :mod");

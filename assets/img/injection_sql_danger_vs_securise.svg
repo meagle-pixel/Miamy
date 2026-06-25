@@ -1,0 +1,21 @@
+<svg width="100%" viewBox="0 0 680 330" role="img" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, sans-serif">
+  <title>Injection SQL : concaténation directe contre requête préparée</title>
+  <desc>Comparaison entre une requête dangereuse par concaténation directe et une requête préparée sécurisée.</desc>
+
+  <text x="40" y="30" font-size="19" font-weight="500" fill="#1a1a18">Injection SQL : concaténation vs requête préparée</text>
+
+  <rect x="40" y="48" width="600" height="104" rx="10" fill="#FDECEC" stroke="#E24B4A" stroke-width="1.5"/>
+  <circle cx="66" cy="74" r="11" fill="#E24B4A"/>
+  <text x="66" y="79" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">✕</text>
+  <text x="86" y="79" font-size="14" font-weight="500" fill="#E24B4A">DANGEREUX — concaténation directe</text>
+  <text x="60" y="124" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="12" fill="#1a1a18">$query = "SELECT * FROM utilisateurs WHERE email = '" . $_POST['email'] . "'";</text>
+  <text x="60" y="142" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#9a4a48">// la saisie est injectée telle quelle dans la requête → injection possible</text>
+
+  <rect x="40" y="172" width="600" height="124" rx="10" fill="#E6F7F0" stroke="#1D9E75" stroke-width="1.5"/>
+  <circle cx="66" cy="198" r="11" fill="#1D9E75"/>
+  <text x="66" y="203" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">✓</text>
+  <text x="86" y="203" font-size="14" font-weight="500" fill="#1D9E75">SÉCURISÉ — requête préparée</text>
+  <text x="60" y="248" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="12" fill="#1a1a18">$stmt = $this-&gt;pdo-&gt;prepare("SELECT * FROM utilisateurs WHERE email = :email");</text>
+  <text x="60" y="268" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="12" fill="#1a1a18">$stmt-&gt;execute(['email' =&gt; $_POST['email']]);</text>
+  <text x="60" y="286" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#3a7d63">// la valeur est traitée comme une donnée, jamais comme du SQL</text>
+</svg>

@@ -1,24 +1,5 @@
 <?php
-/**
- * ImageUploader : helper pour les uploads d'images.
- *
- * Centralise la validation (extensions, taille), la creation du dossier
- * cible si necessaire et l'appel a move_uploaded_file. Le but est de
- * remplacer les blocs dupliques dans les controleurs ajouter/modifier
- * pour les plats et restaurants.
- *
- * Usage typique :
- *
- *   $uploader = new ImageUploader('plats');
- *   $filename = $uploader->upload($_FILES['image'], $slug . '-' . time());
- *   if ($filename) {
- *       // OK, $filename contient le nom du fichier (sans le chemin)
- *   } elseif ($uploader->error) {
- *       // Erreur de validation/upload : $uploader->error contient le message
- *   }
- *   // Si $filename est null et $uploader->error est null :
- *   //   pas de fichier uploade (rien a faire)
- */
+
 class ImageUploader
 {
     public const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
@@ -36,10 +17,7 @@ class ImageUploader
     }
 
     /**
-     * Upload une image et retourne son nom de fichier (avec extension)
-     * si tout va bien, null sinon. Si null, $this->error contient le
-     * message d'erreur (sauf si aucun fichier n'etait fourni).
-     *
+
      * @param array  $fileEntry  Le tableau $_FILES['key']
      * @param string $basename   Nom de base sans extension (ex: "entrecote-1234567890")
      * @return string|null       Le nom complet (basename.ext) ou null

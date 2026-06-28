@@ -17,10 +17,8 @@ class Horaires {
         $this->pdo = Database::getInstance()->getConnection();
     }
 
-    /**
-     * Retourne les horaires d'un restaurant, indexés par numéro de jour (0-6).
-     * Si un jour n'existe pas en base, il est retourné avec des valeurs par défaut.
-     */
+    // Retourne les horaires d'un restaurant, indexés par numéro de jour (0-6).Si un jour n'existe pas en base, il est retourné avec des valeurs par défaut.
+   
     public function getByRestaurant(int $id_restaurant): array {
         $stmt = $this->pdo->prepare(
             "SELECT * FROM horaires WHERE id_restaurant = :id ORDER BY jour ASC"
@@ -90,7 +88,6 @@ class Horaires {
     /**
      * Retourne les horaires "du jour" pour une liste de restaurants.
      * Indexe par id_restaurant. Le numero de jour suit la convention
-     * date('N') - 1 (0=Lundi).
      */
     public function getTodayForRestaurants(array $ids): array
     {

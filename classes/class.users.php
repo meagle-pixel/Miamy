@@ -29,8 +29,8 @@ class User
 
     public function insertUtilisateur(array $utilisateur)
     {
-        $options = ['cost' => 9];
-        $pass    = password_hash($utilisateur['motdepasse'] . $utilisateur['email'], PASSWORD_BCRYPT, $options);
+       
+        $pass    = password_hash($utilisateur['motdepasse'] . $utilisateur['email'], PASSWORD_BCRYPT);
 
         $stmt = $this->pdo->prepare(
             "INSERT INTO `utilisateurs`

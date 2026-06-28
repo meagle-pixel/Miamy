@@ -29,8 +29,6 @@ if ($isLocal) {
     define('DB_USERNAME', $_ENV['PROD_DB_USER'] ?? '');
     define('DB_PASSWORD', $_ENV['PROD_DB_PASS'] ?? '');
     define('DB_NAME',     $_ENV['PROD_DB_NAME'] ?? '');
-    define('APP_URL',     $_ENV['PROD_URL']     ?? 'https://miamy.fr');
+    define('APP_URL',     $_ENV['PROD_URL']     ?? 'http://miamy.yaxo7081.odns.fr');
     define('APP_DEV',     false);
 }
-
-// Mots de passe : hashés avec bcrypt via password_hash() (voir class.users.php)

@@ -85,8 +85,8 @@
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3">
                                         <label>Photo du plat</label>
-                                        <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
-                                        <small class="text-muted">JPG, PNG, WebP — max 5 Mo</small>
+                                        <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp,.jfif">
+                                        <small class="text-muted">JPG, PNG, WebP, JFIF — max 5 Mo</small>
                                     </div>
                                 </div>
 

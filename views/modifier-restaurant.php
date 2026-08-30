@@ -90,7 +90,7 @@
                                 <div class="col-lg-12">
                                     <div class="form-group mb-4">
                                         <label>Changer la photo</label>
-                                        <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+                                        <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp,.jfif">
                                         <small class="text-muted">Laissez vide pour garder l'image actuelle</small>
                                     </div>
                                 </div>

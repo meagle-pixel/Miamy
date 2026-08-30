@@ -12,7 +12,7 @@ class UserLog
     /**
      * Enregistre une action utilisateur dans user_logs (avec IP).
      */
-    public function log(int $userId, string $actionType, string $message): void
+    public function log(?int $userId, string $actionType, string $message): void
     {
         $ip   = $_SERVER['REMOTE_ADDR'] ?? '';
         $stmt = $this->pdo->prepare(

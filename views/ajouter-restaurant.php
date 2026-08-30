@@ -80,8 +80,8 @@
                                     <div class="col-lg-12">
                                         <div class="form-group mb-4">
                                             <label>Photo principale</label>
-                                            <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
-                                            <small class="text-muted">Formats acceptés : JPG, PNG, WebP (max 5Mo)</small>
+                                            <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp,.jfif">
+                                            <small class="text-muted">Formats acceptés : JPG, PNG, WebP, JFIF (max 5Mo)</small>
                                         </div>
                                     </div>
 

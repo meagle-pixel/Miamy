@@ -2,7 +2,7 @@
 
 class ImageUploader
 {
-    public const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+    public const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'jfif'];
     public const MAX_SIZE_BYTES     = 5_000_000; // 5 Mo
 
     /** Sous-dossier sous assets/img/ (ex: 'plats', 'restaurants') */
@@ -33,7 +33,7 @@ class ImageUploader
         $ext = strtolower(pathinfo($fileEntry['name'], PATHINFO_EXTENSION));
 
         if (!in_array($ext, self::ALLOWED_EXTENSIONS, true)) {
-            $this->error = "Format d'image non supporté (JPG, PNG, WebP uniquement).";
+            $this->error = "Format d'image non supporté (JPG, PNG, WebP, JFIF uniquement).";
             return null;
         }
 

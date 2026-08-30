@@ -188,7 +188,7 @@ CREATE TABLE `horaires` (
 
 CREATE TABLE `user_logs` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
-    `user_id` int(11) NOT NULL,
+    `user_id` int(11) DEFAULT NULL,
     `action_type` varchar(50) NOT NULL,
     `message` varchar(255) NOT NULL,
     `ip_address` varchar(45) DEFAULT NULL,
@@ -256,5 +256,7 @@ INSERT INTO `pages` (`nom`, `mod`, `url`) VALUES
     ('Ajouter un administrateur','ajouter-admin',           'views/admin/ajouter-admin.php'),
     ('Vue admin restaurants',    'admin-restaurants',       'views/admin/admin-restaurants.php'),
     ('Liste des plats',          'liste-plats',             'views/liste-plats.php');
+
+    ALTER TABLE user_logs MODIFY COLUMN user_id INT(11) NULL;
 
 COMMIT;

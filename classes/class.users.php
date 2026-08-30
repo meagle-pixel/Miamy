@@ -84,7 +84,7 @@ public function tryToConnect(string $email, string $pass): bool
 
     // 3. Mauvais mot de passe → on note l'échec et on arrête
     if (!password_verify($pass . $email, $user['motdepasse'])) {
-        (new UserLog())->log(0, 'login_fail', "Echec connexion pour $email");
+        (new UserLog())->log(null, 'login_fail', "Echec connexion pour $email");
         return false;
     }
 
